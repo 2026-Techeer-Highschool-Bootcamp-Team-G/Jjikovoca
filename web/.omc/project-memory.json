@@ -42,7 +42,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "cd /Users/chosunghoon/Desktop/Second_Brain/Project/EduLens/Jjikovoca/Jjikovoca/web\nyarn tsc --noEmit && echo \"TSC OK\" && yarn vite build 2>&1 | tail -2\npkill -f \"vite dev --port 5199\" 2>/dev/null && echo \"dev killed\" || echo \"no server\"\nrm -f /Users/chosunghoon/Desktop/Second_Brain/jjik-*.png && echo \"temp png removed\"\nrm -rf /Users/chosunghoon/Desktop/Second_Brain/Project/EduLens/Jjikovoca/Jjikovoca/web/.playwright-mcp && echo \"pw temp removed\"",
+    "buildCommand": "cd /Users/chosunghoon/Desktop/Second_Brain/Project/EduLens/Jjikovoca/Jjikovoca/web\nyarn tsc --noEmit && echo \"=== TSC OK ===\" && yarn oxlint ./src && echo \"=== OXLINT OK ===\" && yarn vite build 2>&1 | tail -3\n(yarn vite dev --port 5199 >/tmp/jjik-dev.log 2>&1 &) ; sleep 3 ; curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5199/ && echo \" dev up\"",
     "testCommand": null,
     "lintCommand": "yarn lint",
     "devCommand": "yarn dev",
@@ -129,6 +129,18 @@
       "type": "file"
     },
     {
+      "path": "src/features/capture/ui/AnalyzingView.tsx",
+      "accessCount": 10,
+      "lastAccessed": 1784762535787,
+      "type": "file"
+    },
+    {
+      "path": "src/app/styles/global.css",
+      "accessCount": 8,
+      "lastAccessed": 1784762480112,
+      "type": "file"
+    },
+    {
       "path": "src/app/router.tsx",
       "accessCount": 7,
       "lastAccessed": 1784733953864,
@@ -147,21 +159,9 @@
       "type": "file"
     },
     {
-      "path": "src/app/styles/global.css",
-      "accessCount": 6,
-      "lastAccessed": 1784759734513,
-      "type": "file"
-    },
-    {
       "path": "src/shared/ui/index.ts",
       "accessCount": 5,
       "lastAccessed": 1784736100649,
-      "type": "file"
-    },
-    {
-      "path": "src/features/capture/ui/AnalyzingView.tsx",
-      "accessCount": 5,
-      "lastAccessed": 1784739347751,
       "type": "file"
     },
     {

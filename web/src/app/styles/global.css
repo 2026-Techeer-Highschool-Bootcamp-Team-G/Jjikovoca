@@ -133,6 +133,61 @@ button {
   }
 }
 
+/* AI 분석 중(토스식): 중앙 그래픽이 둥실 떠오름 */
+@keyframes jjik-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* 회전 — 스캔 링·궤도 파티클 공용 */
+@keyframes jjik-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 카메라 로딩(토스식): 스켈레톤 시머가 사선으로 훑고 지나감 */
+@keyframes jjik-shimmer-sweep {
+  0% {
+    transform: translateX(-140%) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(320%) skewX(-12deg);
+  }
+}
+
+/* 카메라 로딩: 오토포커스 링이 숨쉬듯 커졌다 작아짐 */
+@keyframes jjik-breathe {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+/* 카메라 로딩: 통통 튀는 점 3개 */
+@keyframes jjik-dots {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
 /* 네모 박스: 점선이 흐르는 마칭 앤츠(활성 느낌) — dasharray 10+8=18 만큼 이동해 무한 루프 */
 @keyframes jjik-march {
   to {

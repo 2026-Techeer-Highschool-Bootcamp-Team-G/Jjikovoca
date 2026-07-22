@@ -61,27 +61,7 @@ export function AnalyzingView({ subject = 'ENGLISH' }: { subject?: Subject }) {
         gap: 0,
       }}
     >
-      <div
-        style={{
-          width: 180,
-          height: 180,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-        }}
-        aria-hidden
-      >
-        <span style={{ fontSize: 64 }}>{c.emoji}</span>
-        <span style={{ position: 'absolute', top: 34, right: 40, fontSize: 22, color: 'var(--color-brand-primary)' }}>
-          ✦
-        </span>
-        <span style={{ position: 'absolute', bottom: 40, left: 40, fontSize: 16, color: 'var(--teal-500)' }}>
-          ✦
-        </span>
-      </div>
+      <AnalyzingOrb emoji={c.emoji} />
 
       <h1 style={{ margin: '24px 0 12px', fontSize: 22, fontWeight: 700, color: 'var(--color-text-primary)' }}>
         {c.title}
@@ -93,7 +73,7 @@ export function AnalyzingView({ subject = 'ENGLISH' }: { subject?: Subject }) {
       </p>
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginTop: 28 }}>
-        {c.chips.map((w) => (
+        {c.chips.map((w, i) => (
           <span
             key={w}
             style={{
@@ -103,6 +83,8 @@ export function AnalyzingView({ subject = 'ENGLISH' }: { subject?: Subject }) {
               fontWeight: 500,
               padding: '6px 12px',
               borderRadius: 'var(--radius-full)',
+              animation: 'jjik-highlight-shimmer 1.5s ease-in-out infinite',
+              animationDelay: `${i * 0.4}s`,
             }}
           >
             {w}
@@ -146,6 +128,59 @@ export function AnalyzingView({ subject = 'ENGLISH' }: { subject?: Subject }) {
         }}
       >
         {c.quota}
+      </div>
+    </div>
+  )
+}
+
+// AI 분석 중 오브(토스식) — 숨쉬는 글로우 + 회전 스캔 링 + 궤도 스파클 + 둥실 떠오르는 글리프
+function AnalyzingOrb({ emoji }: { emoji: string }) {
+  return (
+    <div style={{ position: 'relative', width: 200, height: 200 }} aria-hidden>
+      {/* 숨쉬는 방사형 글로우 */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0) 68%)',
+          animation: 'jjik-breathe 2.6s ease-in-out infinite',
+        }}
+      />
+      {/* 회전 스캔 링 (conic + 마스크로 도넛) */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 22,
+          borderRadius: '50%',
+          background: 'conic-gradient(from 0deg, rgba(49,130,246,0) 0%, rgba(49,130,246,0.65) 28%, rgba(49,130,246,0) 55%)',
+          WebkitMaskImage: 'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px))',
+          maskImage: 'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px))',
+          animation: 'jjik-spin 1.7s linear infinite',
+        }}
+      />
+      {/* 궤도 스파클 3개 — 각기 다른 시작 각도/속도로 공전 */}
+      {[0, 1, 2].map((i) => (
+        <div key={i} style={{ position: 'absolute', inset: 0, animation: 'jjik-spin 3.4s linear infinite', animationDelay: `${-i * 1.13}s` }}>
+          <span
+            style={{
+              position: 'absolute',
+              top: 4,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              fontSize: i === 1 ? 16 : 12,
+              color: '#ffd84d',
+              filter: 'drop-shadow(0 0 4px rgba(255,216,77,0.85))',
+              animation: 'jjik-twinkle 1s ease-in-out infinite',
+            }}
+          >
+            ✦
+          </span>
+        </div>
+      ))}
+      {/* 둥실 떠오르는 중앙 글리프 */}
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ fontSize: 60, animation: 'jjik-float 2.2s ease-in-out infinite' }}>{emoji}</span>
       </div>
     </div>
   )
