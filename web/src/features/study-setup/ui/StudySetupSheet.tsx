@@ -1,0 +1,146 @@
+import { useState } from 'react'
+import { Button } from '@/shared/ui'
+import type { ReviewType, StudyMethod, StudySubject } from '../model/types'
+
+interface Props {
+  onStart: (method: StudyMethod, subject: StudySubject, type: ReviewType) => void
+}
+
+const label = { fontSize: 11, fontWeight: 500, color: 'var(--color-text-tertiary)' } as const
+
+// 학습 설정 시트 내용 (149:851…) — 학습 방식 2택 + 과목(영어/수학) + 영어 유형 + 학습 시작 (F-28 v2.2)
+export function StudySetupSheet({ onStart }: Props) {
+  const [method, setMethod] = useState<StudyMethod>('TODAY')
+  const [subject, setSubject] = useState<StudySubject>('ENGLISH')
+  const [type, setType] = useState<ReviewType>('FLASHCARD')
+
+  return (
+    <>
+      <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)' }}>
+        학습 설정
+      </span>
+
+      <span style={label}>무엇을 학습할까요?</span>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <MethodCard
+          active={method === 'TODAY'}
+          emoji="🔥"
+          title="오늘 복습"
+          sub="시험범위 기억률 62% · 24개"
+          onClick={() => setMethod('TODAY')}
+        />
+        <MethodCard
+          active={method === 'PICK'}
+          emoji="✓"
+          title="직접 선택"
+          sub="내가 골라서"
+          onClick={() => setMethod('PICK')}
+        />
+      </div>
+
+      <span style={label}>과목</span>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <TypeChip active={subject === 'ENGLISH'} label="영어" onClick={() => setSubject('ENGLISH')} />
+        <TypeChip active={subject === 'MATH'} label="수학" onClick={() => setSubject('MATH')} />
+      </div>
+
+      {subject === 'ENGLISH' ? (
+        <>
+          <span style={label}>복습 유형</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <TypeChip active={type === 'FLASHCARD'} label="플래시카드" onClick={() => setType('FLASHCARD')} />
+            <TypeChip active={type === 'CLOZE'} label="빈칸 퀴즈" onClick={() => setType('CLOZE')} />
+          </div>
+        </>
+      ) : (
+        <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
+          🧠 수학은 사고과정 복습으로 진행돼요
+        </span>
+      )}
+
+      <Button block size="lg" onClick={() => onStart(method, subject, type)}>
+        학습 시작
+      </Button>
+    </>
+  )
+}
+
+function MethodCard({
+  active,
+  emoji,
+  title,
+  sub,
+  onClick,
+}: {
+  active: boolean
+  emoji: string
+  title: string
+  sub: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        flex: 1,
+        minWidth: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: 3,
+        padding: 14,
+        borderRadius: 12,
+        textAlign: 'left',
+        background: active ? 'var(--color-brand-weak)' : 'var(--color-bg-elevated)',
+        border: active
+          ? '1.5px solid var(--color-brand-primary)'
+          : '1px solid var(--color-border-default)',
+        cursor: 'pointer',
+      }}
+    >
+      <span style={{ fontSize: 18 }} aria-hidden>
+        {emoji}
+      </span>
+      <span
+        style={{
+          fontSize: 14,
+          fontWeight: 700,
+          color: active ? 'var(--color-brand-primary)' : 'var(--color-text-primary)',
+        }}
+      >
+        {title}
+      </span>
+      <span style={{ fontSize: 10, color: 'var(--color-text-secondary)' }}>{sub}</span>
+    </button>
+  )
+}
+
+function TypeChip({
+  active,
+  label: text,
+  onClick,
+}: {
+  active: boolean
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        padding: '8px 16px',
+        borderRadius: 'var(--radius-full)',
+        fontSize: 13,
+        fontWeight: 500,
+        background: active ? 'var(--color-brand-primary)' : 'transparent',
+        color: active ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)',
+        border: active ? '1px solid transparent' : '1px solid var(--color-border-default)',
+        cursor: 'pointer',
+      }}
+    >
+      {text}
+    </button>
+  )
+}

@@ -1,0 +1,14 @@
+# 로컬 — docker compose up -d mysql redis 후 IDE bootRun (13 §8-3 개발 루프)
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/jjikeoboka?serverTimezone=UTC&characterEncoding=UTF-8
+    username: ${DB_USER:jjik}
+    password: ${DB_PASSWORD:jjik}
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+# 로컬은 모의 Gemini 프로파일 허용 (키 없는 팀원 — 기존 "모의 AI 모드" 승계, 13 §8-4)
+gemini:
+  mock: ${GEMINI_MOCK:true}

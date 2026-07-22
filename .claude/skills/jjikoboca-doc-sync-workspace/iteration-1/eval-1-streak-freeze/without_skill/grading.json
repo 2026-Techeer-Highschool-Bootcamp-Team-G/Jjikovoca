@@ -1,0 +1,39 @@
+{
+  "expectations": [
+    {
+      "text": "02에 F-30 스트릭 프리즈 정의",
+      "passed": true,
+      "evidence": "F-30 정의"
+    },
+    {
+      "text": "03에 프리즈 저장 구조 추가",
+      "passed": true,
+      "evidence": "freeze 컬럼/테이블"
+    },
+    {
+      "text": "04에 프리즈 필드/엔드포인트 반영",
+      "passed": true,
+      "evidence": "freeze 필드"
+    },
+    {
+      "text": "17 사용자플로우 반영",
+      "passed": true,
+      "evidence": "17 반영"
+    },
+    {
+      "text": "버전 증가+변경 이력",
+      "passed": true,
+      "evidence": "02·03 이력 기재"
+    },
+    {
+      "text": "03 DDL sqlglot 파싱 성공",
+      "passed": true,
+      "evidence": "OK"
+    },
+    {
+      "text": "원본 context 미변경",
+      "passed": true,
+      "evidence": "원본 02에 F-30 없음"
+    }
+  ]
+}

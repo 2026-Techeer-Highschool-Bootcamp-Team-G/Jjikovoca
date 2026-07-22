@@ -1,0 +1,1 @@
+단어 카드에 예문 난이도(EASY/NORMAL/HARD) 필드를 추가하자. 요구사항·ERD·API에 반영해

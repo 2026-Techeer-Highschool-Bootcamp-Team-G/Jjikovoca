@@ -1,0 +1,14 @@
+{
+  "eval_id": 0,
+  "eval_name": "difficulty-field",
+  "prompt": "단어 카드에 예문 난이도(EASY/NORMAL/HARD) 필드를 추가하자. 요구사항·ERD·API에 반영해",
+  "assertions": [
+    {"text": "03 ERD에 난이도 컬럼이 추가됐다 (card 테이블, EASY/NORMAL/HARD CHECK)"},
+    {"text": "04 API 명세에 난이도 필드가 반영됐다"},
+    {"text": "02 요구사항에 예문 난이도가 기능으로 기술됐다"},
+    {"text": "enum 값 EASY/NORMAL/HARD가 02·03·04에서 동일 표기로 일관된다"},
+    {"text": "03의 버전이 증가하고 변경 이력 한 줄이 추가됐다"},
+    {"text": "03의 수정된 DDL이 sqlglot MySQL 방언으로 파싱 성공한다"},
+    {"text": "원본 context/ 문서는 수정되지 않았다 (복사본만 변경)"}
+  ]
+}

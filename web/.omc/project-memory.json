@@ -1,0 +1,427 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1784729552742,
+  "projectRoot": "/Users/chosunghoon/Desktop/Second_Brain/Project/EduLens/Jjikovoca/Jjikovoca/web",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "react",
+        "version": "19",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "19",
+        "category": "frontend"
+      },
+      {
+        "name": "vite",
+        "version": "8.1.5",
+        "category": "build"
+      }
+    ],
+    "packageManager": "yarn",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "cd /Users/chosunghoon/Desktop/Second_Brain/Project/EduLens/Jjikovoca/Jjikovoca/web\nyarn tsc --noEmit && echo \"TSC OK\" && yarn vite build 2>&1 | tail -2\npkill -f \"vite dev --port 5199\" 2>/dev/null && echo \"dev killed\" || echo \"no server\"\nrm -f /Users/chosunghoon/Desktop/Second_Brain/jjik-*.png && echo \"temp png removed\"\nrm -rf /Users/chosunghoon/Desktop/Second_Brain/Project/EduLens/Jjikovoca/Jjikovoca/web/.playwright-mcp && echo \"pw temp removed\"",
+    "testCommand": null,
+    "lintCommand": "yarn lint",
+    "devCommand": "yarn dev",
+    "scripts": {
+      "dev": "vite",
+      "build": "tsc --noEmit && vite build",
+      "preview": "vite preview",
+      "typecheck": "tsc --noEmit",
+      "lint": "oxlint ./src",
+      "format": "prettier --write ."
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": "feature-based"
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "src"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "dist": {
+      "path": "dist",
+      "purpose": "Distribution/build output",
+      "fileCount": 1,
+      "lastAccessed": 1784729552695,
+      "keyFiles": [
+        "index.html"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 1,
+      "lastAccessed": 1784729552696,
+      "keyFiles": [
+        "vite-env.d.ts"
+      ]
+    },
+    "dist/assets": {
+      "path": "dist/assets",
+      "purpose": "Static assets",
+      "fileCount": 2,
+      "lastAccessed": 1784729552698,
+      "keyFiles": [
+        "index-DhEZTJZQ.css",
+        "index-Dr1XVAfO.js"
+      ]
+    },
+    "src/app": {
+      "path": "src/app",
+      "purpose": "Application code",
+      "fileCount": 4,
+      "lastAccessed": 1784729552698,
+      "keyFiles": [
+        "App.tsx",
+        "StudyLayout.tsx",
+        "main.tsx"
+      ]
+    },
+    "src/pages": {
+      "path": "src/pages",
+      "purpose": "Page components",
+      "fileCount": 0,
+      "lastAccessed": 1784729552699,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "src/pages/report/ui/ReportPage.tsx",
+      "accessCount": 10,
+      "lastAccessed": 1784739503444,
+      "type": "file"
+    },
+    {
+      "path": "src/app/router.tsx",
+      "accessCount": 7,
+      "lastAccessed": 1784733953864,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/capture/ui/CapturePage.tsx",
+      "accessCount": 7,
+      "lastAccessed": 1784758855169,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/capture-2/ui/CaptureTwoPage.tsx",
+      "accessCount": 6,
+      "lastAccessed": 1784736256797,
+      "type": "file"
+    },
+    {
+      "path": "src/app/styles/global.css",
+      "accessCount": 6,
+      "lastAccessed": 1784759734513,
+      "type": "file"
+    },
+    {
+      "path": "src/shared/ui/index.ts",
+      "accessCount": 5,
+      "lastAccessed": 1784736100649,
+      "type": "file"
+    },
+    {
+      "path": "src/features/capture/ui/AnalyzingView.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1784739347751,
+      "type": "file"
+    },
+    {
+      "path": "src/widgets/card-row/ui/CardRow.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1784735426380,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/cloze/ui/ClozePage.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1784739213787,
+      "type": "file"
+    },
+    {
+      "path": "src/features/capture/ui/CaptureMethodSheet.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1784758817740,
+      "type": "file"
+    },
+    {
+      "path": "src/shared/styles/tokens.css",
+      "accessCount": 3,
+      "lastAccessed": 1784733730612,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/math-problem/ui/MathProblemPage.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1784733751776,
+      "type": "file"
+    },
+    {
+      "path": "src/features/cloze/ui/ClozeFeedback.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1784739197927,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/flashcard/ui/FlashcardPage.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1784739203401,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/wrong-note/ui/WrongNotePage.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1784739307000,
+      "type": "file"
+    },
+    {
+      "path": "src/features/capture/index.ts",
+      "accessCount": 3,
+      "lastAccessed": 1784758834264,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/export/ui/ExportPage.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1784732417839,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/pay-done/ui/PayDonePage.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1784733711756,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/study-pick/ui/StudyPickPage.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1784739370333,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/card-done/ui/CardDonePage.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784732392473,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/card-done/index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784732393277,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/export-done/ui/ExportDonePage.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784732403279,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/export-done/index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784732404042,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/math-problem/index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784732605383,
+      "type": "file"
+    },
+    {
+      "path": "src/features/capture/ui/CaptureStage.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733718951,
+      "type": "file"
+    },
+    {
+      "path": "src/shared/ui/icons.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733726161,
+      "type": "file"
+    },
+    {
+      "path": "src/features/cloze/index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784733732866,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/exam/ui/ExamPage.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733733226,
+      "type": "file"
+    },
+    {
+      "path": "src/features/cloze/model/types.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784733733696,
+      "type": "file"
+    },
+    {
+      "path": "src/features/cloze/model/useCloze.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784733734653,
+      "type": "file"
+    },
+    {
+      "path": "src/features/cloze/ui/ClozeCard.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733735190,
+      "type": "file"
+    },
+    {
+      "path": "src/features/cloze/ui/OptionGrid.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733736662,
+      "type": "file"
+    },
+    {
+      "path": "src/shared/ui/BottomSheet.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733738003,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/cloze/index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784733738634,
+      "type": "file"
+    },
+    {
+      "path": "src/features/math-review/index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784733742388,
+      "type": "file"
+    },
+    {
+      "path": "src/features/math-review/model/types.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784733742896,
+      "type": "file"
+    },
+    {
+      "path": "src/features/math-review/model/useMathReview.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784733744317,
+      "type": "file"
+    },
+    {
+      "path": "src/features/math-review/ui/MathProblemCard.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733744869,
+      "type": "file"
+    },
+    {
+      "path": "src/features/math-review/ui/DiagnosisBanner.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733745896,
+      "type": "file"
+    },
+    {
+      "path": "src/features/math-review/ui/StepItem.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733746889,
+      "type": "file"
+    },
+    {
+      "path": "src/features/math-review/ui/StepAccordion.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733747376,
+      "type": "file"
+    },
+    {
+      "path": "src/features/math-review/ui/AnswerInput.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733748371,
+      "type": "file"
+    },
+    {
+      "path": "src/features/math-review/ui/VerdictView.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733749376,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/math-review/ui/MathReviewPage.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733750401,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/math-review/index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784733750874,
+      "type": "file"
+    },
+    {
+      "path": "src/shared/ui/Button.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733757861,
+      "type": "file"
+    },
+    {
+      "path": "src/shared/ui/Chip.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733757921,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/capture-2/index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784733779285,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/study-pick-3/ui/StudyPickThreePage.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1784733787904,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/study-pick-3/index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784733788594,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

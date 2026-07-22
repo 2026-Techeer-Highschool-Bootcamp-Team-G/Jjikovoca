@@ -1,0 +1,181 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', system-ui, 'Segoe UI',
+    sans-serif;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+@keyframes omc-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes omc-sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* 촬영 모션 스펙 (motion-spec 33:301) — F-02 인식·캡처 애니메이션 */
+
+/* 인식 성공: 종이 둘레 노란 글로우 펄스 1.2s 반복 */
+@keyframes jjik-edge-glow {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+/* 스파클 트윙클 0.6s (인스턴스마다 animation-delay로 스태거) */
+@keyframes jjik-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+/* 브래킷 옐로 전환 200ms ease-out — 등장 스케일-인 */
+@keyframes jjik-bracket-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 캡처: 화이트 플래시 120ms 피크 후 페이드 */
+@keyframes jjik-flash {
+  0% {
+    opacity: 0;
+  }
+  24% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 캡처: 스파클 버스트 400ms */
+@keyframes jjik-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.7);
+  }
+}
+
+/* 인식 전: 프레임 스캔 라인이 종이 위를 위→아래로 훑음 */
+@keyframes jjik-scan {
+  0% {
+    top: 2%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 96%;
+    opacity: 0;
+  }
+}
+
+/* 네모 박스: 점선이 흐르는 마칭 앤츠(활성 느낌) — dasharray 10+8=18 만큼 이동해 무한 루프 */
+@keyframes jjik-march {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+
+/* 형광펜: 칠한 자국의 잉크가 번지듯 은은하게 밝아지는 시머 */
+@keyframes jjik-highlight-shimmer {
+  0%,
+  100% {
+    opacity: 0.82;
+    filter: saturate(1);
+  }
+  50% {
+    opacity: 1;
+    filter: saturate(1.25);
+  }
+}
+
+/* 형광펜 칠 시작 시 살짝 퍼지는 등장 */
+@keyframes jjik-highlight-in {
+  from {
+    transform: scaleY(0.4);
+    opacity: 0.4;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* 캡처: +5 XP 칩 상승 애니메이션 600ms (즉시 보상) */
+@keyframes jjik-xp-rise {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 12px) scale(0.8);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -44px) scale(1);
+  }
+}

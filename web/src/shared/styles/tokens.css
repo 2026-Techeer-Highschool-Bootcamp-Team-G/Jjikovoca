@@ -1,0 +1,76 @@
+/*
+ * 찍어보카 디자인 토큰 — Figma "프로토타입 디자인"(fileKey ZD5gMYgz1Buv59QMMf4zWg) 변수와 1:1.
+ * 토스(Toss) TDS 스타일. get_design_context 코드가 참조하는 var(--...) 이름을 그대로 사용해
+ * 디자인→코드 매핑이 어긋나지 않게 한다. Figma 변수 확정/변경 시 이 파일을 export로 교체.
+ */
+:root {
+  /* ===== Primitives ===== */
+  --common-white: #ffffff;
+  --grey-50: #f9fafb;
+  --grey-100: #f2f4f6;
+  --grey-200: #e5e8eb;
+  --grey-300: #d1d6db;
+  --grey-400: #b0b8c1;
+  --grey-500: #8b95a1;
+  --grey-600: #6b7684;
+  --grey-700: #4e5968;
+  --grey-900: #191f28;
+  --blue-500: #3182f6;
+  --blue-600: #2272eb;
+  --teal-500: #1bc1bd;
+  --teal-50: #e7f8f8;
+  --green-500: #05c072;
+  --yellow-500: #ffc342;
+  --yellow-900: #4a3b14;
+  --red-500: #f04452;
+  --highlight-300: #ffe45e;
+
+  /* ===== Semantic — Color ===== */
+  --color-brand-primary: #3182f6;
+  --color-brand-strong: #2272eb;
+  --color-brand-weak: #e8f3ff;
+
+  --color-text-primary: #191f28;
+  --color-text-secondary: #6b7684;
+  --color-text-tertiary: #b0b8c1;
+  --color-text-inverse: #ffffff;
+  --color-text-brand: #3182f6;
+  --color-text-danger: #f04452;
+
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f2f4f6;
+  --color-bg-elevated: #ffffff;
+
+  --color-border-default: #e5e8eb;
+
+  --color-success-primary: #05c072;
+  --color-success-weak: #e8f8f0;
+  --color-warning-primary: #ffc342;
+  --color-warning-weak: #fff9e7;
+  --color-danger-primary: #f04452;
+  --color-danger-weak: #fee9ea;
+
+  --color-highlight: #ffe45e;
+  --color-overlay-dim: rgba(0, 0, 0, 0.6);
+
+  /* ===== Spacing ===== */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  --spacing-3xl: 32px;
+
+  /* ===== Radius ===== */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  /* ===== Shadow ===== */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-modal: 0 8px 24px rgba(0, 0, 0, 0.16);
+  --shadow-fab: 0 5px 12px rgba(14, 61, 140, 0.35);
+}

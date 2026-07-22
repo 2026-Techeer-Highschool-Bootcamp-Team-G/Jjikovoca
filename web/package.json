@@ -1,0 +1,33 @@
+{
+  "name": "jjikboka-web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "packageManager": "yarn@4.17.1",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint ./src",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.101.3",
+    "katex": "^0.18.1",
+    "react": "^19",
+    "react-dom": "^19",
+    "react-router-dom": "^7.18.1"
+  },
+  "devDependencies": {
+    "@types/katex": "^0.16.8",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.3",
+    "oxlint": "^1.74.0",
+    "prettier": "^3.9.5",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.5"
+  }
+}

@@ -1,0 +1,30 @@
+# dependencies / build
+node_modules
+dist
+dist-ssr
+*.local
+
+# env
+.env
+.env.*.local
+
+# editor / os
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# yarn berry (node-modules linker) — keep releases/plugins, drop cache
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*

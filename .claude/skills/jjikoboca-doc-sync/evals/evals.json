@@ -1,0 +1,52 @@
+{
+  "skill_name": "jjikoboca-doc-sync",
+  "evals": [
+    {
+      "id": 0,
+      "name": "difficulty-field",
+      "prompt": "단어 카드에 예문 난이도(EASY/NORMAL/HARD) 필드를 추가하자. 요구사항·ERD·API에 반영해",
+      "expected_output": "02·03·04 세 문서에 난이도 필드가 일관된 enum(EASY/NORMAL/HARD)으로 반영. 03 DDL에 컬럼+CHECK 추가되고 sqlglot 파싱 통과. 각 문서 버전 증가+변경 이력.",
+      "files": [],
+      "assertions": [
+        {"text": "03 ERD에 난이도 컬럼이 추가됐다 (card 테이블, EASY/NORMAL/HARD CHECK)"},
+        {"text": "04 API 명세에 난이도 필드가 반영됐다"},
+        {"text": "02 요구사항에 예문 난이도가 기능으로 기술됐다"},
+        {"text": "enum 값 EASY/NORMAL/HARD가 02·03·04에서 동일 표기로 일관된다"},
+        {"text": "03의 버전이 증가하고 변경 이력 한 줄이 추가됐다"},
+        {"text": "03의 수정된 DDL이 sqlglot MySQL 방언으로 파싱 성공한다 (구문 유효)"},
+        {"text": "원본 context/ 문서는 수정되지 않았다 (복사본만 변경)"}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "streak-freeze",
+      "prompt": "F-30 스트릭 프리즈(하루 빠져도 연속 학습일이 끊기지 않게 하는 보호 아이템) 기능을 추가해줘",
+      "expected_output": "신규 F-30이 02에 정의되고, 03(저장 데이터)·04(엔드포인트)·17(화면 흐름)까지 연쇄 반영. 03 변경 시 sqlglot 통과. 관련 문서 버전 증가+이력.",
+      "files": [],
+      "assertions": [
+        {"text": "02 요구사항에 F-30 스트릭 프리즈가 신규 기능으로 정의됐다"},
+        {"text": "03 ERD에 프리즈 상태를 저장할 컬럼/구조가 추가됐다 (예: user_stat 프리즈 개수)"},
+        {"text": "04 API에 프리즈 사용/조회 엔드포인트 또는 필드가 반영됐다"},
+        {"text": "17 사용자플로우에 반영됐거나, 흐름 영향이 명시적으로 검토됐다"},
+        {"text": "수정한 문서들의 버전이 증가하고 변경 이력이 추가됐다"},
+        {"text": "03 DDL을 바꿨다면 sqlglot 파싱에 성공한다"},
+        {"text": "원본 context/ 문서는 수정되지 않았다 (복사본만 변경)"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "remove-duration",
+      "prompt": "study_log 테이블의 duration_ms 컬럼을 없애자",
+      "expected_output": "03에서 study_log.duration_ms 제거, 04에서 관련 참조 정리, sqlglot 재검증 통과, 03 버전 증가+이력. 다른 문서에 duration_ms 잔존 참조 없음.",
+      "files": [],
+      "assertions": [
+        {"text": "03 ERD의 study_log에서 duration_ms 컬럼이 제거됐다"},
+        {"text": "04 API에서 duration_ms 관련 참조가 정리됐다 (있었다면)"},
+        {"text": "03의 버전이 증가하고 변경 이력 한 줄이 추가됐다"},
+        {"text": "03의 수정된 study_log DDL이 sqlglot 파싱에 성공한다"},
+        {"text": "수정 대상 외 문서에 duration_ms 잔존 참조가 없다 (일관성)"},
+        {"text": "원본 context/ 문서는 수정되지 않았다 (복사본만 변경)"}
+      ]
+    }
+  ]
+}

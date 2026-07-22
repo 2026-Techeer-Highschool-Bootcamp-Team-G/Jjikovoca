@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "eval_name": "remove-duration",
+  "prompt": "study_log 테이블의 duration_ms 컬럼을 없애자",
+  "assertions": [
+    {"text": "03 ERD의 study_log에서 duration_ms 컬럼이 제거됐다"},
+    {"text": "04 API에서 duration_ms 관련 참조가 정리됐다 (있었다면)"},
+    {"text": "03의 버전이 증가하고 변경 이력 한 줄이 추가됐다"},
+    {"text": "03의 수정된 study_log DDL이 sqlglot 파싱에 성공한다"},
+    {"text": "수정 대상 외 문서에 duration_ms 잔존 참조가 없다 (일관성)"},
+    {"text": "원본 context/ 문서는 수정되지 않았다 (복사본만 변경)"}
+  ]
+}

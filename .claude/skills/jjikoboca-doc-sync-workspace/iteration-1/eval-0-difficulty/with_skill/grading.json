@@ -1,0 +1,39 @@
+{
+  "expectations": [
+    {
+      "text": "03 ERD에 난이도 컬럼 추가",
+      "passed": true,
+      "evidence": "example_difficulty+CHECK"
+    },
+    {
+      "text": "04 API에 난이도 필드 반영",
+      "passed": true,
+      "evidence": "exampleDifficulty"
+    },
+    {
+      "text": "02 요구사항에 난이도 기능 기술",
+      "passed": true,
+      "evidence": "난이도 언급"
+    },
+    {
+      "text": "enum EASY/NORMAL/HARD가 02·03·04 일관",
+      "passed": true,
+      "evidence": "3문서 모두 EASY/HARD 표기"
+    },
+    {
+      "text": "03 버전 증가+변경 이력",
+      "passed": true,
+      "evidence": "2026-07-23 이력"
+    },
+    {
+      "text": "03 DDL sqlglot 파싱 성공",
+      "passed": true,
+      "evidence": "OK"
+    },
+    {
+      "text": "원본 context 미변경",
+      "passed": true,
+      "evidence": "원본 03에 신규 컬럼 없음"
+    }
+  ]
+}
