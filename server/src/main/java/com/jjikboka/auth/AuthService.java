@@ -1,8 +1,9 @@
 package com.jjikboka.auth;
 
 import com.jjikboka.auth.dto.AuthResponse;
-import com.jjikboka.auth.dto.LoginRequest;
+import com.jjikboka.auth.dto.RefreshRequest;
 import com.jjikboka.auth.dto.RegisterRequest;
+import com.jjikboka.auth.dto.TokenResponse;
 import com.jjikboka.shared.error.BusinessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -51,6 +52,26 @@ class AuthService {
     }
 
     @Transactional
+    TokenResponse refresh(RefreshRequest request) {
+        Long userId;
+        try {
+            // JWT 서명·만료 검증 (형식·서명·기간이 깨지면 예외)
+            userId = jwtProvider.parseUserId(request.refreshToken());
+        } catch (RuntimeException e) {
+            throw new BusinessException(HttpStatus.UNAUTHORIZED, "INVALID_REFRESH_TOKEN", "다시 로그인해 주세요.");
+        }
+        // 저장소에 해시가 있어야 유효 — 없으면 이미 폐기(rotation)됐거나 재사용 탐지
+        RefreshToken stored = refreshTokenRepository.findByTokenHash(sha256(request.refreshToken()))
+                .orElseThrow(() -> new BusinessException(
+                        HttpStatus.UNAUTHORIZED, "INVALID_REFRESH_TOKEN", "다시 로그인해 주세요."));
+        refreshTokenRepository.delete(stored); // rotation: 구 refresh 즉시 폐기
+        String accessToken = jwtProvider.createAccessToken(userId);
+        String refreshToken = jwtProvider.createRefreshToken(userId);
+        refreshTokenRepository.save(RefreshToken.issue(
+                userId,
+                sha256(refreshToken),
+                LocalDateTime.now().plus(Duration.ofMillis(jwtProvider.refreshExpMs()))));
+        return new TokenResponse(accessToken, refreshToken);
     AuthResponse login(LoginRequest request) {
         // 조회 실패·비밀번호 불일치를 구분하지 않는다 — 계정 존재 여부 노출 방지(Notion API-ID 2)
         AppUser user = userRepository.findByEmail(request.email())
