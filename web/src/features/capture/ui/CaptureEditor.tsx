@@ -28,6 +28,18 @@ function strokeLen(pts: Pt[]) {
   return d
 }
 
+// 삭제 배지 위치 — 박스는 우상단, 형광펜은 궤적 바운딩박스 우상단 (QA #5)
+function regionAnchor(r: Region): Pt {
+  if (r.mode === 'box') return { x: r.x + r.w, y: r.y }
+  let maxX = -Infinity
+  let minY = Infinity
+  for (const p of r.points) {
+    if (p.x > maxX) maxX = p.x
+    if (p.y < minY) minY = p.y
+  }
+  return { x: maxX, y: minY }
+}
+
 // 촬영/선택 이미지 위에서 형광펜(손으로 칠하기)·네모 박스(드래그)로 표시 (F-02 듀얼 제스처)
 export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
   const [mode, setMode] = useState<Mode>('highlighter')
@@ -92,6 +104,7 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
   }
 
   const undo = () => setRegions((r) => r.slice(0, -1))
+  const removeRegion = (idx: number) => setRegions((r) => r.filter((_, i) => i !== idx)) // QA #5
 
   const strokes = regions.filter((r): r is Stroke => r.mode === 'highlighter')
   const boxes = regions.filter((r): r is Box => r.mode === 'box')
@@ -160,6 +173,45 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
           ))}
           {draftBox && <BoxView b={draftBox} />}
 
+          {/* 영역 삭제 배지 (QA #5) — 잘못 표시한 곳을 탭해 개별 삭제 */}
+          {regions.map((r, idx) => {
+            const a = regionAnchor(r)
+            return (
+              <button
+                key={`del-${idx}`}
+                type="button"
+                aria-label="표시 삭제"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  removeRegion(idx)
+                }}
+                style={{
+                  position: 'absolute',
+                  left: a.x,
+                  top: a.y,
+                  transform: 'translate(-50%, -50%)',
+                  width: 22,
+                  height: 22,
+                  borderRadius: '50%',
+                  border: '1.5px solid rgba(255,255,255,0.85)',
+                  background: 'rgba(17,20,26,0.82)',
+                  color: 'var(--common-white)',
+                  fontSize: 13,
+                  lineHeight: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 5px rgba(0,0,0,0.45)',
+                  touchAction: 'none',
+                }}
+              >
+                ×
+              </button>
+            )
+          })}
+
           {/* 형광펜 펜 끝 스파클 — 손 끝을 따라다님 (F-02 반짝임) */}
           {draftStroke && tip && (
             <>
@@ -200,7 +252,11 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
       </div>
 
       <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginBottom: 12, textAlign: 'center', padding: '0 24px' }}>
-        {mode === 'highlighter' ? '모르는 단어 위를 형광펜으로 직접 칠하세요' : '모르는 문제와 풀이에 네모 박스로 드래그하세요'}
+        {regions.length > 0
+          ? '잘못 표시한 곳은 × 를 눌러 지울 수 있어요'
+          : mode === 'highlighter'
+            ? '모르는 단어 위를 형광펜으로 직접 칠하세요'
+            : '모르는 문제와 풀이에 네모 박스로 드래그하세요'}
       </span>
 
       <ModeToggle mode={mode} onHighlighter={() => setMode('highlighter')} onBox={() => setMode('box')} />
