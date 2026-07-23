@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { Tabs, Chip, Button, SearchBar, BottomSheet } from '@/shared/ui'
 import { CardRow } from '@/widgets/card-row'
 import type { CardRowView } from '@/widgets/card-row'
 import { StudySetupSheet } from '@/features/study-setup'
-import type { FeedSubject } from '@/entities/card'
+import { fetchCards } from '@/entities/card'
+import type { Card, FeedSubject } from '@/entities/card'
 
 const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
   { key: 'ALL', label: '전체' },
@@ -60,10 +62,27 @@ const sampleRows: CardRowView[] = [
   },
 ]
 
+// 피드 Card → 행 뷰 매핑. pronunciation·품사 tags·유형 배지는 피드 미제공(후속 백엔드)
+function toRow(c: Card): CardRowView {
+  const isWord = c.type === 'WORD'
+  const exams = c.exams ?? []
+  return {
+    id: c.id,
+    title: isWord ? (c.word ?? '') : (c.latex ?? c.summary ?? '문제'),
+    subtitle: isWord ? (c.contextMeaning ?? '') : (c.summary ?? ''),
+    exams: exams.map((e) => e.title),
+    untagged: exams.length === 0,
+    showSpeaker: isWord,
+  }
+}
+
 /** 오답노트 (F-04) — 06 오답노트 */
 export function WrongNotePage() {
   const navigate = useNavigate()
   const [subject, setSubject] = useState<FeedSubject>('ALL')
+  // 실 피드 조회 — 백엔드 실패/미가동 시 목업 폴백(데모 유지)
+  const { data } = useQuery({ queryKey: ['cards', subject], queryFn: () => fetchCards(subject), retry: 0 })
+  const rows = data ? data.map(toRow) : sampleRows
   const [status, setStatus] = useState<Status>('ALL')
   const [setupOpen, setSetupOpen] = useState(false)
   // 스피커로 발음 재생 중인 단어 — 듣기 끝날 때까지 그 행을 강조 (오답노트 QA)
@@ -182,7 +201,7 @@ export function WrongNotePage() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 var(--spacing-xl)' }}>
-        {sampleRows.map((row) => (
+        {rows.map((row) => (
           <CardRow
             key={row.id}
             row={row}
