@@ -163,6 +163,10 @@ export function ClozePage() {
               padding: '14px 16px',
               borderRadius: 12,
               background: result.correct ? 'var(--color-success-weak)' : 'var(--color-danger-weak)',
+              // 정답 시 토스식 스프링 팝, 오답은 부드러운 등장
+              animation: result.correct
+                ? 'jjik-pop-spring 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both'
+                : 'jjik-rise-in 0.4s ease-out both',
             }}
           >
             <span

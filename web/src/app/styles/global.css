@@ -331,3 +331,60 @@ button {
     transform: scale(1.18);
   }
 }
+
+/* Toss식 성공 팝 — 스프링 오버슈트로 튀어오르며 등장 (졸업·완료·정답) */
+@keyframes jjik-pop-spring {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.14);
+  }
+  75% {
+    transform: scale(0.94);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Toss식 순차 등장 — 아래에서 살짝 떠오르며 페이드 인 (배지·제목·문구 스태거) */
+@keyframes jjik-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Toss식 축하 컨페티 — 중심에서 바깥으로 튀어 흩어지며 사라짐 (--tx/--ty/--r) */
+@keyframes jjik-confetti-burst {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.5) rotate(0deg);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--r));
+  }
+}
+
+/* 성공 원 둘레로 퍼지는 링 (팝과 함께) */
+@keyframes jjik-success-ring {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}

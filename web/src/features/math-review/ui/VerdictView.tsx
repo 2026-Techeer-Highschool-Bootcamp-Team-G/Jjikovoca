@@ -26,6 +26,10 @@ export function VerdictView({ correct, answerValue, explanation, enteredAnswer }
           padding: '14px 16px',
           background: correct ? 'var(--color-success-weak)' : 'var(--color-danger-weak)',
           color: correct ? 'var(--color-success-primary)' : 'var(--color-text-danger)',
+          // 정답 시 토스식 스프링 팝, 오답은 부드러운 등장
+          animation: correct
+            ? 'jjik-pop-spring 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both'
+            : 'jjik-rise-in 0.4s ease-out both',
         }}
       >
         <span style={{ fontSize: 16, fontWeight: 700 }}>
