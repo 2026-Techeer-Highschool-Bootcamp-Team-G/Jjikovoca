@@ -70,4 +70,16 @@ interface CardRepository extends JpaRepository<Card, Long> {
             + "AND c.graduatedAt IS NULL AND c.deletedAt IS NULL AND c.example IS NOT NULL "
             + "ORDER BY c.createdAt DESC")
     List<Card> findClozeCandidates(@Param("userId") Long userId, Pageable pageable);
+
+    /**
+     * 수학 복습 큐(API-29) — 복습 대상 PROBLEM 카드(미졸업·due). next_review 도래 또는 미학습(null)까지 포함.
+     * soft-delete 제외·최신순, limit은 Pageable로.
+     */
+    @Query("SELECT c FROM Card c WHERE c.userId = :userId AND c.type = 'PROBLEM' "
+            + "AND c.graduatedAt IS NULL AND c.deletedAt IS NULL "
+            + "AND (c.nextReviewAt IS NULL OR c.nextReviewAt <= :now) "
+            + "ORDER BY c.createdAt DESC")
+    List<Card> findMathQueue(@Param("userId") Long userId,
+                             @Param("now") LocalDateTime now,
+                             Pageable pageable);
 }
