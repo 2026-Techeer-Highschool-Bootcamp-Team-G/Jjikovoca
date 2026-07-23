@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
 import { Button, TextField } from '@/shared/ui'
+import { login } from '@/features/auth'
 
 const GRADIENT = 'linear-gradient(180deg, var(--color-brand-weak) 0%, var(--color-bg-primary) 55%)'
 
@@ -10,6 +12,11 @@ export function LoginPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const { mutate, isPending, error } = useMutation({
+    mutationFn: () => login(email, password),
+    onSuccess: () => navigate('/'),
+  })
+  const canSubmit = email.trim() !== '' && password !== '' && !isPending
 
   return (
     <div
@@ -35,8 +42,13 @@ export function LoginPage() {
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12, marginTop: 32 }}>
         <TextField value={email} onChange={setEmail} placeholder="이메일" type="email" />
         <TextField value={password} onChange={setPassword} placeholder="비밀번호" type="password" />
-        <Button block size="lg" onClick={() => navigate('/')}>
-          로그인
+        {error && (
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-danger)' }}>
+            {(error as Error).message}
+          </p>
+        )}
+        <Button block size="lg" onClick={() => mutate()} disabled={!canSubmit}>
+          {isPending ? '로그인 중…' : '로그인'}
         </Button>
         <Button block size="lg" variant="weak" onClick={() => navigate('/register')}>
           이메일로 회원가입
