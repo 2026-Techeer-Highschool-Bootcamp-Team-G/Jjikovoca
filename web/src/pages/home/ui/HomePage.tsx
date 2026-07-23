@@ -4,10 +4,9 @@ import { useQuery } from '@tanstack/react-query'
 import { AppHeader } from '@/widgets/app-header'
 import { GameStatusCard } from '@/widgets/game-status'
 import { DdayCard } from '@/widgets/dday-card'
-import { WordCard } from '@/widgets/word-card'
+import { RecentCarousel } from '@/widgets/recent-cards'
 import { Tabs, ListHeader } from '@/shared/ui'
-import { fetchCards } from '@/entities/card'
-import type { Card, FeedSubject } from '@/entities/card'
+import type { FeedSubject } from '@/entities/card'
 import { fetchExpSummary, attend } from '@/entities/exp'
 import { fetchExams } from '@/entities/exam'
 import { fetchReviewQueue } from '@/features/study'
@@ -17,19 +16,6 @@ const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
   { key: 'ENGLISH', label: '영어' },
   { key: 'MATH', label: '수학' },
 ]
-
-// 백엔드 연결 전 데모 데이터 (프로토타입 03 홈과 동일 값)
-const recentCard: Card = {
-  id: 1,
-  type: 'WORD',
-  subject: 'ENGLISH',
-  boxLevel: 2,
-  graduated: false,
-  createdAt: '2026-07-22T00:00:00Z',
-  word: 'sound',
-  contextMeaning: '타당한, 믿을 만한 (이 지문에서)',
-  example: 'Her argument was sound and convincing.',
-}
 
 // 홈 QA #4 — 동기부여 문구 풀(매 진입 랜덤)
 const HOME_QUOTES = [
@@ -48,7 +34,6 @@ export function HomePage() {
   const exp = useQuery({ queryKey: ['exp-summary'], queryFn: fetchExpSummary, retry: 0 })
   const exams = useQuery({ queryKey: ['exams'], queryFn: fetchExams, retry: 0 })
   const review = useQuery({ queryKey: ['review-queue'], queryFn: () => fetchReviewQueue(), retry: 0 })
-  const feed = useQuery({ queryKey: ['cards', subject], queryFn: () => fetchCards(subject), retry: 0 })
 
   // 출석 체크 — 진입 시 1회(서버 멱등). 백엔드 없으면 조용히 무시
   useEffect(() => {
@@ -65,10 +50,6 @@ export function HomePage() {
   const ddayTitle = nearest?.title ?? '중간고사'
   const dday = nearest?.dday ?? 7
   const todayDue = review.data?.dueCount ?? 12
-
-  const apiRecent = feed.data?.[0]
-  const recent = apiRecent ?? recentCard
-  const usingDemoCard = !apiRecent
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -115,23 +96,8 @@ export function HomePage() {
         <ListHeader title="최근 카드" link="전체 보기" onLink={() => navigate('/wrong-note')} />
       </div>
 
-      <div style={{ padding: '16px var(--spacing-xl) 24px' }}>
-        <WordCard
-          card={recent}
-          result={usingDemoCard ? 'WRONG' : undefined}
-          pronunciation={usingDemoCard ? '[saʊnd]' : undefined}
-          conceptEmoji={usingDemoCard ? '⚖️' : undefined}
-          tags={
-            usingDemoCard
-              ? [
-                  { label: '형용사', tone: 'grey' },
-                  { label: '📚 학업', tone: 'blue' },
-                  { label: '다의어', tone: 'blue' },
-                ]
-              : undefined
-          }
-          onClick={() => navigate('/wrong-note')}
-        />
+      <div style={{ padding: '4px 0 24px' }}>
+        <RecentCarousel subject={subject} />
       </div>
     </div>
   )
