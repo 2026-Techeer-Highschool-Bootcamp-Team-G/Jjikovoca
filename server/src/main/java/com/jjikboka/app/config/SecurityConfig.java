@@ -1,5 +1,6 @@
 package com.jjikboka.app.config;
 
+import com.jjikboka.auth.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -7,16 +8,21 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * 처음부터 JWT 무상태 (13 §5) — 세션 저장소 없음.
- * 검증 필터는 app 보안 체인에 배치, 통과 후 userId만 SecurityContext로 하류 전달
- * (auth/core/analysis는 "신뢰된 userId를 받는다"는 계약만 앎 → 10 4단계 게이트웨이 이전 시 코드 불변).
- *
- * TODO(app2 이관 §11): auth 모듈의 JwtAuthenticationFilter를 여기 addFilterBefore로 연결.
+ * JwtAuthenticationFilter가 Bearer access 토큰을 검증해 userId를 SecurityContext에 싣고,
+ * 하류(core/analysis)는 "신뢰된 userId를 받는다"는 계약만 안다(10 4단계 게이트웨이 이전 시 코드 불변).
  */
 @Configuration
 public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -24,12 +30,14 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())                 // 무상태 REST — CSRF 토큰 불필요
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // 인증 예외 경로 (04 §2-3) + Swagger UI·OpenAPI 문서 (개발 편의)
-                .requestMatchers("/api/auth/**", "/api/health", "/actuator/health", "/images/**",
+                // 인증 불필요: 가입·로그인·재발급(만료된 access로도 호출) + 헬스·이미지·Swagger
+                .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/refresh",
+                        "/api/health", "/actuator/health", "/images/**",
                         "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                // 로그아웃 등 나머지는 인증 필요 — JwtAuthenticationFilter가 실은 userId를 확인
                 .anyRequest().authenticated()
-            );
-        // TODO: .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
