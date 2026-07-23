@@ -1,5 +1,5 @@
 export type { Card, CardType, Subject, ReasonTag, Diagnosis, SolutionStepMeta } from './model/types'
-export { fetchCards } from './api/cardApi'
+export { fetchCards, tagCardExams, untagCardExam } from './api/cardApi'
 export type { FeedSubject } from './api/cardApi'
 export { fetchArchive } from './api/archiveApi'
 export type { ArchiveDay, ArchiveItem } from './api/archiveApi'
