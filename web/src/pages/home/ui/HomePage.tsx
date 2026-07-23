@@ -1,11 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { AppHeader } from '@/widgets/app-header'
 import { GameStatusCard } from '@/widgets/game-status'
 import { DdayCard } from '@/widgets/dday-card'
 import { WordCard } from '@/widgets/word-card'
 import { Tabs, ListHeader } from '@/shared/ui'
+import { fetchCards } from '@/entities/card'
 import type { Card, FeedSubject } from '@/entities/card'
+import { fetchExpSummary, attend } from '@/entities/exp'
+import { fetchExams } from '@/entities/exam'
+import { fetchReviewQueue } from '@/features/study'
 
 const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
   { key: 'ALL', label: '전체' },
@@ -39,6 +44,32 @@ export function HomePage() {
   const [subject, setSubject] = useState<FeedSubject>('ALL')
   const [quote] = useState(() => HOME_QUOTES[Math.floor(Math.random() * HOME_QUOTES.length)])
 
+  // 실 API 조회 — 백엔드 실패/미가동 시 각 값 목업 폴백(데모 유지)
+  const exp = useQuery({ queryKey: ['exp-summary'], queryFn: fetchExpSummary, retry: 0 })
+  const exams = useQuery({ queryKey: ['exams'], queryFn: fetchExams, retry: 0 })
+  const review = useQuery({ queryKey: ['review-queue'], queryFn: () => fetchReviewQueue(), retry: 0 })
+  const feed = useQuery({ queryKey: ['cards', subject], queryFn: () => fetchCards(subject), retry: 0 })
+
+  // 출석 체크 — 진입 시 1회(서버 멱등). 백엔드 없으면 조용히 무시
+  useEffect(() => {
+    attend().catch(() => {})
+  }, [])
+
+  const e = exp.data
+  const level = e?.level ?? 5
+  const expVal = e?.exp ?? 320
+  const nextExp = e?.nextLevelExp ?? 400
+  const streakDays = e?.streakDays ?? 5
+
+  const nearest = exams.data?.[0]
+  const ddayTitle = nearest?.title ?? '중간고사'
+  const dday = nearest?.dday ?? 7
+  const todayDue = review.data?.dueCount ?? 12
+
+  const apiRecent = feed.data?.[0]
+  const recent = apiRecent ?? recentCard
+  const usingDemoCard = !apiRecent
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <AppHeader onBell={() => navigate('/notifications')} />
@@ -52,14 +83,14 @@ export function HomePage() {
         }}
       >
         <GameStatusCard
-          level={5}
+          level={level}
           heroTitle="단어 헌터"
-          exp={320}
-          nextExp={400}
-          streakDays={5}
-          questLabel="일일 퀘스트 — 복습 12개 · 달성 시 +40XP"
+          exp={expVal}
+          nextExp={nextExp}
+          streakDays={streakDays}
+          questLabel={`일일 퀘스트 — 복습 ${todayDue}개 · 달성 시 +40XP`}
         />
-        <DdayCard title="중간고사" dday={7} memoryRate={62} todayDue={12} onClick={() => navigate('/exam')} />
+        <DdayCard title={ddayTitle} dday={dday} memoryRate={62} todayDue={todayDue} onClick={() => navigate('/exam')} />
 
         {/* 홈 QA #4 — 동기부여 문구 (D-day 카드 아래) */}
         <div
@@ -86,15 +117,19 @@ export function HomePage() {
 
       <div style={{ padding: '16px var(--spacing-xl) 24px' }}>
         <WordCard
-          card={recentCard}
-          result="WRONG"
-          pronunciation="[saʊnd]"
-          conceptEmoji="⚖️"
-          tags={[
-            { label: '형용사', tone: 'grey' },
-            { label: '📚 학업', tone: 'blue' },
-            { label: '다의어', tone: 'blue' },
-          ]}
+          card={recent}
+          result={usingDemoCard ? 'WRONG' : undefined}
+          pronunciation={usingDemoCard ? '[saʊnd]' : undefined}
+          conceptEmoji={usingDemoCard ? '⚖️' : undefined}
+          tags={
+            usingDemoCard
+              ? [
+                  { label: '형용사', tone: 'grey' },
+                  { label: '📚 학업', tone: 'blue' },
+                  { label: '다의어', tone: 'blue' },
+                ]
+              : undefined
+          }
           onClick={() => navigate('/wrong-note')}
         />
       </div>
