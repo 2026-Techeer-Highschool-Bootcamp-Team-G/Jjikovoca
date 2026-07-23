@@ -21,6 +21,9 @@ interface CardRepository extends JpaRepository<Card, Long> {
     /** 상세 조회 — 삭제된 카드는 없는 것으로 본다(404). 소유자 검증은 조회 후 서비스에서(403). */
     Optional<Card> findByIdAndDeletedAtIsNull(Long id);
 
+    /** 폴링(API-39) — 특정 분석 작업이 만든 카드들. soft-delete 제외·최신순. */
+    List<Card> findByUserIdAndAnalyzeJobIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long userId, Long analyzeJobId);
+
     /**
      * 원문 보관함(API-36) — 해당 월[start, end) 안의 크롭 원문(image_path 존재) 카드를 최신순으로.
      * soft-delete 제외. 일자별 그룹핑은 서비스에서 한다.
