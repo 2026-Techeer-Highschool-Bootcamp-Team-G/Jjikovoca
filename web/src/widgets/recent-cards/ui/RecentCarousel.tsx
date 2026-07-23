@@ -1,24 +1,15 @@
-import { useState } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { IconSpeaker } from '@/shared/ui'
+import { getSavedCards, subscribeSavedCards } from '@/entities/card'
+import type { RecentCard } from '@/entities/card'
 
-// 최근 카드 데모 — 영어(단어) + 수학(문제) 혼합. 탭하면 뒷면(뜻/정답)
-interface RecentCard {
-  id: number
-  type: 'WORD' | 'PROBLEM'
-  // WORD
-  word?: string
-  pronunciation?: string
-  emoji?: string
-  pos?: string
-  meaning?: string
-  example?: string
-  // PROBLEM
-  problem?: string
-  answer?: string
-  solution?: string
+// 저장 카드 구독 — 캡처로 저장한 카드가 홈 캐러셀 앞에 연동됨
+function useSavedCards(): RecentCard[] {
+  return useSyncExternalStore(subscribeSavedCards, getSavedCards, getSavedCards)
 }
 
+// 최근 카드 데모 — 영어(단어) + 수학(문제) 혼합. 탭하면 뒷면(뜻/정답)
 const CARDS: RecentCard[] = [
   { id: 1, type: 'WORD', word: 'sound', pronunciation: '[saʊnd]', emoji: '⚖️', pos: '형용사', meaning: '타당한, 믿을 만한', example: 'Her argument was sound and convincing.' },
   { id: 2, type: 'PROBLEM', problem: 'x² − 5x + 6 = 0 의 두 근을 구하시오.', answer: '2, 3', solution: '곱해서 6, 더해서 5 → (x−2)(x−3)=0' },
@@ -46,9 +37,11 @@ const CARDS: RecentCard[] = [
 
 const CARD_H = 300
 
-/** 홈 최근 카드 — 좌우 스와이프 캐러셀 + 탭 플립(영어=뜻 / 수학=정답) */
+/** 홈 최근 카드 — 좌우 스와이프 캐러셀 + 탭 플립(영어=뜻 / 수학=정답). 저장 카드가 앞에 연동 */
 export function RecentCarousel({ subject = 'ALL' }: { subject?: 'ALL' | 'ENGLISH' | 'MATH' }) {
-  const cards = CARDS.filter(
+  const saved = useSavedCards()
+  const all = [...saved, ...CARDS]
+  const cards = all.filter(
     (c) => subject === 'ALL' || (subject === 'ENGLISH' ? c.type === 'WORD' : c.type === 'PROBLEM'),
   )
   return (
@@ -72,11 +65,11 @@ export function RecentCarousel({ subject = 'ALL' }: { subject?: 'ALL' | 'ENGLISH
   )
 }
 
-function FlipCard({ card }: { card: RecentCard }) {
+export function FlipCard({ card, height = CARD_H }: { card: RecentCard; height?: number }) {
   const [flipped, setFlipped] = useState(false)
   const isWord = card.type === 'WORD'
   return (
-    <div style={{ perspective: 1000, height: CARD_H }}>
+    <div style={{ perspective: 1000, height }}>
       <div
         onClick={() => setFlipped((f) => !f)}
         style={{
@@ -189,12 +182,49 @@ function ProblemFront({ card }: { card: RecentCard }) {
 }
 
 function ProblemBack({ card }: { card: RecentCard }) {
+  const steps = card.steps ?? []
   return (
     <>
-      <span style={chip('var(--blue-500)', 'rgba(49,130,246,0.12)')}>정답</span>
-      <div style={{ margin: 'auto 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, textAlign: 'center' }}>
-        <span style={{ fontSize: 34, fontWeight: 700, color: 'var(--blue-500)' }}>{card.answer}</span>
-        <span style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--color-text-secondary)' }}>{card.solution}</span>
+      <span style={chip('var(--blue-500)', 'rgba(49,130,246,0.12)')}>사고 단계 + 정답</span>
+      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8, margin: '10px 0 6px' }}>
+        {steps.map((s, i) => (
+          <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+            <span
+              style={{
+                flexShrink: 0,
+                width: 18,
+                height: 18,
+                borderRadius: '50%',
+                background: 'var(--blue-500)',
+                color: 'var(--color-text-inverse)',
+                fontSize: 10,
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {i + 1}
+            </span>
+            <span style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--color-text-secondary)', textAlign: 'left' }}>{s}</span>
+          </div>
+        ))}
+        {steps.length === 0 && card.solution && (
+          <span style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--color-text-secondary)', textAlign: 'center' }}>{card.solution}</span>
+        )}
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          padding: '10px 0',
+          borderTop: '1px dashed var(--color-border-default)',
+        }}
+      >
+        <span style={{ fontSize: 12, color: 'var(--color-text-tertiary)' }}>정답</span>
+        <span style={{ fontSize: 24, fontWeight: 700, color: 'var(--blue-500)' }}>{card.answer}</span>
       </div>
       <span style={tapHint}>탭하면 문제로 돌아가요</span>
     </>
