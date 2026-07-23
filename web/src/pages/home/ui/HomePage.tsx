@@ -26,10 +26,18 @@ const recentCard: Card = {
   example: 'Her argument was sound and convincing.',
 }
 
+// 홈 QA #4 — 동기부여 문구 풀(매 진입 랜덤)
+const HOME_QUOTES = [
+  '어제의 나보다 딱 한 걸음만 더 나아가자',
+  '오늘 한 문제가 내일의 자신감이 된다',
+  '꾸준함이 결국 실력을 만든다',
+]
+
 /** 게임형 홈 (F-16) — 03 홈 */
 export function HomePage() {
   const navigate = useNavigate()
   const [subject, setSubject] = useState<FeedSubject>('ALL')
+  const [quote] = useState(() => HOME_QUOTES[Math.floor(Math.random() * HOME_QUOTES.length)])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -52,6 +60,23 @@ export function HomePage() {
           questLabel="일일 퀘스트 — 복습 12개 · 달성 시 +40XP"
         />
         <DdayCard title="중간고사" dday={7} memoryRate={62} todayDue={12} onClick={() => navigate('/exam')} />
+
+        {/* 홈 QA #4 — 동기부여 문구 (D-day 카드 아래) */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '10px 14px',
+            borderRadius: 12,
+            background: 'var(--color-bg-secondary)',
+          }}
+        >
+          <span style={{ fontSize: 15 }} aria-hidden>
+            💪
+          </span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-secondary)' }}>{quote}</span>
+        </div>
       </div>
 
       <div style={{ marginTop: 16, background: 'var(--color-bg-primary)' }}>
@@ -60,7 +85,7 @@ export function HomePage() {
       </div>
 
       <div style={{ padding: '16px var(--spacing-xl) 24px' }}>
-        <WordCard card={recentCard} onClick={() => navigate('/wrong-note')} />
+        <WordCard card={recentCard} result="WRONG" onClick={() => navigate('/wrong-note')} />
       </div>
     </div>
   )
