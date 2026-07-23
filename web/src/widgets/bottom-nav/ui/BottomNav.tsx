@@ -48,11 +48,20 @@ export function BottomNav() {
   return (
     <nav
       style={{
-        position: 'relative',
+        // 하단 고정 — 앱 폭(480) 중앙 정렬. FAB(absolute)의 positioned 컨테이너도 겸함
+        position: 'fixed',
+        bottom: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        maxWidth: 480,
+        zIndex: 50,
+        boxSizing: 'border-box',
         display: 'flex',
         alignItems: 'flex-start',
-        height: 82,
-        padding: '8px 24px 24px',
+        // 스마트폰 하단 인디케이터(safe-area)만큼 여백 추가
+        height: 'calc(82px + env(safe-area-inset-bottom))',
+        padding: '8px 24px calc(24px + env(safe-area-inset-bottom))',
         background: 'var(--color-bg-primary)',
         borderTop: '1px solid var(--color-border-default)',
       }}

@@ -14,7 +14,8 @@ export function App() {
         background: 'var(--color-bg-secondary)',
       }}
     >
-      <main style={{ flex: 1 }}>
+      {/* 고정된 하단 내비에 가려지지 않도록 nav 높이(+safe-area)만큼 여백 확보 */}
+      <main style={{ flex: 1, paddingBottom: 'calc(82px + env(safe-area-inset-bottom))' }}>
         <Outlet />
       </main>
       <BottomNav />
