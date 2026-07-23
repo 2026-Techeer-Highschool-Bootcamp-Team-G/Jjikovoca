@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { Tabs, Chip, Button, SearchBar, BottomSheet } from '@/shared/ui'
 import { CardRow } from '@/widgets/card-row'
 import type { CardRowView } from '@/widgets/card-row'
-import type { FeedSubject } from '@/entities/card'
+import { fetchCards, tagCardExams } from '@/entities/card'
+import type { Card, FeedSubject } from '@/entities/card'
+import { fetchExams } from '@/entities/exam'
 
 const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
   { key: 'ALL', label: '전체' },
@@ -55,6 +58,20 @@ const EXAMS = [
   { id: 'mock', name: '9월 모의고사', detail: '전과목 · D-52' },
 ]
 
+// 피드 Card → 행 뷰 (오답노트와 동일 매핑)
+function toRow(c: Card): CardRowView {
+  const isWord = c.type === 'WORD'
+  const exams = c.exams ?? []
+  return {
+    id: c.id,
+    title: isWord ? (c.word ?? '') : (c.latex ?? c.summary ?? '문제'),
+    subtitle: isWord ? (c.contextMeaning ?? '') : (c.summary ?? ''),
+    exams: exams.map((e) => e.title),
+    untagged: exams.length === 0,
+    showSpeaker: isWord,
+  }
+}
+
 /** 시험 선택 시트 (14-4, F-29) — 카드에 시험 지정. 마이/오답노트 딤 위 BottomSheet 복수 선택 */
 export function ExamSelectPage() {
   const navigate = useNavigate()
@@ -62,6 +79,26 @@ export function ExamSelectPage() {
   const [status, setStatus] = useState<Status>('ALL')
   const [open, setOpen] = useState(true)
   const [checked, setChecked] = useState<Set<string>>(new Set(['mid']))
+  const [activeCardId, setActiveCardId] = useState<number | null>(null)
+
+  // 실 데이터 — 미가동 시 데모 폴백
+  const cardsQ = useQuery({ queryKey: ['cards', subject], queryFn: () => fetchCards(subject), retry: 0 })
+  const rows = cardsQ.data && cardsQ.data.length > 0 ? cardsQ.data.map(toRow) : ROWS
+  const examsQ = useQuery({ queryKey: ['exams'], queryFn: fetchExams, retry: 0 })
+  const examList =
+    examsQ.data && examsQ.data.length > 0
+      ? examsQ.data.map((e) => ({ id: String(e.id), name: e.title, detail: `${e.subject ?? '전과목'} · D-${e.dday}` }))
+      : EXAMS
+  const tag = useMutation({
+    mutationFn: (v: { cardId: number; examIds: number[] }) => tagCardExams(v.cardId, v.examIds),
+    onSuccess: () => setOpen(false),
+  })
+
+  const done = () => {
+    const examIds = [...checked].map(Number).filter((n) => !Number.isNaN(n))
+    if (activeCardId != null && examIds.length) tag.mutate({ cardId: activeCardId, examIds })
+    else setOpen(false)
+  }
 
   const toggle = (id: string) =>
     setChecked((prev) => {
@@ -113,8 +150,15 @@ export function ExamSelectPage() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 var(--spacing-xl) 24px' }}>
-        {ROWS.map((row) => (
-          <CardRow key={row.id} row={row} onClick={() => setOpen(true)} />
+        {rows.map((row) => (
+          <CardRow
+            key={row.id}
+            row={row}
+            onClick={() => {
+              setActiveCardId(row.id)
+              setOpen(true)
+            }}
+          />
         ))}
       </div>
 
@@ -126,7 +170,7 @@ export function ExamSelectPage() {
           </span>
         </div>
 
-        {EXAMS.map((e) => {
+        {examList.map((e) => {
           const on = checked.has(e.id)
           return (
             <button
@@ -173,8 +217,8 @@ export function ExamSelectPage() {
           )
         })}
 
-        <Button block size="lg" onClick={() => setOpen(false)}>
-          완료
+        <Button block size="lg" onClick={done} disabled={tag.isPending}>
+          {tag.isPending ? '지정 중…' : '완료'}
         </Button>
       </BottomSheet>
     </div>
