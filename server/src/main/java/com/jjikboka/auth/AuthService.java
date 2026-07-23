@@ -85,6 +85,14 @@ class AuthService {
         return issueTokens(user);
     }
 
+    @Transactional
+    void logout(Long userId, String refreshToken) {
+        // 멱등: 이 userId의 refresh면 폐기, 없거나 이미 폐기됐어도 성공(재요청도 200 — Notion API-ID 38)
+        refreshTokenRepository.findByTokenHash(sha256(refreshToken))
+                .filter(token -> token.getUserId().equals(userId))
+                .ifPresent(refreshTokenRepository::delete);
+    }
+
     private AuthResponse issueTokens(AppUser user) {
         String accessToken = jwtProvider.createAccessToken(user.getId());
         String refreshToken = jwtProvider.createRefreshToken(user.getId());
