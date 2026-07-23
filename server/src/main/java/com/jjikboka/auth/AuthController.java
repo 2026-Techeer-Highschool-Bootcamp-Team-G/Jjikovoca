@@ -2,12 +2,14 @@ package com.jjikboka.auth;
 
 import com.jjikboka.auth.dto.AuthResponse;
 import com.jjikboka.auth.dto.LoginRequest;
+import com.jjikboka.auth.dto.LogoutRequest;
 import com.jjikboka.auth.dto.RefreshRequest;
 import com.jjikboka.auth.dto.RegisterRequest;
 import com.jjikboka.auth.dto.TokenResponse;
 import com.jjikboka.shared.response.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,5 +47,14 @@ class AuthController {
     ResponseEntity<ApiResponse<TokenResponse>> refresh(@Valid @RequestBody RefreshRequest request) {
         TokenResponse data = authService.refresh(request);
         return ResponseEntity.ok(ApiResponse.ok(data, "토큰이 갱신되었습니다."));
+    }
+
+    /** 로그아웃 (Notion API-ID 38, 인증 필요) — refresh 폐기. 멱등(재요청도 200). */
+    @PostMapping("/logout")
+    ResponseEntity<ApiResponse<Void>> logout(
+            @AuthenticationPrincipal Long userId,
+            @Valid @RequestBody LogoutRequest request) {
+        authService.logout(userId, request.refreshToken());
+        return ResponseEntity.ok(ApiResponse.<Void>ok(null, "로그아웃되었습니다."));
     }
 }
