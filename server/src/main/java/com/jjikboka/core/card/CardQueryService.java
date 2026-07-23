@@ -42,6 +42,13 @@ public class CardQueryService {
         return cards.stream().map(CardSummary::from).toList();
     }
 
+    /** 폴링(API-39) — 특정 분석 작업이 만든 카드 목록(요약). soft-delete 제외·최신순. */
+    @Transactional(readOnly = true)
+    public List<CardSummary> getCardsByJob(Long userId, Long analyzeJobId) {
+        return cardRepository.findByUserIdAndAnalyzeJobIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId, analyzeJobId)
+                .stream().map(CardSummary::from).toList();
+    }
+
     /**
      * 카드 상세. 없거나 삭제된 카드는 404, 남의 카드는 403으로 서버가 막는다(NFR-04).
      * 힌트 게이팅에 쓸 프리미엄 여부를 함께 판정해 {@link CardDetail}로 조립한다.
