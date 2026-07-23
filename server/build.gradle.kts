@@ -17,6 +17,7 @@ repositories { mavenCentral() }
 dependencies {
     // 웹·보안·영속 (auth·core 전 도메인 공용)
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     // Redis 캐시-어사이드 (13 §9) — 15 스케일아웃 시 SSE pub/sub 팬아웃도 이 위에
