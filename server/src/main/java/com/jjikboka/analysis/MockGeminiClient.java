@@ -50,4 +50,14 @@ class MockGeminiClient implements GeminiClient {
         // 모의 새 예문 — 반드시 word(또는 그 토큰)를 포함해 빈칸 처리가 되도록 한다. 실 전환 시 이 구현만 교체.
         return "She decided to " + word + " the situation herself.";
     }
+
+    @Override
+    public String generateSolutionJson(String latex) {
+        // 모의 다른 풀이(근의 공식) — index는 core.card가 붙인다. 실 전환 시 이 구현만 교체.
+        return """
+                {"label":"근의 공식","steps":[\
+                {"no":1,"title":"1단계","question":"판별식을 구해볼까요?","content":"D=b^2-4ac=25-24=1"},\
+                {"no":2,"title":"2단계","question":"근의 공식에 대입하면?","content":"x=(5±√1)/2 이므로 3, 2"}],\
+                "explanation":"근의 공식 x=(-b±√D)/2a에 대입해 x=3, 2를 얻는다."}""";
+    }
 }

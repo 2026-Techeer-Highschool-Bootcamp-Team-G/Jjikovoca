@@ -44,4 +44,25 @@ class MathJsonSupport {
             return null;
         }
     }
+
+    /** AI가 만든 단건 풀이 JSON을 파싱한다(API-41). index는 없을 수 있어(0으로) 호출부가 다시 붙인다. 실패면 null. */
+    Solution parseSolution(String json) {
+        if (json == null || json.isBlank()) {
+            return null;
+        }
+        try {
+            return objectMapper.readValue(json, Solution.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** 풀이 목록을 card.solutions에 저장할 JSON 문자열로 직렬화한다(API-41 append). content 포함(단계 공개 30 열람용). */
+    String writeSolutions(List<Solution> solutions) {
+        try {
+            return objectMapper.writeValueAsString(solutions);
+        } catch (Exception e) {
+            throw new IllegalStateException("풀이 직렬화 실패", e);
+        }
+    }
 }

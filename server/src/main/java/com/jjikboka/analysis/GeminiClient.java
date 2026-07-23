@@ -11,4 +11,10 @@ public interface GeminiClient {
 
     /** 주어진 단어(숙어 포함)를 담은 새 예문을 생성한다(API-16 예문 재생성). 세션용 — 카드 원문은 바꾸지 않는다. */
     String generateExample(String word);
+
+    /**
+     * 주어진 문제 수식의 다른 접근 풀이를 JSON으로 생성한다(API-41). index는 core.card가 붙이므로
+     * {@code {label, steps:[{no,title,question,content}], explanation}} 형태만 반환한다.
+     */
+    String generateSolutionJson(String latex);
 }

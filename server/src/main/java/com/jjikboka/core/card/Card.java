@@ -192,6 +192,14 @@ class Card {
         return solutions;
     }
 
+    /**
+     * 다른 풀이 생성(API-41) 시 갱신된 풀이 배열 JSON을 저장한다. content 포함(단계 공개 30 열람용) —
+     * @Transactional 안에서 호출되면 JPA 더티체킹으로 UPDATE된다.
+     */
+    void updateSolutions(String solutionsJson) {
+        this.solutions = solutionsJson;
+    }
+
     /** 진단 JSON(원본). */
     String getDiagnosis() {
         return diagnosis;
