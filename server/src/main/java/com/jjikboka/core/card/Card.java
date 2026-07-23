@@ -28,6 +28,9 @@ class Card {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Column(name = "analyze_job_id")
+    private Long analyzeJobId;
+
     @Column(nullable = false)
     private String type;
 
@@ -92,6 +95,33 @@ class Card {
     private LocalDateTime deletedAt;
 
     protected Card() {
+    }
+
+    /**
+     * 분석 산출로 새 오답 카드를 만든다 (API-6 처리). mock=true·boxLevel=0로 시작하고 analyze_job_id로 job에 잇는다.
+     * 실 Gemini 전환 시 mock만 false가 되고 필드 출처가 바뀔 뿐, 이 팩토리 계약은 그대로다.
+     */
+    static Card fromAnalysis(CardCreateCommand command) {
+        Card card = new Card();
+        card.userId = command.userId();
+        card.analyzeJobId = command.analyzeJobId();
+        card.type = command.type();
+        card.subject = command.subject();
+        card.imagePath = command.imagePath();
+        card.word = command.word();
+        card.contextMeaning = command.contextMeaning();
+        card.dictMeaning = command.dictMeaning();
+        card.example = command.example();
+        card.summary = command.summary();
+        card.latex = command.latex();
+        card.concept = command.concept();
+        card.hint1 = command.hint1();
+        card.hint2 = command.hint2();
+        card.hint3 = command.hint3();
+        card.answerFormat = command.answerFormat();
+        card.mock = true;
+        card.boxLevel = 0;
+        return card;
     }
 
     Long getId() {
