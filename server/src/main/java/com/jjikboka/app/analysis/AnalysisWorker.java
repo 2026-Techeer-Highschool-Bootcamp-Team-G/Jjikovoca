@@ -51,6 +51,7 @@ class AnalysisWorker {
         Long jobId = event.jobId();
         try {
             analyzeJobService.markRunning(jobId);
+            emitStages(jobId, event.type());
             AnalysisContent content = geminiClient.generate(event.type());
             cardCreationService.create(toCommand(event, content));
             analyzeJobService.markDone(jobId);
@@ -60,6 +61,19 @@ class AnalysisWorker {
             analyzeJobService.markFailed(jobId);
             quotaConsumeService.refund(event.userId());
             eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeFailed(jobId, e.getMessage()));
+        }
+    }
+
+    /**
+     * 진행 단계를 SSE(API-40)용으로 발행한다. WORD는 문맥 분석만, PROBLEM은 힌트·사고단계·진단까지 이어진다.
+     * mock은 즉시 끝나 단계가 순식간에 지나갈 수 있다 — 구독이 늦으면 폴링/즉시 done으로 메운다.
+     */
+    private void emitStages(Long jobId, String type) {
+        eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeProgressed(jobId, "analyzing"));
+        if ("PROBLEM".equals(type)) {
+            eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeProgressed(jobId, "hintGenerating"));
+            eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeProgressed(jobId, "stepChaining"));
+            eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeProgressed(jobId, "diagnosing"));
         }
     }
 
