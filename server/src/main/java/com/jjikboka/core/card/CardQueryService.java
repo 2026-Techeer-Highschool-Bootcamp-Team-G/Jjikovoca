@@ -1,6 +1,7 @@
 package com.jjikboka.core.card;
 
 import com.jjikboka.shared.error.BusinessException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,6 +61,22 @@ public class CardQueryService {
         if (!card.getUserId().equals(userId)) {
             throw new BusinessException(HttpStatus.FORBIDDEN, "FORBIDDEN", "접근 권한이 없습니다.");
         }
+    }
+
+    /** 넛지 소급 대상(API-45) — 최근 since 이후 만들어진 미졸업·active 카드 id. subject=null이면 전과목. */
+    @Transactional(readOnly = true)
+    public List<Long> recentCardIds(Long userId, String subject, LocalDateTime since) {
+        return cardRepository.findRecentCardIds(userId, subject, since);
+    }
+
+    /** 시험 대비 오늘 복습(API-42) — 태깅 카드 중 due(next_review 도래)를 이른 순 limit만큼. 빈 목록이면 빈 결과. */
+    @Transactional(readOnly = true)
+    public List<ExamReviewItem> getExamReviewCards(Long userId, List<Long> cardIds, int limit) {
+        if (cardIds.isEmpty()) {
+            return List.of();
+        }
+        return cardRepository.findDueAmong(userId, cardIds, LocalDateTime.now(), PageRequest.of(0, limit))
+                .stream().map(ExamReviewItem::from).toList();
     }
 
     /**
