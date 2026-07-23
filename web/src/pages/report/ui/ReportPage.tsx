@@ -1,9 +1,51 @@
-import type { ReactNode } from 'react'
-import { useState } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { fetchReportSummary } from '@/entities/report'
 import { fetchReviewQueue } from '@/features/study'
+
+// 진입 시 0→목표 카운트업 (rAF, ease-out cubic)
+function useCountUp(target: number, durationMs = 900): number {
+  const [v, setV] = useState(0)
+  useEffect(() => {
+    let raf = 0
+    const start = performance.now()
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / durationMs)
+      setV(target * (1 - Math.pow(1 - t, 3)))
+      if (t < 1) raf = requestAnimationFrame(tick)
+      else setV(target)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [target, durationMs])
+  return v
+}
+
+// "24장" / "78%" / "12개" 의 앞 숫자를 카운트업하고 접미사는 유지
+function CountUp({ value }: { value: string }) {
+  const match = /^(\d+)(.*)$/.exec(value)
+  const target = match ? Number(match[1]) : 0
+  const suffix = match ? match[2] : value
+  const cur = useCountUp(target)
+  if (!match) return <>{value}</>
+  return (
+    <>
+      {Math.round(cur)}
+      {suffix}
+    </>
+  )
+}
+
+// mount 기반 순차 등장 스타일(아래에서 떠오르며 페이드) — 전역 keyframe 불필요
+function entrance(mounted: boolean, delay: number): CSSProperties {
+  return {
+    opacity: mounted ? 1 : 0,
+    transform: mounted ? 'translateY(0)' : 'translateY(12px)',
+    transition: `opacity 0.5s ease-out ${delay}s, transform 0.5s ease-out ${delay}s`,
+  }
+}
 
 // 과목별 학습 비중 — 오늘 / 이번 달 (백엔드 연결 전 데모)
 const SUBJECT = {
@@ -75,6 +117,64 @@ const WEEK = [
 ]
 const WEEK_MAX = Math.max(...WEEK.map((d) => d.eng + d.math))
 
+// 주간 학습 추이 선그래프 (SVG) — 진입 시 선이 왼쪽부터 그려지고 면적이 채워짐
+function TrendChart({ mounted }: { mounted: boolean }) {
+  const W = 320
+  const H = 96
+  const pad = 8
+  const vals = WEEK.map((d) => d.eng + d.math)
+  const max = Math.max(...vals, 1)
+  const pts = vals.map((v, i) => {
+    const x = pad + (i * (W - pad * 2)) / (vals.length - 1)
+    const y = H - pad - (v / max) * (H - pad * 2)
+    return [x, y] as const
+  })
+  const line = pts.map((p) => `${p[0]},${p[1]}`).join(' ')
+  const area = `${pad},${H - pad} ${line} ${W - pad},${H - pad}`
+  const DASH = 1000 // 폴리라인 전체 길이보다 크게 → offset DASH→0 으로 좌→우 그리기
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} preserveAspectRatio="none" aria-hidden>
+      <defs>
+        <linearGradient id="jjik-trend-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--color-brand-primary)" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="var(--color-brand-primary)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon
+        points={area}
+        fill="url(#jjik-trend-fill)"
+        style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease-out 0.4s' }}
+      />
+      <polyline
+        points={line}
+        fill="none"
+        stroke="var(--color-brand-primary)"
+        strokeWidth={2.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{
+          strokeDasharray: DASH,
+          strokeDashoffset: mounted ? 0 : DASH,
+          transition: 'stroke-dashoffset 1s ease-out 0.3s',
+        }}
+      />
+      {pts.map((p, i) => (
+        <circle
+          key={i}
+          cx={p[0]}
+          cy={p[1]}
+          r={3}
+          fill="var(--color-bg-primary)"
+          stroke="var(--color-brand-primary)"
+          strokeWidth={2}
+          style={{ opacity: mounted ? 1 : 0, transition: `opacity 0.3s ease-out ${0.5 + i * 0.06}s` }}
+        />
+      ))}
+    </svg>
+  )
+}
+
 /** 학습 리포트 (F-10) — 13 리포트 */
 export function ReportPage() {
   const navigate = useNavigate()
@@ -90,6 +190,13 @@ export function ReportPage() {
   const newCards = basic ? `${basic.newCards}장` : '24장'
   const accuracyWord = basic?.accuracy.word != null ? `${Math.round(basic.accuracy.word * 100)}%` : '78%'
   const dueCount = review.data?.dueCount ?? 12
+
+  // 진입 시 카드/막대/잔디가 생성되듯 순차 등장
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setMounted(true))
+    return () => cancelAnimationFrame(id)
+  }, [])
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <header style={{ background: 'var(--color-bg-primary)', padding: '24px var(--spacing-xl) 16px' }}>
@@ -116,21 +223,24 @@ export function ReportPage() {
             background: 'var(--color-brand-primary)',
             border: 'none',
             cursor: 'pointer',
+            ...entrance(mounted, 0),
           }}
         >
           <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-text-inverse)' }}>
             <span style={{ fontSize: 18 }} aria-hidden>🔔</span>
-            <span style={{ fontSize: 15, fontWeight: 700 }}>오늘 복습 대기 {dueCount}개</span>
+            <span style={{ fontSize: 15, fontWeight: 700 }}>
+              오늘 복습 대기 <CountUp value={`${dueCount}개`} />
+            </span>
           </span>
           <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-inverse)', opacity: 0.9 }}>지금 복습 ›</span>
         </button>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9, ...entrance(mounted, 0.06) }}>
           <StatCard label="새로 만든 카드" value={newCards} />
           <StatCard label="단어 정답률" value={accuracyWord} accent />
         </div>
 
-        <Card>
+        <Card style={entrance(mounted, 0.12)}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-primary)' }}>
               {scope === 'TODAY' ? '오늘' : '이번 달'} 과목별 학습 비중
@@ -154,7 +264,7 @@ export function ReportPage() {
           <span style={{ fontSize: 11, color: 'var(--grey-500)' }}>{s.caption}</span>
         </Card>
 
-        <Card>
+        <Card style={entrance(mounted, 0.18)}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>학습 잔디</span>
@@ -175,7 +285,18 @@ export function ReportPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 18px)', gap: 8 }}>
                 {m.grass.flat().map((lvl, i) => (
-                  <span key={i} style={{ width: 18, height: 18, borderRadius: 5, background: GRASS_COLOR[lvl] }} />
+                  <span
+                    key={i}
+                    style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: 5,
+                      background: GRASS_COLOR[lvl],
+                      opacity: mounted ? 1 : 0,
+                      transform: mounted ? 'scale(1)' : 'scale(0.4)',
+                      transition: `opacity 0.3s ease-out ${0.25 + i * 0.012}s, transform 0.3s ease-out ${0.25 + i * 0.012}s`,
+                    }}
+                  />
                 ))}
               </div>
               {/* 색 범례 (적음→많음) */}
@@ -204,7 +325,7 @@ export function ReportPage() {
           </div>
         </Card>
 
-        <Card>
+        <Card style={entrance(mounted, 0.24)}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>일일 학습 시간</span>
@@ -216,7 +337,7 @@ export function ReportPage() {
             <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>평균 세션 24분</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'stretch', gap: 10, height: 96 }}>
-            {WEEK.map((d) => {
+            {WEEK.map((d, di) => {
               const total = d.eng + d.math
               const hPct = (total / WEEK_MAX) * 100
               return (
@@ -227,12 +348,13 @@ export function ReportPage() {
                       style={{
                         width: '100%',
                         maxWidth: 22,
-                        height: `${hPct}%`,
-                        minHeight: 6,
+                        height: mounted ? `${hPct}%` : '0%',
+                        minHeight: mounted ? 6 : 0,
                         borderRadius: 4,
                         overflow: 'hidden',
                         display: 'flex',
                         flexDirection: 'column',
+                        transition: `height 0.6s cubic-bezier(0.2, 0.8, 0.3, 1) ${0.28 + di * 0.05}s`,
                       }}
                     >
                       <div style={{ height: `${(d.math / total) * 100}%`, background: 'var(--blue-500)' }} />
@@ -248,7 +370,25 @@ export function ReportPage() {
           </div>
         </Card>
 
-        <Card>
+        <Card style={entrance(mounted, 0.3)}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>주간 학습 추이</span>
+            <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)' }}>하루 총 학습 시간</span>
+          </div>
+          <TrendChart mounted={mounted} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 6px' }}>
+            {WEEK.map((d) => (
+              <span
+                key={d.day}
+                style={{ fontSize: 10, color: d.today ? 'var(--color-text-brand)' : 'var(--color-text-tertiary)' }}
+              >
+                {d.day}
+              </span>
+            ))}
+          </div>
+        </Card>
+
+        <Card style={entrance(mounted, 0.36)}>
           <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>지난달보다</span>
           <div style={{ display: 'flex', gap: 24 }}>
             <GrowthItem label="외운 단어" value="24" delta="+8" up />
@@ -257,7 +397,7 @@ export function ReportPage() {
           </div>
         </Card>
 
-        <Card>
+        <Card style={entrance(mounted, 0.42)}>
           <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>
             나의 약한 개념
           </span>
@@ -273,7 +413,7 @@ export function ReportPage() {
   )
 }
 
-function Card({ children }: { children: ReactNode }) {
+function Card({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
     <div
       style={{
@@ -283,6 +423,7 @@ function Card({ children }: { children: ReactNode }) {
         display: 'flex',
         flexDirection: 'column',
         gap: 14,
+        ...style,
       }}
     >
       {children}
@@ -305,7 +446,7 @@ function StatCard({ label, value, accent = false }: { label: string; value: stri
     >
       <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>{label}</span>
       <span style={{ fontSize: 24, fontWeight: 700, color: accent ? 'var(--color-text-brand)' : 'var(--color-text-primary)' }}>
-        {value}
+        <CountUp value={value} />
       </span>
     </div>
   )
@@ -453,7 +594,9 @@ function LegendRow({
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
         <div style={{ display: 'flex', gap: 6, alignItems: 'baseline', fontSize: 14, fontWeight: 700 }}>
           <span style={{ color: 'var(--color-text-primary)' }}>{subject}</span>
-          <span style={{ color: pctColor }}>{pct}</span>
+          <span style={{ color: pctColor }}>
+            <CountUp value={pct} />
+          </span>
         </div>
         <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>{detail}</span>
       </div>
@@ -467,7 +610,9 @@ function GrowthItem({ label, value, delta, up }: { label: string; value: string;
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)' }}>{label}</span>
       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-        <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)' }}>{value}</span>
+        <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)' }}>
+          <CountUp value={value} />
+        </span>
         <span
           style={{
             fontSize: 10,
