@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { NavigationBar } from '@/shared/ui'
 import { FlashcardView } from '@/features/flashcard'
 import type { FlashcardData } from '@/features/flashcard'
 import { GradeButtons } from '@/features/study-grade'
 import type { Grade } from '@/features/study-grade'
-
-const INDEX = 3
-const TOTAL = 12
+import { fetchFlashcards, recordStudy } from '@/features/study'
+import type { FlashcardQueueCard } from '@/features/study'
 
 // 백엔드 연결 전 데모 (프로토타입 10 플래시카드와 동일)
 const sample: FlashcardData = {
@@ -34,17 +34,55 @@ const sample: FlashcardData = {
   },
 }
 
+// 큐 카드(얇은 응답) → 카드 뷰 매핑. pronunciation·품사·tags 등은 큐 미제공(후속)
+function toFlashcard(c: FlashcardQueueCard): FlashcardData {
+  const w = c.word ?? ''
+  const ex = c.example ?? ''
+  const i = w ? ex.toLowerCase().indexOf(w.toLowerCase()) : -1
+  const example =
+    i >= 0
+      ? { pre: ex.slice(0, i), highlight: ex.slice(i, i + w.length), post: ex.slice(i + w.length), translation: '' }
+      : { pre: '', highlight: '', post: ex, translation: '' }
+  return {
+    word: w,
+    pronunciation: '',
+    conceptEmoji: '📘',
+    pos: '',
+    meaning: c.contextMeaning ?? '',
+    dictNote: '',
+    frontTags: [],
+    backTags: [],
+    example,
+  }
+}
+
 /** 플래시카드 (F-05) — 10 플래시카드 */
 export function FlashcardPage() {
   const navigate = useNavigate()
   const [flipped, setFlipped] = useState(false)
+  const [idx, setIdx] = useState(0)
+
+  // 실 큐 조회 — 미가동 시 데모 단일 카드 폴백
+  const queue = useQuery({ queryKey: ['flashcards'], queryFn: () => fetchFlashcards({ mode: 'TODAY' }), retry: 0 })
+  const list =
+    queue.data && queue.data.cards.length > 0
+      ? queue.data.cards.map((c) => ({ id: c.id as number | null, data: toFlashcard(c) }))
+      : [{ id: null as number | null, data: sample }]
+  const total = list.length
+  const pos = Math.min(idx, total - 1)
+  const cur = list[pos]
+
+  const record = useMutation({
+    mutationFn: (grade: Grade) => recordStudy(cur.id as number, { activity: 'FLASHCARD', result: grade }),
+  })
 
   const handleGrade = (grade: Grade) => {
-    // v2: study_log 기록 + 다음 카드 로드. 데모는 '알아요' 4연속 졸업(10-3)으로 이동.
-    if (grade === 'KNOW') {
+    if (cur.id != null) record.mutate(grade) // 실 학습 기록(백엔드 없으면 조용히 실패)
+    if (pos + 1 >= total) {
       navigate('/card-done')
       return
     }
+    setIdx(pos + 1)
     setFlipped(false)
   }
 
@@ -62,7 +100,7 @@ export function FlashcardPage() {
         onBack={() => navigate(-1)}
         right={
           <span style={{ fontSize: 15, color: 'var(--color-text-brand)' }}>
-            {INDEX} / {TOTAL}
+            {pos + 1} / {total}
           </span>
         }
       />
@@ -78,7 +116,7 @@ export function FlashcardPage() {
         >
           <div
             style={{
-              width: `${(INDEX / TOTAL) * 100}%`,
+              width: `${((pos + 1) / total) * 100}%`,
               height: '100%',
               borderRadius: 2,
               background: 'var(--color-brand-primary)',
@@ -124,7 +162,7 @@ export function FlashcardPage() {
       </div>
 
       <div style={{ padding: '16px var(--spacing-xl) 0' }}>
-        <FlashcardView data={sample} flipped={flipped} onFlip={() => setFlipped((f) => !f)} />
+        <FlashcardView data={cur.data} flipped={flipped} onFlip={() => setFlipped((f) => !f)} />
       </div>
 
       <div style={{ marginTop: 'auto', padding: '0 var(--spacing-xl) 8px' }}>
