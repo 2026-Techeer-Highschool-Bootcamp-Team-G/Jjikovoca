@@ -1,1 +1,1 @@
-export { RecentCarousel } from './ui/RecentCarousel'
+export { RecentCarousel, FlipCard } from './ui/RecentCarousel'
