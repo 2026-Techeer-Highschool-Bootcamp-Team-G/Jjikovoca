@@ -180,7 +180,7 @@ export function ReportPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 9, ...entrance(mounted, 0.06) }}>
           <StatCard label="새로 만든 카드" value={newCards} />
-          <StatCard label="단어 정답률" value={accuracyWord} accent />
+          <StatCard label="영어 정답률" value={accuracyWord} accent />
           <StatCard label="수학 정답률" value={accuracyMath} accent />
         </div>
 
@@ -379,18 +379,20 @@ function StatCard({ label, value, accent = false }: { label: string; value: stri
 }
 
 function Donut({ total, mathPct }: { total: string; mathPct: number }) {
+  // 진입 시 0→100% 시계방향으로 채워지며 원그래프 생성 (sweep 이 도달한 각도까지만 색, 나머지는 배경)
+  const sweep = useCountUp(100, 900)
+  const blueEnd = Math.min(sweep, mathPct)
   return (
     <div
       style={{
         width: 120,
         height: 120,
         borderRadius: '50%',
-        background: `conic-gradient(var(--blue-500) 0% ${mathPct}%, var(--teal-500) ${mathPct}% 100%)`,
+        background: `conic-gradient(var(--blue-500) 0% ${blueEnd}%, var(--teal-500) ${blueEnd}% ${sweep}%, var(--color-bg-secondary) ${sweep}% 100%)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
-        transition: 'background 200ms ease',
       }}
     >
       <div
