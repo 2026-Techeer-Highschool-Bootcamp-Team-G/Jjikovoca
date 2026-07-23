@@ -1,6 +1,6 @@
-# 로컬/단일서버 스택 (13 §8). 사용:
-#   개발  → docker compose -f docker-compose.app.yml up -d mysql redis  (앱은 IDE bootRun)
-#   통합  → docker compose -f docker-compose.app.yml --profile full up -d --build
+# 로컬/단일서버 스택 (13 §8). 파일명이 docker-compose.yml이라 -f 없이 자동 인식된다. 사용:
+#   개발  → docker compose up -d mysql redis  (앱은 IDE bootRun)
+#   통합  → docker compose --profile full up -d --build
 services:
   mysql:
     image: mysql:8.0
