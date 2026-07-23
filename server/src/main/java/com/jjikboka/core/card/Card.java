@@ -134,6 +134,9 @@ class Card {
         card.hint2 = command.hint2();
         card.hint3 = command.hint3();
         card.answerFormat = command.answerFormat();
+        card.solutions = command.solutionsJson();
+        card.answerValue = command.answerValue();
+        card.diagnosis = command.diagnosisJson();
         card.mock = true;
         card.boxLevel = 0;
         return card;
