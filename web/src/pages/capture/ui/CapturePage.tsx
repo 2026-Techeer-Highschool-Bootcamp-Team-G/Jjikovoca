@@ -2,8 +2,17 @@ import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { BottomSheet } from '@/shared/ui'
-import { CaptureMethodSheet, CameraView, CaptureEditor, AnalyzingView, AnalysisResult } from '@/features/capture'
+import {
+  CaptureMethodSheet,
+  CameraView,
+  CaptureEditor,
+  AnalyzingView,
+  AnalysisResult,
+  analyzeCapture,
+  pollAnalyzeJob,
+} from '@/features/capture'
 import type { CaptureResult } from '@/features/capture'
+import { fetchMe } from '@/entities/user'
 
 type Phase = 'method' | 'camera' | 'edit' | 'analyzing' | 'done'
 
@@ -24,11 +33,47 @@ export function CapturePage() {
 
   const finish = () => (isMath ? navigate('/math-problem') : setPhase('done'))
 
-  // AI 분석 대기(실제 p95 10초)를 데모용으로 축약 — 탭하면 즉시 결과로도 진행
+  // 분석: 한도 확인 → analyze 접수(202) → 폴링. 실패/미가동 시 데모 타이머 폴백(탭하면 즉시 결과)
   useEffect(() => {
     if (phase !== 'analyzing') return
-    const t = setTimeout(finish, 2800)
-    return () => clearTimeout(t)
+    let cancelled = false
+    let pollTimer: ReturnType<typeof setTimeout> | undefined
+    const fallback = setTimeout(finish, 2800) // 폴백: 백엔드 실패/미가동 시 데모 결과
+    ;(async () => {
+      try {
+        const me = await fetchMe()
+        if (me.dailyUsed >= me.dailyLimit) {
+          clearTimeout(fallback)
+          navigate('/limit') // 무료 한도 초과
+          return
+        }
+        // ⚠️ CaptureEditor가 크롭 base64를 아직 만들지 않음 → fullImage best-effort(크롭 추출은 후속)
+        const { jobId } = await analyzeCapture({
+          type: isMath ? 'PROBLEM' : 'WORD',
+          fullImage: imageSrc ?? undefined,
+          cropImages: imageSrc && !isMath ? [imageSrc] : undefined,
+          cropImage: imageSrc && isMath ? imageSrc : undefined,
+        })
+        const poll = async () => {
+          if (cancelled) return
+          const r = await pollAnalyzeJob(jobId)
+          if (r.status === 'COMPLETED' || r.status === 'FAILED') {
+            clearTimeout(fallback)
+            finish()
+          } else {
+            pollTimer = setTimeout(poll, 2000)
+          }
+        }
+        poll()
+      } catch {
+        // 폴백 타이머가 데모 결과로 진행 (백엔드 미가동 등)
+      }
+    })()
+    return () => {
+      cancelled = true
+      clearTimeout(fallback)
+      if (pollTimer) clearTimeout(pollTimer)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, isMath])
 
