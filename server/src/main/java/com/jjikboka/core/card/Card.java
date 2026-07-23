@@ -82,6 +82,9 @@ class Card {
     @Column(name = "wrong_count")
     private int wrongCount;
 
+    @Column(name = "next_review_at")
+    private LocalDateTime nextReviewAt;
+
     @Column(name = "graduated_at")
     private LocalDateTime graduatedAt;
 
@@ -194,8 +197,51 @@ class Card {
         return graduatedAt != null;
     }
 
+    LocalDateTime getNextReviewAt() {
+        return nextReviewAt;
+    }
+
     LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    /**
+     * 라이트너 복습 전이 (API-11, 서버 고정). box는 카드가 소유하므로 전이 규칙도 여기 둔다.
+     * fsrs_state IS NULL(현재 전량)일 때의 경로 — FSRS(v2)는 core.review가 별도로 갱신한다(계약 동일).
+     *
+     * <ul>
+     *   <li>KNOW — box+1(최대 4). 다음 복습 간격 1·3·7·30일, box 4 도달 시 졸업</li>
+     *   <li>CONFUSED — box 유지, +1일</li>
+     *   <li>DONT_KNOW — box 0, +1일, 몰라요 빈도(wrong_count)+1</li>
+     * </ul>
+     */
+    void applyLightner(String result, LocalDateTime now) {
+        switch (result) {
+            case "KNOW" -> {
+                boxLevel = Math.min(boxLevel + 1, 4);
+                nextReviewAt = now.plusDays(intervalDays(boxLevel));
+                if (boxLevel == 4) {
+                    graduatedAt = now;
+                }
+            }
+            case "CONFUSED" -> nextReviewAt = now.plusDays(1);
+            case "DONT_KNOW" -> {
+                boxLevel = 0;
+                wrongCount += 1;
+                nextReviewAt = now.plusDays(1);
+            }
+            default -> throw new IllegalArgumentException("unknown result: " + result);
+        }
+    }
+
+    /** box 도달 시 다음 복습까지 일수: box1=1 · box2=3 · box3=7 · box4=30. */
+    private static int intervalDays(int box) {
+        return switch (box) {
+            case 1 -> 1;
+            case 2 -> 3;
+            case 3 -> 7;
+            default -> 30;
+        };
     }
 
     /**
