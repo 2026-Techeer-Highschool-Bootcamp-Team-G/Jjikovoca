@@ -31,7 +31,8 @@ export function CapturePage() {
   const [isMath, setIsMath] = useState(params.get('subject') === 'math')
   const [imageSrc, setImageSrc] = useState<string | null>(null)
 
-  const finish = () => (isMath ? navigate('/math-problem') : setPhase('done'))
+  // 영어·수학 모두 결과 카드 화면으로 (수학도 카드로 저장)
+  const finish = () => setPhase('done')
 
   // 분석: 한도 확인 → analyze 접수(202) → 폴링. 실패/미가동 시 데모 타이머 폴백(탭하면 즉시 결과)
   useEffect(() => {
@@ -137,5 +138,5 @@ export function CapturePage() {
     )
   }
 
-  return <AnalysisResult onBack={() => navigate(-1)} onGoNote={() => navigate('/wrong-note')} />
+  return <AnalysisResult isMath={isMath} onBack={() => navigate(-1)} />
 }
