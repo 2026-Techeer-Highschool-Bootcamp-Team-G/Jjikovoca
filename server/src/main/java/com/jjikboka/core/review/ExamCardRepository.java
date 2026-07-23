@@ -1,6 +1,8 @@
 package com.jjikboka.core.review;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -13,5 +15,7 @@ interface ExamCardRepository extends JpaRepository<ExamCard, ExamCardId> {
 
     void deleteByExamIdAndCardId(Long examId, Long cardId);
 
-    List<ExamCard> findByCardId(Long cardId);
+    /** 카드에 걸린 시험들(태그 칩·태깅 응답용). 다가오는 순. */
+    @Query("SELECT e FROM Exam e, ExamCard ec WHERE ec.examId = e.id AND ec.cardId = :cardId ORDER BY e.examDate ASC")
+    List<Exam> findExamsByCardId(@Param("cardId") Long cardId);
 }
