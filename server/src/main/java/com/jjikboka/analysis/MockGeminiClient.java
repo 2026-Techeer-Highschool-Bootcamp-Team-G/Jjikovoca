@@ -11,6 +11,15 @@ class MockGeminiClient implements GeminiClient {
 
     private static final String MODEL = "mock";
 
+    private static final String MOCK_SOLUTIONS = """
+            [{"index":0,"label":"인수분해","steps":[\
+            {"no":1,"title":"1단계","question":"무엇을 구하는 문제인가?","content":"두 근을 찾는 이차방정식이다."},\
+            {"no":2,"title":"2단계","question":"어떻게 인수분해할까?","content":"곱해서 6, 더해서 5인 두 수는 2와 3."}],\
+            "explanation":"곱해서 6, 더해서 5가 되는 두 수 2와 3으로 (x-2)(x-3)=0."}]""";
+
+    private static final String MOCK_DIAGNOSIS =
+            "{\"failedStep\":3,\"description\":\"이항 부호 오류\",\"suggestedReason\":\"MISTAKE\"}";
+
     @Override
     public AnalysisContent generate(String type) {
         if ("PROBLEM".equals(type)) {
@@ -23,7 +32,8 @@ class MockGeminiClient implements GeminiClient {
                     "두 근의 합과 곱을 계수로 표현해 보세요.",
                     "근과 계수의 관계: 합 = -b/a, 곱 = c/a",
                     "인수분해하면 (x-2)(x-3)=0",
-                    "NUMERIC");
+                    "NUMERIC",
+                    MOCK_SOLUTIONS, "2, 3", MOCK_DIAGNOSIS);
         }
         return new AnalysisContent(
                 MODEL, "ENGLISH",
@@ -31,7 +41,8 @@ class MockGeminiClient implements GeminiClient {
                 "타당한, 믿을 만한",
                 "① 소리 ② 건전한, 타당한 ③ (잠이) 깊은",
                 "That's a sound argument.",
-                null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null,
+                null, null, null);
     }
 
     @Override
