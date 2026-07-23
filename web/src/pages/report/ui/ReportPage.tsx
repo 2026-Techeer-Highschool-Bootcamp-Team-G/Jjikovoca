@@ -154,23 +154,38 @@ export function ReportPage() {
               학습일 {m.days}일 · 연속 {m.streak}일 🔥
             </span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 18px)', gap: 8 }}>
-            {m.grass.flat().map((lvl, i) => (
-              <span key={i} style={{ width: 18, height: 18, borderRadius: 5, background: GRASS_COLOR[lvl] }} />
-            ))}
+          {/* 좌: 잔디 그리드 + 색 범례 / 우: 설명 */}
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 18px)', gap: 8 }}>
+                {m.grass.flat().map((lvl, i) => (
+                  <span key={i} style={{ width: 18, height: 18, borderRadius: 5, background: GRASS_COLOR[lvl] }} />
+                ))}
+              </div>
+              {/* 색 범례 (적음→많음) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)' }}>적음</span>
+                {GRASS_COLOR.map((c, i) => (
+                  <span key={i} style={{ width: 12, height: 12, borderRadius: 3, background: c }} aria-hidden />
+                ))}
+                <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)' }}>많음</span>
+              </div>
+            </div>
+            {/* 학습 잔디 설명 (무엇을 뜻하는지) — 잔디 오른쪽 */}
+            <span
+              style={{
+                flex: 1,
+                fontSize: 11,
+                lineHeight: 1.6,
+                color: 'var(--grey-500)',
+                background: 'var(--color-bg-secondary)',
+                borderRadius: 10,
+                padding: '10px 12px',
+              }}
+            >
+              매일의 학습 기록이 초록색으로 채워져요. 그날 활동량이 많을수록 색이 더 짙어져 꾸준함을 한눈에 볼 수 있어요.
+            </span>
           </div>
-          {/* 색 범례 (적음→많음) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)' }}>적음</span>
-            {GRASS_COLOR.map((c, i) => (
-              <span key={i} style={{ width: 12, height: 12, borderRadius: 3, background: c }} aria-hidden />
-            ))}
-            <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)' }}>많음</span>
-          </div>
-          {/* 학습 잔디 설명 (무엇을 뜻하는지) */}
-          <span style={{ fontSize: 11, lineHeight: 1.5, color: 'var(--grey-500)' }}>
-            매일의 학습 기록이 초록색으로 채워져요. 그날 활동량이 많을수록 색이 더 짙어져 꾸준함을 한눈에 볼 수 있어요.
-          </span>
         </Card>
 
         <Card>
