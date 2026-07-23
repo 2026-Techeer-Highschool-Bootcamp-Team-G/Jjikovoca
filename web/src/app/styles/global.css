@@ -280,3 +280,32 @@ button {
     background-position: 200% 50%;
   }
 }
+
+/* '오늘 복습' 추천 — 주변이 빨갛게 숨쉬는 글로우 (오답노트 QA) */
+@keyframes jjik-red-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1.5px rgba(229, 72, 77, 0.7), 0 0 12px rgba(229, 72, 77, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 1.5px rgba(229, 72, 77, 0.95), 0 0 22px rgba(229, 72, 77, 0.6);
+  }
+}
+
+/* '오늘 복습' 추천 — 불꽃처럼 주기적으로 살짝 흔들림 (오답노트 QA) */
+@keyframes jjik-shake {
+  0%,
+  88%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  91% {
+    transform: translateX(-1.5px) rotate(-0.8deg);
+  }
+  94% {
+    transform: translateX(1.5px) rotate(0.8deg);
+  }
+  97% {
+    transform: translateX(-1px) rotate(-0.4deg);
+  }
+}
