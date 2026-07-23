@@ -92,4 +92,27 @@ interface CardRepository extends JpaRepository<Card, Long> {
             + "AND (:subject IS NULL OR c.subject = :subject) "
             + "ORDER BY c.createdAt ASC")
     List<Card> findReschedulable(@Param("userId") Long userId, @Param("subject") String subject);
+
+    /**
+     * 넛지 소급 대상(API-45) — 최근(since 이후) 만들어진 미졸업·active 카드 id. subject가 null이면 전과목.
+     */
+    @Query("SELECT c.id FROM Card c WHERE c.userId = :userId "
+            + "AND c.graduatedAt IS NULL AND c.deletedAt IS NULL "
+            + "AND (:subject IS NULL OR c.subject = :subject) "
+            + "AND c.createdAt >= :since")
+    List<Long> findRecentCardIds(@Param("userId") Long userId,
+                                 @Param("subject") String subject,
+                                 @Param("since") LocalDateTime since);
+
+    /**
+     * 시험 대비 오늘 복습(API-42) — 주어진 카드들 중 소유·미졸업·due(next_review 도래). next_review 이른 순.
+     */
+    @Query("SELECT c FROM Card c WHERE c.userId = :userId AND c.id IN :cardIds "
+            + "AND c.graduatedAt IS NULL AND c.deletedAt IS NULL "
+            + "AND c.nextReviewAt IS NOT NULL AND c.nextReviewAt <= :now "
+            + "ORDER BY c.nextReviewAt ASC")
+    List<Card> findDueAmong(@Param("userId") Long userId,
+                            @Param("cardIds") List<Long> cardIds,
+                            @Param("now") LocalDateTime now,
+                            Pageable pageable);
 }
