@@ -82,4 +82,14 @@ interface CardRepository extends JpaRepository<Card, Long> {
     List<Card> findMathQueue(@Param("userId") Long userId,
                              @Param("now") LocalDateTime now,
                              Pageable pageable);
+
+    /**
+     * 시험일 역산 재배치 대상(API-33~35) — 미졸업·active 카드. subject가 null이면 전과목, 아니면 해당 과목만.
+     * 오래된 순으로 균등 분산하기 좋게 created_at 오름차순으로 준다.
+     */
+    @Query("SELECT c FROM Card c WHERE c.userId = :userId "
+            + "AND c.graduatedAt IS NULL AND c.deletedAt IS NULL "
+            + "AND (:subject IS NULL OR c.subject = :subject) "
+            + "ORDER BY c.createdAt ASC")
+    List<Card> findReschedulable(@Param("userId") Long userId, @Param("subject") String subject);
 }
