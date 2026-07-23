@@ -40,8 +40,8 @@ cp .env.example .env
 ## 개발 루프 (13 §8-3)
 
 ```bash
-docker compose -f docker-compose.app.yml up -d mysql redis   # 인프라만
-./gradlew bootRun                                            # 앱은 IDE/터미널
+docker compose up -d mysql redis   # 인프라만 (파일명이 docker-compose.yml이라 -f 불필요)
+./gradlew bootRun                  # 앱은 IDE/터미널
 ```
 
 - 앱 기동 시 Flyway가 `V1__baseline.sql`을 적용(스키마는 Flyway 소유, JPA는 `validate`만).
@@ -51,7 +51,7 @@ docker compose -f docker-compose.app.yml up -d mysql redis   # 인프라만
 ## 통합 실행 (전체 스택)
 
 ```bash
-docker compose -f docker-compose.app.yml --profile full up -d --build   # +server +nginx
+docker compose --profile full up -d --build   # +server +nginx
 ```
 
 ## 빌드·테스트
