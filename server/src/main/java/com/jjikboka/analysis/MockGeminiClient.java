@@ -33,4 +33,10 @@ class MockGeminiClient implements GeminiClient {
                 "That's a sound argument.",
                 null, null, null, null, null, null, null);
     }
+
+    @Override
+    public String generateExample(String word) {
+        // 모의 새 예문 — 반드시 word(또는 그 토큰)를 포함해 빈칸 처리가 되도록 한다. 실 전환 시 이 구현만 교체.
+        return "She decided to " + word + " the situation herself.";
+    }
 }
