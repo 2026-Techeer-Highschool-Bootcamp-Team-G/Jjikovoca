@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
 import { NavigationBar, Button } from '@/shared/ui'
+import { createExport } from '@/features/export'
 
 type ExportType = 'MATH' | 'WORD'
 type Range = 'DONT' | 'CONFUSED' | 'ALL'
@@ -16,6 +18,13 @@ export function ExportPage() {
   const navigate = useNavigate()
   const [type, setType] = useState<ExportType>('WORD')
   const [range, setRange] = useState<Range>('DONT')
+
+  // 생성 요청 — 성공 시 downloadUrl 전달, 실패/미가동 시에도 결과 화면으로(폴백)
+  const create = useMutation({
+    mutationFn: () => createExport({ type: type === 'WORD' ? 'PDF_WORDTEST' : 'PDF_NOTE' }),
+    onSuccess: (r) => navigate('/export-done', { state: { downloadUrl: r.downloadUrl } }),
+    onError: () => navigate('/export-done'),
+  })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
@@ -88,8 +97,8 @@ export function ExportPage() {
       </div>
 
       <div style={{ background: 'var(--color-bg-primary)', padding: '12px var(--spacing-xl) 32px' }}>
-        <Button block size="lg" onClick={() => navigate('/export-done')}>
-          📄 PDF 만들기
+        <Button block size="lg" onClick={() => create.mutate()} disabled={create.isPending}>
+          {create.isPending ? '생성 중…' : '📄 PDF 만들기'}
         </Button>
       </div>
     </div>
