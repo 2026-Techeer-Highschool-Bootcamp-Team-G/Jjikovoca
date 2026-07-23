@@ -22,6 +22,6 @@ class MeController {
 
     @GetMapping
     ResponseEntity<ApiResponse<MeResponse>> me(@AuthenticationPrincipal Long userId) {
-        return ResponseEntity.ok(ApiResponse.ok(meService.getMe(userId)));
+        return ResponseEntity.ok(ApiResponse.ok(meService.getMe(userId), "내 정보 조회가 완료되었습니다."));
     }
 }
