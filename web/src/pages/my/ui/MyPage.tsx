@@ -1,9 +1,27 @@
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { ListRow } from '@/shared/ui'
+import { fetchMe } from '@/entities/user'
+import { fetchExpSummary } from '@/entities/exp'
+import { fetchExams } from '@/entities/exam'
 
 /** 마이페이지 (14 마이) — 프로필·프리미엄·학습·계정 */
 export function MyPage() {
   const navigate = useNavigate()
+  // 실 API — 미가동 시 목업 폴백(데모 유지)
+  const me = useQuery({ queryKey: ['me'], queryFn: fetchMe, retry: 0 })
+  const exp = useQuery({ queryKey: ['exp-summary'], queryFn: fetchExpSummary, retry: 0 })
+  const exams = useQuery({ queryKey: ['exams'], queryFn: fetchExams, retry: 0 })
+
+  const nickname = me.data?.nickname ?? '테스터'
+  const email = me.data?.email ?? 'test@edulens.kr'
+  const premium = me.data?.premium ?? true
+  const level = exp.data?.level ?? 5
+  const expVal = exp.data?.exp ?? 320
+  const nextExp = exp.data?.nextLevelExp ?? 400
+  const nearest = exams.data?.[0]
+  const examLabel = nearest ? `${nearest.title} D-${nearest.dday}` : '중간고사 D-7'
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <header style={{ padding: '12px var(--spacing-xl) 0' }}>
@@ -13,14 +31,14 @@ export function MyPage() {
       </header>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '16px var(--spacing-xl) 0' }}>
-        <ProfileCard />
-        <PremiumCard onManage={() => navigate('/paywall')} />
+        <ProfileCard nickname={nickname} email={email} level={level} exp={expVal} nextExp={nextExp} />
+        <PremiumCard premium={premium} onManage={() => navigate('/paywall')} />
       </div>
 
       <SectionLabel>학습</SectionLabel>
       <ListRow
         title="📅 시험 일정"
-        value="중간고사 D-7"
+        value={examLabel}
         valueColor="var(--color-brand-primary)"
         divider
         onClick={() => navigate('/exam')}
@@ -69,8 +87,20 @@ function SectionLabel({ children }: { children: string }) {
   )
 }
 
-function ProfileCard() {
-  const ratio = 320 / 400
+function ProfileCard({
+  nickname,
+  email,
+  level,
+  exp,
+  nextExp,
+}: {
+  nickname: string
+  email: string
+  level: number
+  exp: number
+  nextExp: number
+}) {
+  const ratio = nextExp > 0 ? Math.min(1, exp / nextExp) : 0
   return (
     <div
       style={{
@@ -101,7 +131,7 @@ function ProfileCard() {
       </span>
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)' }}>테스터</span>
+          <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)' }}>{nickname}</span>
           <span
             style={{
               fontSize: 11,
@@ -112,15 +142,15 @@ function ProfileCard() {
               padding: '2px 8px',
             }}
           >
-            Lv.5 단어 헌터
+            Lv.{level} 단어 헌터
           </span>
         </div>
-        <span style={{ fontSize: 12, color: 'var(--color-text-tertiary)' }}>test@edulens.kr</span>
+        <span style={{ fontSize: 12, color: 'var(--color-text-tertiary)' }}>{email}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
           <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--color-bg-secondary)', overflow: 'hidden' }}>
             <div style={{ width: `${ratio * 100}%`, height: '100%', background: 'var(--color-brand-primary)', borderRadius: 3 }} />
           </div>
-          <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>320/400</span>
+          <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>{exp}/{nextExp}</span>
         </div>
       </div>
       <button
@@ -143,7 +173,7 @@ function ProfileCard() {
   )
 }
 
-function PremiumCard({ onManage }: { onManage: () => void }) {
+function PremiumCard({ premium, onManage }: { premium: boolean; onManage: () => void }) {
   return (
     <div
       style={{
@@ -159,10 +189,10 @@ function PremiumCard({ onManage }: { onManage: () => void }) {
       }}
     >
       <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--common-white)' }}>
-        ⭐ 프리미엄 이용 중
+        {premium ? '⭐ 프리미엄 이용 중' : '무료 플랜 이용 중'}
       </span>
       <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>
-        월 ₩4,900 · 다음 결제 8월 20일
+        {premium ? '월 ₩4,900 · 다음 결제 8월 20일' : '프리미엄으로 더 많은 기능을 열어보세요'}
       </span>
       <button
         type="button"
@@ -180,7 +210,7 @@ function PremiumCard({ onManage }: { onManage: () => void }) {
           cursor: 'pointer',
         }}
       >
-        관리 ›
+        {premium ? '관리 ›' : '업그레이드 ›'}
       </button>
     </div>
   )
