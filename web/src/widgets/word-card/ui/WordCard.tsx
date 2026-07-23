@@ -4,41 +4,90 @@ import { Badge, IconSpeaker } from '@/shared/ui'
 interface Props {
   card: Card
   result?: 'CORRECT' | 'WRONG' // 홈 QA #3 — 최근 카드 정답/오답 색
-  onSpeak?: () => void
+  pronunciation?: string
+  conceptEmoji?: string
+  tags?: { label: string; tone: 'grey' | 'blue' }[]
+  onSpeak?: (locale?: 'US' | 'UK') => void
   onClick?: () => void
 }
 
-// 찍어보카 단어 카드 (10:21) — 크롭(형광펜) + 단어 + Box 배지 + 문맥 뜻 + 예문 (+정답/오답 accent)
-export function WordCard({ card, result, onSpeak, onClick }: Props) {
+// 홈 최근 카드 (185:1093, Figma 03 홈) — 개념 이미지 + 단어 + 발음 + 미/영 발음 + 태그 + 탭 힌트
+// (+ QA #3 정답/오답 accent: 좌측 색 + 배지)
+export function WordCard({ card, result, pronunciation, conceptEmoji, tags, onSpeak, onClick }: Props) {
   const accent = result === 'WRONG' ? '#e5484d' : result === 'CORRECT' ? '#0a8a55' : null
   return (
     <article
       onClick={onClick}
       style={{
+        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        gap: 'var(--spacing-md)',
-        padding: 'var(--spacing-lg)',
+        alignItems: 'center',
+        gap: 12,
+        padding: 16,
         background: 'var(--color-bg-elevated)',
         border: '1px solid var(--color-border-default)',
         ...(accent ? { borderLeftWidth: 4, borderLeftColor: accent } : {}),
-        borderRadius: 'var(--radius-lg)',
-        boxShadow: 'var(--shadow-card)',
+        borderRadius: 20,
+        boxShadow: '0 8px 24px rgba(0,0,0,0.16)',
         cursor: onClick ? 'pointer' : 'default',
       }}
     >
-      <CropPreview imagePath={card.imagePath} />
+      {/* 개념 이미지 (AI 연상 이미지) */}
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: 118,
+          borderRadius: 12,
+          background: 'linear-gradient(90deg, #e8f3ff 0%, #e7f8f8 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+        }}
+      >
+        <span
+          style={{
+            position: 'absolute',
+            top: 8,
+            left: 8,
+            background: 'rgba(255,255,255,0.85)',
+            color: 'var(--color-text-secondary)',
+            fontSize: 10,
+            fontWeight: 500,
+            padding: '3px 8px',
+            borderRadius: 999,
+          }}
+        >
+          ✨ AI 연상 이미지
+        </span>
+        {result && (
+          <span style={{ position: 'absolute', top: 8, right: 8 }}>
+            <Badge color={result === 'WRONG' ? 'red' : 'green'}>
+              {result === 'WRONG' ? '오답' : '정답'}
+            </Badge>
+          </span>
+        )}
+        <span style={{ fontSize: 48, lineHeight: 1 }} aria-hidden>
+          {conceptEmoji ?? '⚖️'}
+        </span>
+      </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--color-text-primary)' }}>
+      {/* 단어 + 발음 */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, marginTop: 4 }}>
+        <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--color-text-primary)' }}>
           {card.word ?? '단어'}
         </span>
-        <Badge color="blue">Box {card.boxLevel}</Badge>
-        {result && (
-          <Badge color={result === 'WRONG' ? 'red' : 'green'}>
-            {result === 'WRONG' ? '오답' : '정답'}
-          </Badge>
+        {pronunciation && (
+          <span style={{ fontSize: 13, color: 'var(--color-text-tertiary)' }}>{pronunciation}</span>
         )}
+      </div>
+
+      {/* 발음 버튼 (미국/영국) + 스피커 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <VoiceButton primary label="🇺🇸 미국" onClick={() => onSpeak?.('US')} />
+        <VoiceButton label="🇬🇧 영국" onClick={() => onSpeak?.('UK')} />
         <button
           type="button"
           aria-label="발음 듣기"
@@ -59,66 +108,64 @@ export function WordCard({ card, result, onSpeak, onClick }: Props) {
         </button>
       </div>
 
-      {card.contextMeaning && (
-        <p
-          style={{
-            margin: 0,
-            fontSize: 15,
-            fontWeight: 500,
-            color: 'var(--color-text-brand)',
-          }}
-        >
-          {card.contextMeaning}
-        </p>
+      {/* 태그 */}
+      {tags && tags.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {tags.map((t) => (
+            <Tag key={t.label} label={t.label} tone={t.tone} />
+          ))}
+        </div>
       )}
-      {card.example && (
-        <p style={{ margin: 0, fontSize: 15, color: 'var(--color-text-secondary)' }}>
-          {card.example}
-        </p>
-      )}
+
+      {/* 탭 힌트 */}
+      <span style={{ fontSize: 13, color: 'var(--color-text-tertiary)' }}>카드를 탭하면 뜻이 보여요</span>
     </article>
   )
 }
 
-// 크롭 원문 미리보기. imagePath 있으면 실제 이미지, 없으면 형광펜 스켈레톤(프로토타입 표현).
-function CropPreview({ imagePath }: { imagePath?: string | null }) {
-  if (imagePath) {
-    return (
-      <img
-        src={imagePath}
-        alt="캡처 원문"
-        style={{
-          width: '100%',
-          height: 110,
-          objectFit: 'cover',
-          borderRadius: 'var(--radius-sm)',
-        }}
-      />
-    )
-  }
-  const bar = (w: string) => (
-    <div style={{ height: 8, width: w, borderRadius: 4, background: 'var(--grey-300)' }} />
-  )
+// 발음 버튼 — 미국(강조: brand-weak) / 영국(흰 배경 + 테두리)
+function VoiceButton({ label, primary = false, onClick }: { label: string; primary?: boolean; onClick: () => void }) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        gap: 10,
-        height: 110,
-        padding: '14px 16px',
-        background: 'var(--color-bg-secondary)',
-        borderRadius: 'var(--radius-sm)',
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation()
+        onClick()
       }}
-      aria-hidden
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        padding: '5px 10px',
+        borderRadius: 999,
+        fontSize: 12,
+        fontWeight: 500,
+        cursor: 'pointer',
+        background: primary ? 'var(--color-brand-weak)' : 'var(--color-bg-primary)',
+        color: primary ? 'var(--color-text-brand)' : 'var(--color-text-secondary)',
+        border: primary ? '1px solid transparent' : '1px solid var(--color-border-default)',
+      }}
     >
-      {bar('100%')}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ height: 18, width: 96, borderRadius: 9, background: 'var(--color-highlight)' }} />
-        {bar('100%')}
-      </div>
-      {bar('160px')}
-    </div>
+      {label}
+    </button>
+  )
+}
+
+// 태그 — grey(품사) / blue(주제·유형)
+function Tag({ label, tone }: { label: string; tone: 'grey' | 'blue' }) {
+  const blue = tone === 'blue'
+  return (
+    <span
+      style={{
+        fontSize: 10,
+        fontWeight: 500,
+        padding: '2px 7px',
+        borderRadius: 5,
+        background: blue ? 'var(--color-brand-weak)' : 'var(--color-bg-secondary)',
+        color: blue ? 'var(--color-text-brand)' : 'var(--color-text-secondary)',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {label}
+    </span>
   )
 }
