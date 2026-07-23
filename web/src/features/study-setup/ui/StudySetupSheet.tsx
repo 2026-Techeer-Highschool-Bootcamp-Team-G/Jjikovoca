@@ -26,6 +26,7 @@ export function StudySetupSheet({ onStart }: Props) {
           emoji="🔥"
           title="오늘 복습"
           sub="시험범위 기억률 62% · 24개"
+          recommend
           onClick={() => setMethod('TODAY')}
         />
         <MethodCard
@@ -55,14 +56,18 @@ function MethodCard({
   emoji,
   title,
   sub,
+  recommend = false,
   onClick,
 }: {
   active: boolean
   emoji: string
   title: string
   sub: string
+  recommend?: boolean
   onClick: () => void
 }) {
+  // '오늘 복습' 추천 카드가 선택되면 주변 빨간 글로우 + 미세 흔들림 (오답노트 QA)
+  const hot = active && recommend
   return (
     <button
       type="button"
@@ -77,11 +82,16 @@ function MethodCard({
         padding: 14,
         borderRadius: 12,
         textAlign: 'left',
-        background: active ? 'var(--color-brand-weak)' : 'var(--color-bg-elevated)',
-        border: active
-          ? '1.5px solid var(--color-brand-primary)'
-          : '1px solid var(--color-border-default)',
+        background: hot ? '#fff1f1' : active ? 'var(--color-brand-weak)' : 'var(--color-bg-elevated)',
+        border: hot
+          ? '1.5px solid #e5484d'
+          : active
+            ? '1.5px solid var(--color-brand-primary)'
+            : '1px solid var(--color-border-default)',
         cursor: 'pointer',
+        animation: hot
+          ? 'jjik-red-glow 1.6s ease-in-out infinite, jjik-shake 2.6s ease-in-out infinite'
+          : undefined,
       }}
     >
       <span style={{ fontSize: 18 }} aria-hidden>
@@ -91,7 +101,7 @@ function MethodCard({
         style={{
           fontSize: 14,
           fontWeight: 700,
-          color: active ? 'var(--color-brand-primary)' : 'var(--color-text-primary)',
+          color: hot ? '#e5484d' : active ? 'var(--color-brand-primary)' : 'var(--color-text-primary)',
         }}
       >
         {title}
