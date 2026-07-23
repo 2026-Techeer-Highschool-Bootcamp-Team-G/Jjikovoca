@@ -21,6 +21,7 @@ export function CardRow({
   onExamTag,
   selectable = false,
   selected = false,
+  speaking = false,
 }: {
   row: CardRowView
   onClick?: () => void
@@ -28,20 +29,26 @@ export function CardRow({
   onExamTag?: () => void
   selectable?: boolean
   selected?: boolean
+  speaking?: boolean // 스피커로 발음 재생 중 — 듣기 끝날 때까지 이 행/단어 강조 (오답노트 QA)
 }) {
   return (
     <article
       onClick={onClick}
       style={{
         position: 'relative',
-        background: 'var(--color-bg-primary)',
+        background: speaking ? 'var(--color-brand-weak)' : 'var(--color-bg-primary)',
         borderRadius: 'var(--radius-md)',
-        border: selected ? '1.5px solid var(--color-brand-primary)' : '1.5px solid transparent',
+        border:
+          speaking || selected
+            ? '1.5px solid var(--color-brand-primary)'
+            : '1.5px solid transparent',
         padding: '14px 16px',
         display: 'flex',
         flexDirection: 'column',
         gap: 8,
         cursor: onClick ? 'pointer' : 'default',
+        animation: speaking ? 'jjik-speak-pulse 1.2s ease-in-out infinite' : undefined,
+        transition: 'background 160ms ease, border-color 160ms ease',
       }}
     >
       {selectable && (
@@ -70,7 +77,20 @@ export function CardRow({
       )}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, minWidth: 0 }}>
-          <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text-primary)' }}>
+          <span
+            style={{
+              fontSize: 16,
+              fontWeight: 700,
+              color: 'var(--color-text-primary)',
+              // 재생 중 지금 듣는 단어에 형광펜 하이라이트 (오답노트 QA)
+              padding: speaking ? '0 3px' : undefined,
+              borderRadius: speaking ? 4 : undefined,
+              background: speaking
+                ? 'linear-gradient(transparent 58%, rgba(49,130,246,0.28) 58%)'
+                : undefined,
+              transition: 'background 160ms ease',
+            }}
+          >
             {row.title}
           </span>
           {row.pronunciation && (
@@ -95,6 +115,7 @@ export function CardRow({
               cursor: 'pointer',
               display: 'inline-flex',
               flexShrink: 0,
+              animation: speaking ? 'jjik-speak-bob 0.6s ease-in-out infinite' : undefined,
             }}
           >
             <IconSpeaker size={18} />
