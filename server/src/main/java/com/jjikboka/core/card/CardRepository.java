@@ -61,4 +61,13 @@ interface CardRepository extends JpaRepository<Card, Long> {
     List<Card> findReviewQueue(@Param("userId") Long userId,
                                @Param("now") LocalDateTime now,
                                Pageable pageable);
+
+    /**
+     * 빈칸 퀴즈 문항 대상(API-14) — 예문 보유 미졸업 WORD 카드. 저장 예문을 재활용하므로 example 필수.
+     * soft-delete 제외·최신순, limit은 Pageable로.
+     */
+    @Query("SELECT c FROM Card c WHERE c.userId = :userId AND c.type = 'WORD' "
+            + "AND c.graduatedAt IS NULL AND c.deletedAt IS NULL AND c.example IS NOT NULL "
+            + "ORDER BY c.createdAt DESC")
+    List<Card> findClozeCandidates(@Param("userId") Long userId, Pageable pageable);
 }
