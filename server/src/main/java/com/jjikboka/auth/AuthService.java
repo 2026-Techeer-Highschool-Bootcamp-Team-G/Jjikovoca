@@ -1,6 +1,7 @@
 package com.jjikboka.auth;
 
 import com.jjikboka.auth.dto.AuthResponse;
+import com.jjikboka.auth.dto.LoginRequest;
 import com.jjikboka.auth.dto.RefreshRequest;
 import com.jjikboka.auth.dto.RegisterRequest;
 import com.jjikboka.auth.dto.TokenResponse;
@@ -72,6 +73,9 @@ class AuthService {
                 sha256(refreshToken),
                 LocalDateTime.now().plus(Duration.ofMillis(jwtProvider.refreshExpMs()))));
         return new TokenResponse(accessToken, refreshToken);
+    }
+
+    @Transactional
     AuthResponse login(LoginRequest request) {
         // 조회 실패·비밀번호 불일치를 구분하지 않는다 — 계정 존재 여부 노출 방지(Notion API-ID 2)
         AppUser user = userRepository.findByEmail(request.email())
