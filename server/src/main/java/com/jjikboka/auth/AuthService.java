@@ -1,6 +1,7 @@
 package com.jjikboka.auth;
 
 import com.jjikboka.auth.dto.AuthResponse;
+import com.jjikboka.auth.dto.LoginRequest;
 import com.jjikboka.auth.dto.RegisterRequest;
 import com.jjikboka.shared.error.BusinessException;
 import org.springframework.http.HttpStatus;
@@ -46,6 +47,16 @@ class AuthService {
                 request.email(),
                 passwordEncoder.encode(request.password()),
                 request.nickname()));
+        return issueTokens(user);
+    }
+
+    @Transactional
+    AuthResponse login(LoginRequest request) {
+        // 조회 실패·비밀번호 불일치를 구분하지 않는다 — 계정 존재 여부 노출 방지(Notion API-ID 2)
+        AppUser user = userRepository.findByEmail(request.email())
+                .filter(u -> passwordEncoder.matches(request.password(), u.getPasswordHash()))
+                .orElseThrow(() -> new BusinessException(
+                        HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", "이메일 또는 비밀번호가 올바르지 않습니다."));
         return issueTokens(user);
     }
 
