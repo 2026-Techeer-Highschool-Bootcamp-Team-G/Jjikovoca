@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Tabs, Chip, Button, SearchBar, BottomSheet } from '@/shared/ui'
 import { CardRow } from '@/widgets/card-row'
@@ -66,6 +66,35 @@ export function WrongNotePage() {
   const [subject, setSubject] = useState<FeedSubject>('ALL')
   const [status, setStatus] = useState<Status>('ALL')
   const [setupOpen, setSetupOpen] = useState(false)
+  // 스피커로 발음 재생 중인 단어 — 듣기 끝날 때까지 그 행을 강조 (오답노트 QA)
+  const [speakingId, setSpeakingId] = useState<number | null>(null)
+  const speakingRef = useRef<number | null>(null)
+
+  // 발음 재생: 이전 재생을 취소하고 그 단어로 강조를 옮긴다. onend/onerror에 강조 해제
+  const handleSpeak = (row: CardRowView) => {
+    const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined
+    if (!synth) return
+    synth.cancel() // 이전 발음 중단 → 강조가 여러 단어에 남지 않도록
+    const u = new SpeechSynthesisUtterance(row.title)
+    u.lang = 'en-US'
+    u.rate = 0.9
+    const clear = () => {
+      if (speakingRef.current === row.id) {
+        speakingRef.current = null
+        setSpeakingId(null)
+      }
+    }
+    u.onend = clear
+    u.onerror = clear
+    speakingRef.current = row.id
+    setSpeakingId(row.id)
+    synth.speak(u)
+  }
+
+  // 화면을 떠날 때 재생 중이면 멈춘다
+  useEffect(() => {
+    return () => window.speechSynthesis?.cancel()
+  }, [])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -157,6 +186,8 @@ export function WrongNotePage() {
           <CardRow
             key={row.id}
             row={row}
+            speaking={speakingId === row.id}
+            onSpeak={() => handleSpeak(row)}
             onExamTag={row.untagged ? () => navigate('/exam-select') : undefined}
             onClick={() =>
               navigate(row.untagged ? '/math-problem' : row.id === 2 ? '/cloze' : '/flashcard')
