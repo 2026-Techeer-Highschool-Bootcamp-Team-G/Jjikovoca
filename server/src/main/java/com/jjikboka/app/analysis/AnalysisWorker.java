@@ -83,6 +83,7 @@ class AnalysisWorker {
                 event.userId(), event.jobId(), event.type(), content.subject(), null,
                 content.word(), content.contextMeaning(), content.dictMeaning(), content.example(),
                 content.summary(), content.latex(), content.concept(),
-                content.hint1(), content.hint2(), content.hint3(), content.answerFormat());
+                content.hint1(), content.hint2(), content.hint3(), content.answerFormat(),
+                content.solutionsJson(), content.answerValue(), content.diagnosisJson());
     }
 }

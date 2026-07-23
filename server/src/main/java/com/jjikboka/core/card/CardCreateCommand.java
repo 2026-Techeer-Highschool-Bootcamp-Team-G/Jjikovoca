@@ -24,6 +24,10 @@ public record CardCreateCommand(
         String hint1,
         String hint2,
         String hint3,
-        String answerFormat
+        String answerFormat,
+        // PROBLEM — F-26 사고과정(JSON 문자열)
+        String solutionsJson,
+        String answerValue,
+        String diagnosisJson
 ) {
 }
