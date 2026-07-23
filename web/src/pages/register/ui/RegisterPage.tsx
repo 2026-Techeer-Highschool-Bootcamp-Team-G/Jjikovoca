@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
 import { NavigationBar, Button, TextField } from '@/shared/ui'
+import { register } from '@/features/auth'
 
 const GRADIENT = 'linear-gradient(180deg, var(--color-brand-weak) 0%, var(--color-bg-primary) 55%)'
 
@@ -11,6 +13,15 @@ export function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const { mutate, isPending, error } = useMutation({
+    mutationFn: () => register(email, password, nickname || undefined),
+    onSuccess: () => navigate('/'),
+  })
+
+  // 클라 검증: 이메일·6자 이상 비밀번호·비밀번호 확인 일치
+  const mismatch = confirm !== '' && password !== confirm
+  const canSubmit =
+    email.trim() !== '' && password.length >= 6 && password === confirm && !isPending
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: GRADIENT }}>
@@ -34,10 +45,20 @@ export function RegisterPage() {
           placeholder="••••••••"
           type="password"
         />
+        {mismatch && (
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-danger)' }}>
+            비밀번호가 일치하지 않아요
+          </p>
+        )}
+        {error && (
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-danger)' }}>
+            {(error as Error).message}
+          </p>
+        )}
 
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
-          <Button block size="lg" onClick={() => navigate('/')}>
-            가입하기
+          <Button block size="lg" onClick={() => mutate()} disabled={!canSubmit}>
+            {isPending ? '가입 중…' : '가입하기'}
           </Button>
           <button
             type="button"
