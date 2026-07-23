@@ -115,4 +115,23 @@ interface CardRepository extends JpaRepository<Card, Long> {
                             @Param("cardIds") List<Long> cardIds,
                             @Param("now") LocalDateTime now,
                             Pageable pageable);
+
+    /** 리포트(API-17) — 기간 내 새로 만든 카드 수(soft-delete 제외). */
+    @Query("SELECT COUNT(c) FROM Card c WHERE c.userId = :userId AND c.deletedAt IS NULL "
+            + "AND c.createdAt >= :start AND c.createdAt < :end")
+    long countNewCards(@Param("userId") Long userId,
+                       @Param("start") LocalDateTime start,
+                       @Param("end") LocalDateTime end);
+
+    /** 리포트(API-17) — 기간 내 졸업(graduated_at)한 카드 수. */
+    @Query("SELECT COUNT(c) FROM Card c WHERE c.userId = :userId "
+            + "AND c.graduatedAt >= :start AND c.graduatedAt < :end")
+    long countGraduated(@Param("userId") Long userId,
+                        @Param("start") LocalDateTime start,
+                        @Param("end") LocalDateTime end);
+
+    /** 리포트(API-17) — 약한 개념 후보: wrong_count 높은 카드의 concept(중복 가능, 상위부터). 서비스에서 distinct·상위 N. */
+    @Query("SELECT c.concept FROM Card c WHERE c.userId = :userId AND c.deletedAt IS NULL "
+            + "AND c.concept IS NOT NULL AND c.wrongCount > 0 ORDER BY c.wrongCount DESC")
+    List<String> findWeakConcepts(@Param("userId") Long userId, Pageable pageable);
 }
