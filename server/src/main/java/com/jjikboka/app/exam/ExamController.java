@@ -10,20 +10,23 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 시험 API (Notion API-ID 32~35, F-19). 인증 필요 — JwtAuthenticationFilter가 실은 userId를 넣는다.
- * 등록·수정·삭제 시 서버가 시험일 역산으로 복습 일정을 재배치한다(별도 실행 API 없음). app→core 조립(13 §2).
+ * 시험 API (Notion API-ID 32~35·45·42, F-19). 인증 필요 — JwtAuthenticationFilter가 실은 userId를 넣는다.
+ * 등록·수정·삭제 시 시험일 역산 재배치, 넛지 일괄 태깅, 시험 대비 오늘 복습을 제공한다. app→core 조립(13 §2).
  */
 @RestController
 @RequestMapping("/api/exams")
 class ExamController {
 
     private final ExamFacade examFacade;
+    private final ExamReviewFacade examReviewFacade;
 
-    ExamController(ExamFacade examFacade) {
+    ExamController(ExamFacade examFacade, ExamReviewFacade examReviewFacade) {
         this.examFacade = examFacade;
+        this.examReviewFacade = examReviewFacade;
     }
 
     @GetMapping
@@ -54,5 +57,24 @@ class ExamController {
             @PathVariable Long id) {
         ExamDeleteResponse response = examFacade.delete(userId, id);
         return ResponseEntity.ok(ApiResponse.ok(response, "시험이 삭제되었습니다."));
+    }
+
+    @PostMapping("/{id}/tag-recent")
+    ResponseEntity<ApiResponse<TagRecentResponse>> tagRecent(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long id,
+            @RequestBody TagRecentRequest request) {
+        TagRecentResponse response = examReviewFacade.tagRecent(userId, id, request);
+        return ResponseEntity.ok(ApiResponse.ok(response,
+                response.taggedCount() + "개 카드를 시험에 태깅했습니다."));
+    }
+
+    @GetMapping("/{id}/today")
+    ResponseEntity<ApiResponse<ExamReviewResponse>> today(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "20") int limit) {
+        ExamReviewResponse response = examReviewFacade.today(userId, id, limit);
+        return ResponseEntity.ok(ApiResponse.ok(response, "시험 대비 복습 큐를 불러왔습니다."));
     }
 }
