@@ -38,6 +38,12 @@ jwt:
   access-exp-ms: 1800000       # 액세스 30분
   refresh-exp-ms: 1209600000   # 리프레시 14일
 
+# 크롭 이미지 저장소 (API-10). MVP는 로컬 파일 — 워커(Phase 2)가 여기 저장, /images/{file}이 여기서 서빙.
+# prod에선 env(APP_IMAGE_DIR)로 EBS/마운트 경로 주입. S3 전환 시 이 설정을 버킷/presigned로 대체.
+app:
+  image:
+    dir: ${APP_IMAGE_DIR:./data/images}
+
 # 로그 JSON 구조화는 배포 프로파일에서 (07 규약) — traceId 주입 자리
 logging:
   level:
