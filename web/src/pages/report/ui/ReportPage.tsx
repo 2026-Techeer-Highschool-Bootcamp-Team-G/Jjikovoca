@@ -1,14 +1,54 @@
 import type { ReactNode } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-// 학습 잔디 4주 × 7일 (25:163) — 레벨 0~3 색상. 0=빈칸 / 3=진함
-const GRASS: number[][] = [
-  [0, 1, 2, 0, 3, 1, 0],
-  [1, 2, 0, 1, 0, 2, 3],
-  [0, 3, 1, 2, 1, 0, 1],
-  [2, 0, 0, 3, 2, 1, 0],
-]
+// 과목별 학습 비중 — 오늘 / 이번 달 (백엔드 연결 전 데모)
+const SUBJECT = {
+  TODAY: {
+    total: '1h 20m',
+    mathPct: 65,
+    math: { pct: '65%', detail: '52분 · 28문제' },
+    eng: { pct: '35%', detail: '28분 · 22단어' },
+    caption: '오늘은 수학 위주로 공부했어요',
+  },
+  MONTH: {
+    total: '4h 48m',
+    mathPct: 58,
+    math: { pct: '58%', detail: '168분 · 96문제' },
+    eng: { pct: '42%', detail: '120분 · 84단어' },
+    caption: '이번 달은 수학에 조금 더 집중했어요',
+  },
+} as const
+type Scope = keyof typeof SUBJECT
+
+// 학습 잔디 색상: 0=빈칸 / 3=진함 (당일 활동량이 많을수록 짙어짐)
 const GRASS_COLOR = ['var(--color-bg-secondary)', '#b8ecd4', '#4fd89e', 'var(--color-success-primary)']
+
+// 월별 학습 잔디 4주 × 7일 (25:163) — 백엔드 연결 전 데모
+const MONTHS = [
+  {
+    label: '6월',
+    days: 21,
+    streak: 3,
+    grass: [
+      [1, 0, 2, 1, 3, 0, 1],
+      [2, 1, 1, 0, 2, 3, 0],
+      [0, 2, 3, 1, 0, 1, 2],
+      [1, 3, 0, 2, 1, 0, 1],
+    ],
+  },
+  {
+    label: '7월',
+    days: 18,
+    streak: 5,
+    grass: [
+      [0, 1, 2, 0, 3, 1, 0],
+      [1, 2, 0, 1, 0, 2, 3],
+      [0, 3, 1, 2, 1, 0, 1],
+      [2, 0, 0, 3, 2, 1, 0],
+    ],
+  },
+]
 
 const WEAK = [
   { concept: '이차방정식 인수분해', ratio: 1, count: 5, to: '/math-answer' },
@@ -30,6 +70,10 @@ const WEEK = [
 /** 학습 리포트 (F-10) — 13 리포트 */
 export function ReportPage() {
   const navigate = useNavigate()
+  const [scope, setScope] = useState<Scope>('MONTH')
+  const [monthIdx, setMonthIdx] = useState(MONTHS.length - 1)
+  const s = SUBJECT[scope]
+  const m = MONTHS[monthIdx]
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <header style={{ background: 'var(--color-bg-primary)', padding: '24px var(--spacing-xl) 16px' }}>
@@ -71,31 +115,62 @@ export function ReportPage() {
         </div>
 
         <Card>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-primary)' }}>
-            이번 달 과목별 학습 비중
-          </span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-primary)' }}>
+              {scope === 'TODAY' ? '오늘' : '이번 달'} 과목별 학습 비중
+            </span>
+            <Segmented
+              options={[
+                { key: 'TODAY', label: '오늘' },
+                { key: 'MONTH', label: '이번 달' },
+              ]}
+              value={scope}
+              onChange={(k) => setScope(k as Scope)}
+            />
+          </div>
           <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-            <Donut />
+            <Donut total={s.total} mathPct={s.mathPct} />
             <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <LegendRow color="var(--blue-500)" subject="수학" pct="58%" pctColor="var(--blue-500)" detail="168분 · 96문제" />
-              <LegendRow color="var(--teal-500)" subject="영어" pct="42%" pctColor="var(--teal-500)" detail="120분 · 84단어" />
+              <LegendRow color="var(--blue-500)" subject="수학" pct={s.math.pct} pctColor="var(--blue-500)" detail={s.math.detail} />
+              <LegendRow color="var(--teal-500)" subject="영어" pct={s.eng.pct} pctColor="var(--teal-500)" detail={s.eng.detail} />
             </div>
           </div>
-          <span style={{ fontSize: 11, color: 'var(--grey-500)' }}>이번 달은 수학에 조금 더 집중했어요</span>
+          <span style={{ fontSize: 11, color: 'var(--grey-500)' }}>{s.caption}</span>
         </Card>
 
         <Card>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>학습 잔디</span>
-            <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)' }}>
-              이번 달 학습일 18일 · 연속 5일 🔥
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>학습 잔디</span>
+              <MonthNav
+                label={m.label}
+                canPrev={monthIdx > 0}
+                canNext={monthIdx < MONTHS.length - 1}
+                onPrev={() => setMonthIdx((i) => Math.max(0, i - 1))}
+                onNext={() => setMonthIdx((i) => Math.min(MONTHS.length - 1, i + 1))}
+              />
+            </div>
+            <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>
+              학습일 {m.days}일 · 연속 {m.streak}일 🔥
             </span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 18px)', gap: 8 }}>
-            {GRASS.flat().map((lvl, i) => (
+            {m.grass.flat().map((lvl, i) => (
               <span key={i} style={{ width: 18, height: 18, borderRadius: 5, background: GRASS_COLOR[lvl] }} />
             ))}
           </div>
+          {/* 색 범례 (적음→많음) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)' }}>적음</span>
+            {GRASS_COLOR.map((c, i) => (
+              <span key={i} style={{ width: 12, height: 12, borderRadius: 3, background: c }} aria-hidden />
+            ))}
+            <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)' }}>많음</span>
+          </div>
+          {/* 학습 잔디 설명 (무엇을 뜻하는지) */}
+          <span style={{ fontSize: 11, lineHeight: 1.5, color: 'var(--grey-500)' }}>
+            매일의 학습 기록이 초록색으로 채워져요. 그날 활동량이 많을수록 색이 더 짙어져 꾸준함을 한눈에 볼 수 있어요.
+          </span>
         </Card>
 
         <Card>
@@ -214,18 +289,19 @@ function StatCard({ label, value, accent = false }: { label: string; value: stri
   )
 }
 
-function Donut() {
+function Donut({ total, mathPct }: { total: string; mathPct: number }) {
   return (
     <div
       style={{
         width: 120,
         height: 120,
         borderRadius: '50%',
-        background: 'conic-gradient(var(--blue-500) 0% 58%, var(--teal-500) 58% 100%)',
+        background: `conic-gradient(var(--blue-500) 0% ${mathPct}%, var(--teal-500) ${mathPct}% 100%)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
+        transition: 'background 200ms ease',
       }}
     >
       <div
@@ -240,10 +316,99 @@ function Donut() {
           justifyContent: 'center',
         }}
       >
-        <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text-primary)' }}>4h 48m</span>
+        <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text-primary)' }}>{total}</span>
         <span style={{ fontSize: 9, color: 'var(--color-text-tertiary)' }}>총 학습</span>
       </div>
     </div>
+  )
+}
+
+// 오늘 / 이번 달 세그먼트 토글
+function Segmented({
+  options,
+  value,
+  onChange,
+}: {
+  options: { key: string; label: string }[]
+  value: string
+  onChange: (key: string) => void
+}) {
+  return (
+    <div style={{ display: 'inline-flex', gap: 2, padding: 2, borderRadius: 999, background: 'var(--color-bg-secondary)' }}>
+      {options.map((o) => {
+        const active = o.key === value
+        return (
+          <button
+            key={o.key}
+            type="button"
+            onClick={() => onChange(o.key)}
+            style={{
+              padding: '4px 10px',
+              borderRadius: 999,
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: 11,
+              fontWeight: 700,
+              background: active ? 'var(--color-brand-primary)' : 'transparent',
+              color: active ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)',
+              transition: 'background 140ms ease, color 140ms ease',
+            }}
+          >
+            {o.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// 월 선택 ‹ 7월 › — 월별 학습 잔디 전환
+function MonthNav({
+  label,
+  canPrev,
+  canNext,
+  onPrev,
+  onNext,
+}: {
+  label: string
+  canPrev: boolean
+  canNext: boolean
+  onPrev: () => void
+  onNext: () => void
+}) {
+  const arrow = (glyph: string, enabled: boolean, onClick: () => void, aria: string) => (
+    <button
+      type="button"
+      disabled={!enabled}
+      onClick={onClick}
+      aria-label={aria}
+      style={{
+        width: 20,
+        height: 20,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 0,
+        border: 'none',
+        background: 'none',
+        fontSize: 15,
+        fontWeight: 700,
+        cursor: enabled ? 'pointer' : 'default',
+        color: enabled ? 'var(--color-text-brand)' : 'var(--color-text-tertiary)',
+        opacity: enabled ? 1 : 0.4,
+      }}
+    >
+      {glyph}
+    </button>
+  )
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+      {arrow('‹', canPrev, onPrev, '이전 달')}
+      <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-text-secondary)', minWidth: 26, textAlign: 'center' }}>
+        {label}
+      </span>
+      {arrow('›', canNext, onNext, '다음 달')}
+    </span>
   )
 }
 
