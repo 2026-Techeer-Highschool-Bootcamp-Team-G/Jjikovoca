@@ -1,6 +1,9 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { fetchReportSummary } from '@/entities/report'
+import { fetchReviewQueue } from '@/features/study'
 
 // 과목별 학습 비중 — 오늘 / 이번 달 (백엔드 연결 전 데모)
 const SUBJECT = {
@@ -79,6 +82,14 @@ export function ReportPage() {
   const [monthIdx, setMonthIdx] = useState(MONTHS.length - 1)
   const s = SUBJECT[scope]
   const m = MONTHS[monthIdx]
+
+  // 실 API — 명세 제공 필드만 매핑, 미가동 시 목업 폴백(데모 유지)
+  const report = useQuery({ queryKey: ['report-summary'], queryFn: () => fetchReportSummary(), retry: 0 })
+  const review = useQuery({ queryKey: ['review-queue'], queryFn: () => fetchReviewQueue(), retry: 0 })
+  const basic = report.data?.basic
+  const newCards = basic ? `${basic.newCards}장` : '24장'
+  const accuracyWord = basic?.accuracy.word != null ? `${Math.round(basic.accuracy.word * 100)}%` : '78%'
+  const dueCount = review.data?.dueCount ?? 12
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <header style={{ background: 'var(--color-bg-primary)', padding: '24px var(--spacing-xl) 16px' }}>
@@ -109,14 +120,14 @@ export function ReportPage() {
         >
           <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-text-inverse)' }}>
             <span style={{ fontSize: 18 }} aria-hidden>🔔</span>
-            <span style={{ fontSize: 15, fontWeight: 700 }}>오늘 복습 대기 12개</span>
+            <span style={{ fontSize: 15, fontWeight: 700 }}>오늘 복습 대기 {dueCount}개</span>
           </span>
           <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-inverse)', opacity: 0.9 }}>지금 복습 ›</span>
         </button>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
-          <StatCard label="새로 만든 카드" value="24장" />
-          <StatCard label="단어 정답률" value="78%" accent />
+          <StatCard label="새로 만든 카드" value={newCards} />
+          <StatCard label="단어 정답률" value={accuracyWord} accent />
         </div>
 
         <Card>
