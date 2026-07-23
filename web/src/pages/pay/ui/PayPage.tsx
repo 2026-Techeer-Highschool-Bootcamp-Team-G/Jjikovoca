@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
 import { NavigationBar, Button } from '@/shared/ui'
+import { activatePremium } from '@/entities/user'
 
 type Method = 'TOSS' | 'CARD'
 
@@ -8,6 +10,13 @@ type Method = 'TOSS' | 'CARD'
 export function PayPage() {
   const navigate = useNavigate()
   const [method, setMethod] = useState<Method>('TOSS')
+
+  // 모의 결제 활성화 — 성공·실패 모두 완료 화면으로(폴백)
+  const pay = useMutation({
+    mutationFn: activatePremium,
+    onSuccess: () => navigate('/pay-done'),
+    onError: () => navigate('/pay-done'),
+  })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
@@ -65,8 +74,8 @@ export function PayPage() {
       </div>
 
       <div style={{ background: 'var(--color-bg-primary)', padding: '12px var(--spacing-xl) 32px' }}>
-        <Button block size="lg" onClick={() => navigate('/pay-done')}>
-          ₩4,900 결제하기
+        <Button block size="lg" onClick={() => pay.mutate()} disabled={pay.isPending}>
+          {pay.isPending ? '결제 중…' : '₩4,900 결제하기'}
         </Button>
       </div>
     </div>
