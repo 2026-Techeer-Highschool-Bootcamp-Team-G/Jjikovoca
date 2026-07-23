@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { NavigationBar } from '@/shared/ui'
+import { fetchArchive } from '@/entities/card'
 
 type CaptureType = 'WORD' | 'PROBLEM'
 
@@ -13,6 +15,9 @@ const DAYS: { date: string; items: CaptureType[] }[] = [
 /** 원문 보관함 (F-27) — 15 원문 보관함. 캡처 원문을 일자별 썸네일(형광펜/박스 구분)로 열람 */
 export function ArchivePage() {
   const navigate = useNavigate()
+  // 실 API — 미가동 시 목업 폴백(데모 유지). 썸네일은 유형만 매핑(imageUrl 표시는 후속)
+  const { data } = useQuery({ queryKey: ['archive'], queryFn: () => fetchArchive(), retry: 0 })
+  const days = data ? data.map((d) => ({ date: d.date, items: d.items.map((i) => i.type) })) : DAYS
 
   return (
     <div
@@ -26,7 +31,7 @@ export function ArchivePage() {
       <NavigationBar title="원문 보관함" onBack={() => navigate(-1)} />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 26, padding: '16px var(--spacing-xl) 20px' }}>
-        {DAYS.map((day) => (
+        {days.map((day) => (
           <div key={day.date} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
               {day.date}
