@@ -33,6 +33,8 @@ export interface Card {
   boxLevel: number
   graduated: boolean
   createdAt: string
+  /** 태깅된 시험(행 시험 칩, F-29) */
+  exams?: { id: number; title: string }[]
 
   // WORD
   word?: string
