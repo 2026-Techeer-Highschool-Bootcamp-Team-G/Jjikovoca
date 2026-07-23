@@ -1,7 +1,9 @@
 package com.jjikboka.auth;
 
 import com.jjikboka.auth.dto.AuthResponse;
+import com.jjikboka.auth.dto.RefreshRequest;
 import com.jjikboka.auth.dto.RegisterRequest;
+import com.jjikboka.auth.dto.TokenResponse;
 import com.jjikboka.shared.response.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -28,5 +30,12 @@ class AuthController {
     ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
         AuthResponse data = authService.register(request);
         return ResponseEntity.ok(ApiResponse.ok(data, "회원가입이 완료되었습니다."));
+    }
+
+    /** 토큰 재발급 (Notion API-ID 37) — 성공 200, 만료·폐기·재사용 401. */
+    @PostMapping("/refresh")
+    ResponseEntity<ApiResponse<TokenResponse>> refresh(@Valid @RequestBody RefreshRequest request) {
+        TokenResponse data = authService.refresh(request);
+        return ResponseEntity.ok(ApiResponse.ok(data, "토큰이 갱신되었습니다."));
     }
 }
