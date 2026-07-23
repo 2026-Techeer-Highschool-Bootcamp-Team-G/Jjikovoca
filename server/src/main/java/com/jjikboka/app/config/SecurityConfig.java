@@ -24,8 +24,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())                 // 무상태 REST — CSRF 토큰 불필요
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // 인증 예외 경로 (04 §2-3)
-                .requestMatchers("/api/auth/**", "/api/health", "/actuator/health", "/images/**").permitAll()
+                // 인증 예외 경로 (04 §2-3) + Swagger UI·OpenAPI 문서 (개발 편의)
+                .requestMatchers("/api/auth/**", "/api/health", "/actuator/health", "/images/**",
+                        "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
             );
         // TODO: .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

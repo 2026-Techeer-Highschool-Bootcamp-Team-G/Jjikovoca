@@ -3,13 +3,10 @@ import type { PointerEvent as ReactPointerEvent, ReactNode, SVGProps } from 'rea
 import { IconClose, Button } from '@/shared/ui'
 
 type Mode = 'highlighter' | 'box'
-interface Rect {
-  x: number
-  y: number
-  w: number
-  h: number
-  mode: Mode
-}
+type Pt = { x: number; y: number }
+type Stroke = { mode: 'highlighter'; points: Pt[] }
+type Box = { mode: 'box'; x: number; y: number; w: number; h: number }
+type Region = Stroke | Box
 
 export interface CaptureResult {
   regions: number
@@ -22,14 +19,25 @@ interface Props {
   onClose: () => void
 }
 
-// 촬영/선택 이미지 위에서 형광펜(단어)·네모 박스(문제)를 드래그로 크롭 (F-02 듀얼 제스처)
+const HL_STROKE = 'rgba(255,210,54,0.7)'
+
+// 자유곡선 길이(px) — 아주 짧은 톡은 무시하려고 사용
+function strokeLen(pts: Pt[]) {
+  let d = 0
+  for (let i = 1; i < pts.length; i++) d += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y)
+  return d
+}
+
+// 촬영/선택 이미지 위에서 형광펜(손으로 칠하기)·네모 박스(드래그)로 표시 (F-02 듀얼 제스처)
 export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
   const [mode, setMode] = useState<Mode>('highlighter')
-  const [regions, setRegions] = useState<Rect[]>([])
-  const [draft, setDraft] = useState<Rect | null>(null)
-  const [tip, setTip] = useState<{ x: number; y: number } | null>(null) // 펜 끝(형광펜 드래그 중 스파클)
+  const [regions, setRegions] = useState<Region[]>([])
+  const [draftStroke, setDraftStroke] = useState<Pt[] | null>(null)
+  const [draftBox, setDraftBox] = useState<Box | null>(null)
+  const [tip, setTip] = useState<Pt | null>(null)
   const areaRef = useRef<HTMLDivElement>(null)
-  const startRef = useRef<{ x: number; y: number } | null>(null)
+  const strokeRef = useRef<Pt[] | null>(null)
+  const startRef = useRef<Pt | null>(null)
 
   const toLocal = (e: ReactPointerEvent) => {
     const r = areaRef.current?.getBoundingClientRect()
@@ -43,31 +51,50 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
   const onDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId)
     const p = toLocal(e)
-    startRef.current = p
-    setDraft({ x: p.x, y: p.y, w: 0, h: 0, mode })
     setTip(p)
+    if (mode === 'highlighter') {
+      strokeRef.current = [p]
+      setDraftStroke([p])
+    } else {
+      startRef.current = p
+      setDraftBox({ mode: 'box', x: p.x, y: p.y, w: 0, h: 0 })
+    }
   }
+
   const onMove = (e: ReactPointerEvent<HTMLDivElement>) => {
-    const s = startRef.current
-    if (!s) return
     const p = toLocal(e)
-    setTip(p)
-    setDraft({
-      x: Math.min(s.x, p.x),
-      y: Math.min(s.y, p.y),
-      w: Math.abs(p.x - s.x),
-      h: Math.abs(p.y - s.y),
-      mode,
-    })
+    if (strokeRef.current) {
+      // 형광펜 — 지나간 손의 궤적을 그대로 따라 칠한다
+      strokeRef.current = [...strokeRef.current, p]
+      setDraftStroke(strokeRef.current)
+      setTip(p)
+    } else if (startRef.current) {
+      const s = startRef.current
+      setDraftBox({ mode: 'box', x: Math.min(s.x, p.x), y: Math.min(s.y, p.y), w: Math.abs(p.x - s.x), h: Math.abs(p.y - s.y) })
+      setTip(p)
+    }
   }
+
   const onUp = () => {
-    if (draft && draft.w > 8 && draft.h > 8) setRegions((r) => [...r, draft])
-    setDraft(null)
+    if (strokeRef.current) {
+      const pts = strokeRef.current
+      strokeRef.current = null
+      if (strokeLen(pts) > 12) setRegions((r) => [...r, { mode: 'highlighter', points: pts }])
+      setDraftStroke(null)
+    } else if (startRef.current) {
+      startRef.current = null
+      setDraftBox((b) => {
+        if (b && b.w > 8 && b.h > 8) setRegions((r) => [...r, b])
+        return null
+      })
+    }
     setTip(null)
-    startRef.current = null
   }
 
   const undo = () => setRegions((r) => r.slice(0, -1))
+
+  const strokes = regions.filter((r): r is Stroke => r.mode === 'highlighter')
+  const boxes = regions.filter((r): r is Box => r.mode === 'box')
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: 'var(--grey-900)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -100,8 +127,8 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
           onPointerUp={onUp}
           style={{
             position: 'relative',
-            maxWidth: '100%',
-            maxHeight: '62vh',
+            width: '100%',
+            maxHeight: '74vh',
             touchAction: 'none',
             cursor: 'crosshair',
             userSelect: 'none',
@@ -113,14 +140,28 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
             src={imageSrc}
             alt="촬영한 시험지"
             draggable={false}
-            style={{ display: 'block', maxWidth: '100%', maxHeight: '62vh', pointerEvents: 'none' }}
+            style={{ display: 'block', width: '100%', height: 'auto', maxHeight: '74vh', objectFit: 'contain', pointerEvents: 'none' }}
           />
-          {regions.map((r, i) => (
-            <RegionView key={i} r={r} />
+
+          {/* 형광펜 — 손으로 칠한 궤적을 그대로 마커 스트로크로 (multiply로 글자 위에 겹침) */}
+          <svg
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', mixBlendMode: 'multiply', overflow: 'visible' }}
+            aria-hidden
+          >
+            {strokes.map((s, i) => (
+              <MarkerStroke key={i} points={s.points} />
+            ))}
+            {draftStroke && draftStroke.length > 1 && <MarkerStroke points={draftStroke} />}
+          </svg>
+
+          {/* 네모 박스 — 점선 마칭 앤츠 */}
+          {boxes.map((b, i) => (
+            <BoxView key={i} b={b} />
           ))}
-          {draft && <RegionView r={draft} draft />}
-          {/* 형광펜 펜 끝 스파클 — 손으로 칠하는 느낌 (F-02 반짝임, 펜 끝을 따라다님) */}
-          {tip && draft?.mode === 'highlighter' && (
+          {draftBox && <BoxView b={draftBox} />}
+
+          {/* 형광펜 펜 끝 스파클 — 손 끝을 따라다님 (F-02 반짝임) */}
+          {draftStroke && tip && (
             <>
               <span
                 style={{
@@ -159,9 +200,7 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
       </div>
 
       <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginBottom: 12, textAlign: 'center', padding: '0 24px' }}>
-        {mode === 'highlighter'
-          ? '모르는 단어에 형광펜을 긋듯 드래그하세요'
-          : '모르는 문제와 풀이에 네모 박스로 드래그하세요'}
+        {mode === 'highlighter' ? '모르는 단어 위를 형광펜으로 직접 칠하세요' : '모르는 문제와 풀이에 네모 박스로 드래그하세요'}
       </span>
 
       <ModeToggle mode={mode} onHighlighter={() => setMode('highlighter')} onBox={() => setMode('box')} />
@@ -172,44 +211,32 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
           size="lg"
           disabled={regions.length === 0}
           style={{ opacity: regions.length === 0 ? 0.4 : 1 }}
-          onClick={() => onDone({ regions: regions.length, hasBox: regions.some((r) => r.mode === 'box') })}
+          onClick={() => onDone({ regions: regions.length, hasBox: boxes.length > 0 })}
         >
-          {regions.length === 0 ? '표시할 부분을 드래그하세요' : `${regions.length}곳 분석하기`}
+          {regions.length === 0 ? '표시할 부분을 칠하거나 드래그하세요' : `${regions.length}곳 분석하기`}
         </Button>
       </div>
     </div>
   )
 }
 
-// 표시 영역 렌더 — 형광펜(손칠 마커·잉크 시머) / 네모 박스(점선 마칭 앤츠)
-function RegionView({ r, draft = false }: { r: Rect; draft?: boolean }) {
-  if (r.mode === 'highlighter') {
-    return (
-      <div
-        style={{
-          position: 'absolute',
-          left: r.x,
-          top: r.y,
-          width: r.w,
-          height: r.h,
-          borderRadius: 7,
-          background: 'linear-gradient(180deg, rgba(255,238,130,0.78), rgba(255,214,64,0.82))',
-          mixBlendMode: 'multiply',
-          boxShadow: '0 0 12px rgba(255,214,64,0.65)',
-          transformOrigin: 'center top',
-          animation: draft ? 'jjik-highlight-in 140ms ease-out' : 'jjik-highlight-shimmer 1.5s ease-in-out infinite',
-        }}
-        aria-hidden
-      />
-    )
-  }
-  const w = Math.max(0, r.w)
-  const h = Math.max(0, r.h)
+// 형광펜 마커 스트로크 — 넓은 반투명 밑칠 + 진한 코어로 마커 질감
+function MarkerStroke({ points }: { points: Pt[] }) {
+  const d = points.map((p) => `${p.x},${p.y}`).join(' ')
   return (
-    <svg
-      style={{ position: 'absolute', left: r.x, top: r.y, width: w, height: h, overflow: 'visible', pointerEvents: 'none' }}
-      aria-hidden
-    >
+    <g style={{ animation: 'jjik-highlight-shimmer 1.6s ease-in-out infinite' }}>
+      <polyline points={d} fill="none" stroke={HL_STROKE} strokeWidth={22} strokeLinecap="round" strokeLinejoin="round" opacity={0.6} />
+      <polyline points={d} fill="none" stroke="rgba(255,224,90,0.85)" strokeWidth={13} strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  )
+}
+
+// 네모 박스 — SVG 마칭 앤츠(점선 행진)
+function BoxView({ b }: { b: Box }) {
+  const w = Math.max(0, b.w)
+  const h = Math.max(0, b.h)
+  return (
+    <svg style={{ position: 'absolute', left: b.x, top: b.y, width: w, height: h, overflow: 'visible', pointerEvents: 'none' }} aria-hidden>
       <rect
         x={1.5}
         y={1.5}
@@ -227,15 +254,7 @@ function RegionView({ r, draft = false }: { r: Rect; draft?: boolean }) {
 }
 
 // 형광펜 / 네모 박스 모드 토글
-function ModeToggle({
-  mode,
-  onHighlighter,
-  onBox,
-}: {
-  mode: Mode
-  onHighlighter: () => void
-  onBox: () => void
-}) {
+function ModeToggle({ mode, onHighlighter, onBox }: { mode: Mode; onHighlighter: () => void; onBox: () => void }) {
   return (
     <div style={{ display: 'inline-flex', gap: 4, padding: 4, borderRadius: 'var(--radius-full)', background: 'rgba(255,255,255,0.14)' }}>
       <Seg active={mode === 'highlighter'} icon={<IconHighlighter size={16} />} label="형광펜" onClick={onHighlighter} />

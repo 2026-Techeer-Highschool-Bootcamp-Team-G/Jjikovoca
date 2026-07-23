@@ -53,13 +53,37 @@ export function CameraView({ onCapture, onClose, onPickFile }: Props) {
   const shoot = () => {
     const v = videoRef.current
     if (!v || !v.videoWidth) return
+    // 인식 프레임(종이) 영역만 크롭 — 편집 단계에서도 같은 프레임만 보이도록.
+    // RecognitionFrame과 동일 규칙: width 76%(max 300), aspect 300:420, 프리뷰 중앙.
+    const preview = v.parentElement
+    const Wp = preview?.clientWidth ?? v.clientWidth
+    const Hp = preview?.clientHeight ?? v.clientHeight
+    const Vw = v.videoWidth
+    const Vh = v.videoHeight
+    const fw = Math.min(0.76 * Wp, 300)
+    const fh = fw * (420 / 300)
+    const fx = (Wp - fw) / 2
+    const fy = (Hp - fh) / 2
+    // objectFit: cover 매핑 (프리뷰 좌표 → 비디오 소스 좌표)
+    const scale = Math.max(Wp / Vw, Hp / Vh)
+    const offsetX = (Vw * scale - Wp) / 2
+    const offsetY = (Vh * scale - Hp) / 2
+    let sx = (fx + offsetX) / scale
+    let sy = (fy + offsetY) / scale
+    let sw = fw / scale
+    let sh = fh / scale
+    // 소스 경계 클램프
+    sx = Math.max(0, Math.min(sx, Vw))
+    sy = Math.max(0, Math.min(sy, Vh))
+    sw = Math.min(sw, Vw - sx)
+    sh = Math.min(sh, Vh - sy)
     const canvas = document.createElement('canvas')
-    canvas.width = v.videoWidth
-    canvas.height = v.videoHeight
+    canvas.width = Math.max(1, Math.round(sw))
+    canvas.height = Math.max(1, Math.round(sh))
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    ctx.drawImage(v, 0, 0, canvas.width, canvas.height)
-    onCapture(canvas.toDataURL('image/jpeg', 0.9))
+    ctx.drawImage(v, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
+    onCapture(canvas.toDataURL('image/jpeg', 0.92))
   }
 
   return (
@@ -104,15 +128,17 @@ export function CameraView({ onCapture, onClose, onPickFile }: Props) {
               ref={videoRef}
               playsInline
               muted
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                opacity: ready ? 1 : 0,
+                transition: 'opacity 500ms ease',
+              }}
             />
-            {!ready ? (
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>
-                카메라 준비 중…
-              </div>
-            ) : (
-              <RecognitionFrame recognized={recognized} />
-            )}
+            {!ready ? <CameraLoading /> : <RecognitionFrame recognized={recognized} />}
           </div>
 
           {!recognized && (
@@ -258,4 +284,66 @@ function RecognitionFrame({ recognized }: { recognized: boolean }) {
 
 function Corner({ style }: { style: CSSProperties }) {
   return <div style={{ position: 'absolute', width: 28, height: 28, ...style }} />
+}
+
+// 카메라 로딩 (토스식) — 프레임 스켈레톤 + 사선 시머 스윕 + 오토포커스 브리딩 링 + 통통 튀는 점
+function CameraLoading() {
+  const lineColor = 'rgba(255,255,255,0.55)'
+  const lineAnim = 'jjik-edge-glow 1.6s ease-in-out infinite'
+  return (
+    <div
+      style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 26 }}
+      aria-hidden
+    >
+      <div
+        style={{
+          position: 'relative',
+          width: '76%',
+          maxWidth: 300,
+          aspectRatio: '300 / 420',
+          borderRadius: 12,
+          boxShadow: '0 0 0 9999px rgba(0,0,0,0.82)',
+        }}
+      >
+        {/* 스켈레톤 시머 스윕 */}
+        <div style={{ position: 'absolute', inset: 0, borderRadius: 12, overflow: 'hidden' }}>
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              width: '45%',
+              background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0) 100%)',
+              animation: 'jjik-shimmer-sweep 1.6s ease-in-out infinite',
+            }}
+          />
+        </div>
+
+        {/* 오토포커스 브리딩 링 + 카메라 글리프 */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ position: 'absolute', width: 88, height: 88, borderRadius: '50%', border: '2px solid rgba(49,130,246,0.45)', animation: 'jjik-breathe 1.7s ease-in-out infinite' }} />
+          <div style={{ position: 'absolute', width: 58, height: 58, borderRadius: '50%', border: '2px solid rgba(49,130,246,0.85)', animation: 'jjik-breathe 1.7s ease-in-out 0.22s infinite' }} />
+          <span style={{ fontSize: 24 }}>📷</span>
+        </div>
+
+        {/* 코너 브래킷 — 은은한 펄스 */}
+        <Corner style={{ top: -6, left: -6, borderTop: `3px solid ${lineColor}`, borderLeft: `3px solid ${lineColor}`, borderTopLeftRadius: 12, animation: lineAnim }} />
+        <Corner style={{ top: -6, right: -6, borderTop: `3px solid ${lineColor}`, borderRight: `3px solid ${lineColor}`, borderTopRightRadius: 12, animation: lineAnim }} />
+        <Corner style={{ bottom: -6, left: -6, borderBottom: `3px solid ${lineColor}`, borderLeft: `3px solid ${lineColor}`, borderBottomLeftRadius: 12, animation: lineAnim }} />
+        <Corner style={{ bottom: -6, right: -6, borderBottom: `3px solid ${lineColor}`, borderRight: `3px solid ${lineColor}`, borderBottomRightRadius: 12, animation: lineAnim }} />
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.9)' }}>카메라를 준비하고 있어요</span>
+        <div style={{ display: 'flex', gap: 5 }}>
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-brand-primary)', animation: `jjik-dots 1.2s ease-in-out ${i * 0.16}s infinite` }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
 }

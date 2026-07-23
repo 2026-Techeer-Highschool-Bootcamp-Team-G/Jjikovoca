@@ -24,6 +24,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     // analysis — Gemini REST(WebClient)
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    // API 문서 — SpringDoc OpenAPI(Swagger UI). 04 명세와 실제 구현을 상호 대조(04 §자동 문서)
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
     // 관측 — /actuator/health가 15 §2 k8s readiness/liveness probe가 됨
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.micrometer:micrometer-registry-prometheus")
