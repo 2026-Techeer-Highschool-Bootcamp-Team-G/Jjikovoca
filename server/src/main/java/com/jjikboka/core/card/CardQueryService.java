@@ -50,6 +50,19 @@ public class CardQueryService {
     }
 
     /**
+     * 카드 소유 검증 (API-43·44 태깅 조립용). 없거나 삭제된 카드는 404("대상을 찾을 수 없습니다."), 남의 카드는 403.
+     * app이 exam_card 태깅(core.review) 전에 카드 쪽 소유를 확인하는 진입점 — 카드 엔티티 경계를 지킨다(13 §2).
+     */
+    @Transactional(readOnly = true)
+    public void verifyOwned(Long userId, Long cardId) {
+        Card card = cardRepository.findByIdAndDeletedAtIsNull(cardId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "NOT_FOUND", "대상을 찾을 수 없습니다."));
+        if (!card.getUserId().equals(userId)) {
+            throw new BusinessException(HttpStatus.FORBIDDEN, "FORBIDDEN", "접근 권한이 없습니다.");
+        }
+    }
+
+    /**
      * 카드 상세. 없거나 삭제된 카드는 404, 남의 카드는 403으로 서버가 막는다(NFR-04).
      * 힌트 게이팅에 쓸 프리미엄 여부를 함께 판정해 {@link CardDetail}로 조립한다.
      */
