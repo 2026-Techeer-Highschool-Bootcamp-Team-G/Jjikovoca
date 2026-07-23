@@ -167,4 +167,12 @@ class Card {
     LocalDateTime getCreatedAt() {
         return createdAt;
     }
+
+    /**
+     * soft delete — deleted_at만 찍고 행은 남긴다(학습 이력·통계 근거 보존, ERD v1.1).
+     * @Transactional 안에서 호출되면 JPA 더티체킹으로 UPDATE된다.
+     */
+    void softDelete(LocalDateTime now) {
+        this.deletedAt = now;
+    }
 }
