@@ -3,12 +3,14 @@ import { Badge, IconSpeaker } from '@/shared/ui'
 
 interface Props {
   card: Card
+  result?: 'CORRECT' | 'WRONG' // 홈 QA #3 — 최근 카드 정답/오답 색
   onSpeak?: () => void
   onClick?: () => void
 }
 
-// 찍어보카 단어 카드 (10:21) — 크롭(형광펜) + 단어 + Box 배지 + 문맥 뜻 + 예문
-export function WordCard({ card, onSpeak, onClick }: Props) {
+// 찍어보카 단어 카드 (10:21) — 크롭(형광펜) + 단어 + Box 배지 + 문맥 뜻 + 예문 (+정답/오답 accent)
+export function WordCard({ card, result, onSpeak, onClick }: Props) {
+  const accent = result === 'WRONG' ? '#e5484d' : result === 'CORRECT' ? '#0a8a55' : null
   return (
     <article
       onClick={onClick}
@@ -19,6 +21,7 @@ export function WordCard({ card, onSpeak, onClick }: Props) {
         padding: 'var(--spacing-lg)',
         background: 'var(--color-bg-elevated)',
         border: '1px solid var(--color-border-default)',
+        ...(accent ? { borderLeftWidth: 4, borderLeftColor: accent } : {}),
         borderRadius: 'var(--radius-lg)',
         boxShadow: 'var(--shadow-card)',
         cursor: onClick ? 'pointer' : 'default',
@@ -31,6 +34,11 @@ export function WordCard({ card, onSpeak, onClick }: Props) {
           {card.word ?? '단어'}
         </span>
         <Badge color="blue">Box {card.boxLevel}</Badge>
+        {result && (
+          <Badge color={result === 'WRONG' ? 'red' : 'green'}>
+            {result === 'WRONG' ? '오답' : '정답'}
+          </Badge>
+        )}
         <button
           type="button"
           aria-label="발음 듣기"
