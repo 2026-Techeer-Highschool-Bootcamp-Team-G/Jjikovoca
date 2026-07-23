@@ -73,6 +73,7 @@ function MethodCard({
       type="button"
       onClick={onClick}
       style={{
+        position: 'relative',
         flex: 1,
         minWidth: 0,
         display: 'flex',
@@ -94,6 +95,25 @@ function MethodCard({
           : undefined,
       }}
     >
+      {recommend && (
+        <span
+          style={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            background: '#e5484d',
+            color: 'var(--common-white, #fff)',
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: '0.02em',
+            padding: '2px 7px',
+            borderRadius: 999,
+            lineHeight: 1.4,
+          }}
+        >
+          추천
+        </span>
+      )}
       <span style={{ fontSize: 18 }} aria-hidden>
         {emoji}
       </span>
