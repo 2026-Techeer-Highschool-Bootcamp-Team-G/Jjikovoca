@@ -186,10 +186,9 @@ export function WrongNotePage() {
 
       <BottomSheet open={setupOpen} onClose={() => setSetupOpen(false)}>
         <StudySetupSheet
-          onStart={(method, subject, type) => {
+          onStart={(method, type) => {
             setSetupOpen(false)
             if (method === 'PICK') navigate('/study-pick')
-            else if (subject === 'MATH') navigate('/math-review')
             else navigate(type === 'FLASHCARD' ? '/flashcard' : '/cloze')
           }}
         />
