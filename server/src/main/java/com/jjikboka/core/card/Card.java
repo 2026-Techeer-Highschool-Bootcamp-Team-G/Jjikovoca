@@ -243,6 +243,11 @@ class Card {
         return nextReviewAt;
     }
 
+    /** 시험일 역산 재배치(API-33~35)로 다음 복습 시각을 옮긴다 — @Transactional 안에서 JPA 더티체킹으로 UPDATE된다. */
+    void scheduleReviewAt(LocalDateTime nextReviewAt) {
+        this.nextReviewAt = nextReviewAt;
+    }
+
     LocalDateTime getCreatedAt() {
         return createdAt;
     }
