@@ -1,10 +1,12 @@
 package com.jjikboka.analysis;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 분석 작업 생성 (analysis 공개 진입점, API-6 접수). app 조립 레벨이 quota 차감과 한 트랜잭션으로 묶어 호출한다.
- * analyze_job 엔티티는 패키지 비공개 — 밖으로는 생성된 jobId(Long)만 넘긴다(13 §2).
+ * 분석 작업 생성·상태 전이 (analysis 공개 진입점, API-6). app 조립 레벨이 접수 시 create를,
+ * 워커가 처리 단계마다 mark*를 호출한다. 각 전이는 독립 트랜잭션이라 폴링에 즉시 반영된다.
+ * analyze_job 엔티티는 패키지 비공개 — 밖으로는 jobId(Long)만 넘긴다(13 §2).
  */
 @Service
 public class AnalyzeJobService {
@@ -21,5 +23,23 @@ public class AnalyzeJobService {
      */
     public Long create(Long userId) {
         return analyzeJobRepository.save(AnalyzeJob.pending(userId)).getId();
+    }
+
+    /** 워커 처리 시작 — RUNNING. 각 전이는 독립 트랜잭션으로 즉시 커밋해 폴링에 보이게 한다. */
+    @Transactional
+    public void markRunning(Long jobId) {
+        analyzeJobRepository.findById(jobId).ifPresent(AnalyzeJob::markRunning);
+    }
+
+    /** 카드 생성 완료 — DONE. */
+    @Transactional
+    public void markDone(Long jobId) {
+        analyzeJobRepository.findById(jobId).ifPresent(AnalyzeJob::markDone);
+    }
+
+    /** 최종 실패 — FAILED. quota 환불은 app 워커가 core.card에 따로 지시한다(사가 보상). */
+    @Transactional
+    public void markFailed(Long jobId) {
+        analyzeJobRepository.findById(jobId).ifPresent(AnalyzeJob::markFailed);
     }
 }
