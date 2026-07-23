@@ -1,6 +1,7 @@
 package com.jjikboka.auth;
 
 import com.jjikboka.auth.dto.AuthResponse;
+import com.jjikboka.auth.dto.LoginRequest;
 import com.jjikboka.auth.dto.RegisterRequest;
 import com.jjikboka.shared.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -28,5 +29,12 @@ class AuthController {
     ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
         AuthResponse data = authService.register(request);
         return ResponseEntity.ok(ApiResponse.ok(data, "회원가입이 완료되었습니다."));
+    }
+
+    /** 로그인 (Notion API-ID 2) — 성공 200, 자격 실패 401(미구분). */
+    @PostMapping("/login")
+    ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
+        AuthResponse data = authService.login(request);
+        return ResponseEntity.ok(ApiResponse.ok(data, "로그인이 완료되었습니다."));
     }
 }
