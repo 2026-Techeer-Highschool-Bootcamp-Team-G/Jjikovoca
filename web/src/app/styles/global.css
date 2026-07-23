@@ -270,3 +270,13 @@ button {
     transform: scale(1.5);
   }
 }
+
+/* 홈 일일 퀘스트 무지개 텍스트 — 하고 싶게 만드는 흐르는 무지개 (홈 QA #5) */
+@keyframes jjik-rainbow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}

@@ -21,6 +21,8 @@ export function GameStatusCard({
   onQuestClick,
 }: Props) {
   const ratio = nextExp > 0 ? Math.min(1, exp / nextExp) : 0
+  // 홈 QA #1 — 연속일이 많을수록 불꽃이 커진다(상한 30px)
+  const flameSize = Math.min(14 + streakDays, 30)
   return (
     <section
       style={{
@@ -51,8 +53,21 @@ export function GameStatusCard({
             <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--color-text-primary)' }}>
               Lv.{level} {heroTitle}
             </span>
-            <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-primary)' }}>
-              🔥 연속 {streakDays}일
+            <span
+              style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-primary)', display: 'inline-flex', alignItems: 'center', gap: 3 }}
+            >
+              <span
+                aria-hidden
+                title={`연속 ${streakDays}일`}
+                style={{
+                  fontSize: flameSize,
+                  lineHeight: 1,
+                  filter: streakDays >= 14 ? 'drop-shadow(0 0 5px rgba(255,120,40,0.65))' : undefined,
+                }}
+              >
+                🔥
+              </span>
+              연속 {streakDays}일
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
@@ -100,7 +115,22 @@ export function GameStatusCard({
         }}
       >
         <IconClock size={16} />
-        <span style={{ flex: 1, textAlign: 'left', fontSize: 13, fontWeight: 500 }}>
+        <span
+          style={{
+            flex: 1,
+            textAlign: 'left',
+            fontSize: 13,
+            fontWeight: 700,
+            backgroundImage:
+              'linear-gradient(90deg, #ff5a5a, #ffab4e, #ffe24e, #4fd88b, #4fb0ff, #a06bff, #ff5a5a)',
+            backgroundSize: '200% auto',
+            WebkitBackgroundClip: 'text',
+            backgroundClip: 'text',
+            color: 'transparent',
+            WebkitTextFillColor: 'transparent',
+            animation: 'jjik-rainbow 4s linear infinite',
+          }}
+        >
           {questLabel}
         </span>
         <IconChevronRight size={14} />

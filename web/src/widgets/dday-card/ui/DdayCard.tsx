@@ -1,5 +1,13 @@
 import type { ReactNode } from 'react'
-import { Badge, IconChevronRight } from '@/shared/ui'
+import { IconChevronRight } from '@/shared/ui'
+
+// 홈 QA #2 — D-day 경각심 색: 초록(여유) → 연두 → 주황 → 빨강(임박, 보기 좋은 빨강)
+function ddayColor(dday: number): { bg: string; fg: string } {
+  if (dday > 30) return { bg: '#e3f6ea', fg: '#0a8a55' } // 초록
+  if (dday > 20) return { bg: '#eef7d6', fg: '#5f9a12' } // 연두
+  if (dday > 15) return { bg: '#fff0dd', fg: '#e07a1e' } // 주황
+  return { bg: '#ffe5e7', fg: '#e5484d' } // 빨강
+}
 
 interface Props {
   title: string
@@ -19,6 +27,8 @@ export function DdayCard({ title, dday, memoryRate, todayDue, subtitle, onClick 
     if (todayDue !== undefined) parts.push(`오늘 복습 ${todayDue}개`)
     sub = parts.length ? parts.join(' · ') : undefined
   }
+
+  const dc = ddayColor(dday)
 
   const cardStyle = {
     display: 'flex',
@@ -42,7 +52,21 @@ export function DdayCard({ title, dday, memoryRate, todayDue, subtitle, onClick 
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text-primary)' }}>
             {title}
           </span>
-          <Badge color="blue">D-{dday}</Badge>
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              height: 24,
+              padding: '0 8px',
+              borderRadius: 'var(--radius-sm)',
+              background: dc.bg,
+              color: dc.fg,
+              fontSize: 12,
+              fontWeight: 700,
+            }}
+          >
+            D-{dday}
+          </span>
         </div>
         {sub && <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>{sub}</span>}
       </div>
