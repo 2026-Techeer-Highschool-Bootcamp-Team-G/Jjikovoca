@@ -49,6 +49,26 @@ class Subscription {
     protected Subscription() {
     }
 
+    /**
+     * 모의 결제 활성화 (API-5). 검증 없이 결제 완료 상태만 부여한다 — plan=PREMIUM,
+     * status=ACTIVE, provider=MOCK, 만료는 now+30일. PG 연동 시 이 팩토리가 결제 확인 결과로 대체된다.
+     */
+    static Subscription mockActivated(Long userId, LocalDateTime now) {
+        Subscription subscription = new Subscription();
+        subscription.userId = userId;
+        subscription.plan = "PREMIUM";
+        subscription.status = "ACTIVE";
+        subscription.provider = "MOCK";
+        subscription.startedAt = now;
+        subscription.expiresAt = now.plusDays(30);
+        return subscription;
+    }
+
+    /** premium 판정과 동일 기준: ACTIVE && 미만료. 멱등 활성화에서 재사용한다. */
+    boolean isActiveAt(LocalDateTime now) {
+        return "ACTIVE".equals(status) && expiresAt.isAfter(now);
+    }
+
     String getStatus() {
         return status;
     }
