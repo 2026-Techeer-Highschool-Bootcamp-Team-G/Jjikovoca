@@ -45,8 +45,27 @@ class AnalyzeJob {
         return job;
     }
 
+    /** 워커가 처리를 시작할 때. PENDING→RUNNING. */
+    void markRunning() {
+        this.status = "RUNNING";
+    }
+
+    /** 카드 생성까지 끝났을 때. →DONE(폴링 응답에선 COMPLETED로 매핑). */
+    void markDone() {
+        this.status = "DONE";
+    }
+
+    /** 폴백 소진 등 최종 실패. →FAILED. quota 환불은 app 워커가 별도로 수행한다(13 §6). */
+    void markFailed() {
+        this.status = "FAILED";
+    }
+
     Long getId() {
         return id;
+    }
+
+    Long getUserId() {
+        return userId;
     }
 
     String getStatus() {
