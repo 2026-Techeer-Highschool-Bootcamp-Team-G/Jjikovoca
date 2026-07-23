@@ -72,8 +72,17 @@ class Card {
     @Column
     private String hint3;
 
+    @Column(columnDefinition = "json")   // F-26 풀이 배열 [{index,label,steps:[{no,title,question,content}],explanation}]
+    private String solutions;
+
+    @Column(name = "answer_value")       // F-26 정답(NUMERIC=쉼표 복수) — 판정 전용, 큐/조회 DTO엔 절대 미노출(13 §7)
+    private String answerValue;
+
     @Column(name = "answer_format")
     private String answerFormat;
+
+    @Column(columnDefinition = "json")   // F-18 진단 {failedStep,description,suggestedReason}
+    private String diagnosis;
 
     @Column
     private boolean mock;
@@ -173,6 +182,25 @@ class Card {
 
     String getLatex() {
         return latex;
+    }
+
+    /** 풀이 배열 JSON(원본). 큐/판정 서비스가 파싱해 노출 규칙(단계 content 제거 등)을 적용한다. */
+    String getSolutions() {
+        return solutions;
+    }
+
+    /** 진단 JSON(원본). */
+    String getDiagnosis() {
+        return diagnosis;
+    }
+
+    /** <b>정답 판정 전용</b>(NUMERIC/CHOICE). 큐·조회 DTO엔 절대 싣지 않는다 — 판정 응답에서만 공개(13 §7). */
+    String getAnswerValue() {
+        return answerValue;
+    }
+
+    String getAnswerFormat() {
+        return answerFormat;
     }
 
     String getSummary() {
