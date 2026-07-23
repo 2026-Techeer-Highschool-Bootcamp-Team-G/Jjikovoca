@@ -67,7 +67,7 @@ type Scope = keyof typeof SUBJECT
 
 // 학습 잔디 — 레벨(=학습 시간대)별 색·칸 크기. 시간이 많을수록 진하고 커진다
 const GRASS_COLOR = ['var(--color-bg-secondary)', '#b8ecd4', '#4fd89e', 'var(--color-success-primary)']
-const GRASS_SIZE = [9, 13, 18, 23] // 레벨 0~3 칸 크기(px). 24px 슬롯 안에서 커짐
+const GRASS_HOURS = [0, 2, 4, 7] // 레벨 0~3 → 그날 학습 시간(h). 칸 안에 Nh 표기
 
 // 월별 학습 잔디 4주 × 7일 (25:163) — 백엔드 연결 전 데모
 const MONTHS = [
@@ -128,7 +128,7 @@ export function ReportPage() {
   const [monthIdx, setMonthIdx] = useState(MONTHS.length - 1)
   const s = SUBJECT[scope]
   const m = MONTHS[monthIdx]
-  const grassHours = m.grass.flat().reduce((a, l) => a + l, 0) // 잔디 레벨 합 = 이번 달 총 학습 시간(대략)
+  const grassHours = m.grass.flat().reduce((a, l) => a + GRASS_HOURS[l], 0) // 이번 달 총 학습 시간(h)
 
   // 실 API — 명세 제공 필드만 매핑, 미가동 시 목업 폴백(데모 유지)
   const report = useQuery({ queryKey: ['report-summary'], queryFn: () => fetchReportSummary(), retry: 0 })
@@ -175,9 +175,9 @@ export function ReportPage() {
               onChange={(k) => setScope(k as Scope)}
             />
           </div>
-          <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 24, alignItems: 'center', justifyContent: 'center' }}>
             <Donut total={s.total} mathPct={s.mathPct} />
-            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
               <LegendRow color="var(--blue-500)" subject="수학" pct={s.math.pct} pctColor="var(--blue-500)" detail={s.math.detail} />
               <LegendRow color="var(--teal-500)" subject="영어" pct={s.eng.pct} pctColor="var(--teal-500)" detail={s.eng.detail} />
             </div>
@@ -201,30 +201,37 @@ export function ReportPage() {
               총 {grassHours}시간 · 연속 {m.streak}일 🔥
             </span>
           </div>
-          {/* 잔디 그리드 — 칸 크기 = 그날 학습 시간(많을수록 큼) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 26px)', gap: 6 }}>
+          {/* 잔디 그리드 — 균일 칸, 칸 안에 학습 시간(Nh) 표기. 가운데 정렬 */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 34px)', gap: 6 }}>
               {m.grass.flat().map((lvl, i) => (
-                <span key={i} style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span
-                    style={{
-                      width: GRASS_SIZE[lvl],
-                      height: GRASS_SIZE[lvl],
-                      borderRadius: 5,
-                      background: GRASS_COLOR[lvl],
-                      opacity: mounted ? 1 : 0,
-                      transform: mounted ? 'scale(1)' : 'scale(0.3)',
-                      transition: `opacity 0.3s ease-out ${0.28 + i * 0.012}s, transform 0.3s ease-out ${0.28 + i * 0.012}s`,
-                    }}
-                  />
+                <span
+                  key={i}
+                  style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 8,
+                    background: GRASS_COLOR[lvl],
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: lvl >= 2 ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)',
+                    opacity: mounted ? 1 : 0,
+                    transform: mounted ? 'scale(1)' : 'scale(0.3)',
+                    transition: `opacity 0.3s ease-out ${0.28 + i * 0.012}s, transform 0.3s ease-out ${0.28 + i * 0.012}s`,
+                  }}
+                >
+                  {lvl > 0 ? `${GRASS_HOURS[lvl]}h` : ''}
                 </span>
               ))}
             </div>
-            {/* 범례 — 칸이 클수록 오래 공부한 날 */}
+            {/* 범례 — 색이 진할수록 오래 공부한 날 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)' }}>적게</span>
               {GRASS_COLOR.map((c, i) => (
-                <span key={i} style={{ width: GRASS_SIZE[i], height: GRASS_SIZE[i], borderRadius: 3, background: c }} aria-hidden />
+                <span key={i} style={{ width: 12, height: 12, borderRadius: 3, background: c }} aria-hidden />
               ))}
               <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)' }}>많이 (학습 시간)</span>
             </div>
