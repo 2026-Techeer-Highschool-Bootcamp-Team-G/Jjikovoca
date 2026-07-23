@@ -19,7 +19,7 @@ interface Props {
   onClose: () => void
 }
 
-const HL_STROKE = 'rgba(255,210,54,0.7)'
+const HL_STROKE = 'rgba(255,205,0,0.9)' // 형광펜 밑칠 — 진한 노랑
 
 // 자유곡선 길이(px) — 아주 짧은 톡은 무시하려고 사용
 function strokeLen(pts: Pt[]) {
@@ -50,6 +50,7 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
   const areaRef = useRef<HTMLDivElement>(null)
   const strokeRef = useRef<Pt[] | null>(null)
   const startRef = useRef<Pt | null>(null)
+  const boxRef = useRef<Box | null>(null) // 그리는 중인 박스 — 커밋 이중 실행(두 겹) 방지
 
   const toLocal = (e: ReactPointerEvent) => {
     const r = areaRef.current?.getBoundingClientRect()
@@ -69,7 +70,9 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
       setDraftStroke([p])
     } else {
       startRef.current = p
-      setDraftBox({ mode: 'box', x: p.x, y: p.y, w: 0, h: 0 })
+      const b0: Box = { mode: 'box', x: p.x, y: p.y, w: 0, h: 0 }
+      boxRef.current = b0
+      setDraftBox(b0)
     }
   }
 
@@ -82,7 +85,9 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
       setTip(p)
     } else if (startRef.current) {
       const s = startRef.current
-      setDraftBox({ mode: 'box', x: Math.min(s.x, p.x), y: Math.min(s.y, p.y), w: Math.abs(p.x - s.x), h: Math.abs(p.y - s.y) })
+      const box: Box = { mode: 'box', x: Math.min(s.x, p.x), y: Math.min(s.y, p.y), w: Math.abs(p.x - s.x), h: Math.abs(p.y - s.y) }
+      boxRef.current = box
+      setDraftBox(box)
       setTip(p)
     }
   }
@@ -94,11 +99,11 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
       if (strokeLen(pts) > 12) setRegions((r) => [...r, { mode: 'highlighter', points: pts }])
       setDraftStroke(null)
     } else if (startRef.current) {
+      const b = boxRef.current
+      boxRef.current = null
       startRef.current = null
-      setDraftBox((b) => {
-        if (b && b.w > 8 && b.h > 8) setRegions((r) => [...r, b])
-        return null
-      })
+      if (b && b.w > 8 && b.h > 8) setRegions((r) => [...r, b])
+      setDraftBox(null)
     }
     setTip(null)
   }
@@ -281,8 +286,8 @@ function MarkerStroke({ points }: { points: Pt[] }) {
   const d = points.map((p) => `${p.x},${p.y}`).join(' ')
   return (
     <g style={{ animation: 'jjik-highlight-shimmer 1.6s ease-in-out infinite' }}>
-      <polyline points={d} fill="none" stroke={HL_STROKE} strokeWidth={22} strokeLinecap="round" strokeLinejoin="round" opacity={0.6} />
-      <polyline points={d} fill="none" stroke="rgba(255,224,90,0.85)" strokeWidth={13} strokeLinecap="round" strokeLinejoin="round" />
+      <polyline points={d} fill="none" stroke={HL_STROKE} strokeWidth={22} strokeLinecap="round" strokeLinejoin="round" opacity={0.85} />
+      <polyline points={d} fill="none" stroke="rgba(255,221,0,1)" strokeWidth={13} strokeLinecap="round" strokeLinejoin="round" />
     </g>
   )
 }
