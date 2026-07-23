@@ -234,3 +234,39 @@ button {
     transform: translate(-50%, -44px) scale(1);
   }
 }
+
+/* 인식 완료 체크(✓)가 팝 하고 나타났다 사라짐 — 완료 순간을 분명히 (QA #2) */
+@keyframes jjik-check-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  35% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* 촬영 버튼 강조 — 인식되면 셔터 둘레 링이 퍼지며 다음 행동을 유도 (QA #3) */
+@keyframes jjik-shutter-pulse {
+  0% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
