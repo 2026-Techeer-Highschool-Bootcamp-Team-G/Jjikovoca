@@ -11,6 +11,8 @@ export interface MathStep {
 export interface MathDiagnosis {
   failedStep: number
   description: string
+  // F-18 제안 사유 — 명세 diagnosis.suggestedReason 정합(선택)
+  suggestedReason?: 'CONCEPT' | 'MISTAKE' | 'MISREAD' | 'TIME'
 }
 
 export interface MathProblem {
