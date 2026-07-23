@@ -1,5 +1,6 @@
 package com.jjikboka.core.card;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -34,4 +35,30 @@ interface CardRepository extends JpaRepository<Card, Long> {
     List<Card> findArchive(@Param("userId") Long userId,
                            @Param("start") LocalDateTime start,
                            @Param("end") LocalDateTime end);
+
+    /**
+     * 플래시카드 큐(API-12) — 미졸업 WORD 중 due(next_review 도래 또는 미학습). subject가 null이면 전체.
+     * 정렬은 몰라요 빈도순(wrong_count desc) → 오래된 순(created_at asc), limit은 Pageable로.
+     */
+    @Query("SELECT c FROM Card c WHERE c.userId = :userId AND c.type = 'WORD' "
+            + "AND c.graduatedAt IS NULL AND c.deletedAt IS NULL "
+            + "AND (:subject IS NULL OR c.subject = :subject) "
+            + "AND (c.nextReviewAt IS NULL OR c.nextReviewAt <= :now) "
+            + "ORDER BY c.wrongCount DESC, c.createdAt ASC")
+    List<Card> findFlashcardQueue(@Param("userId") Long userId,
+                                  @Param("subject") String subject,
+                                  @Param("now") LocalDateTime now,
+                                  Pageable pageable);
+
+    /**
+     * 오늘의 복습 큐(API-13) — 미졸업 중 next_review_at 도래(<= now)한 카드. 이른 순, limit은 Pageable로.
+     * 미학습(null)은 아직 '복습' 대상이 아니라 제외한다(플래시카드 큐와 구분).
+     */
+    @Query("SELECT c FROM Card c WHERE c.userId = :userId "
+            + "AND c.graduatedAt IS NULL AND c.deletedAt IS NULL "
+            + "AND c.nextReviewAt IS NOT NULL AND c.nextReviewAt <= :now "
+            + "ORDER BY c.nextReviewAt ASC")
+    List<Card> findReviewQueue(@Param("userId") Long userId,
+                               @Param("now") LocalDateTime now,
+                               Pageable pageable);
 }
