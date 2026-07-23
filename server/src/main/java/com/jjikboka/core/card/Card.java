@@ -98,6 +98,11 @@ class Card {
         return id;
     }
 
+    /** 소유자 검증(NFR-04)에 쓴다 — 조회 DTO엔 싣지 않는다. */
+    Long getUserId() {
+        return userId;
+    }
+
     String getType() {
         return type;
     }
@@ -110,6 +115,10 @@ class Card {
         return concept;
     }
 
+    String getImagePath() {
+        return imagePath;
+    }
+
     String getWord() {
         return word;
     }
@@ -118,8 +127,32 @@ class Card {
         return contextMeaning;
     }
 
+    String getDictMeaning() {
+        return dictMeaning;
+    }
+
+    String getExample() {
+        return example;
+    }
+
+    String getLatex() {
+        return latex;
+    }
+
     String getSummary() {
         return summary;
+    }
+
+    String getHint1() {
+        return hint1;
+    }
+
+    String getHint2() {
+        return hint2;
+    }
+
+    String getHint3() {
+        return hint3;
     }
 
     int getBoxLevel() {
