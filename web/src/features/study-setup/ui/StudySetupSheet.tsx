@@ -1,17 +1,16 @@
 import { useState } from 'react'
 import { Button } from '@/shared/ui'
-import type { ReviewType, StudyMethod, StudySubject } from '../model/types'
+import type { ReviewType, StudyMethod } from '../model/types'
 
 interface Props {
-  onStart: (method: StudyMethod, subject: StudySubject, type: ReviewType) => void
+  onStart: (method: StudyMethod, type: ReviewType) => void
 }
 
 const label = { fontSize: 11, fontWeight: 500, color: 'var(--color-text-tertiary)' } as const
 
-// 학습 설정 시트 내용 (149:851…) — 학습 방식 2택 + 과목(영어/수학) + 영어 유형 + 학습 시작 (F-28 v2.2)
+// 학습 설정 시트 내용 (149:851…) — 학습 방식 2택 + 복습 유형 + 학습 시작
 export function StudySetupSheet({ onStart }: Props) {
   const [method, setMethod] = useState<StudyMethod>('TODAY')
-  const [subject, setSubject] = useState<StudySubject>('ENGLISH')
   const [type, setType] = useState<ReviewType>('FLASHCARD')
 
   return (
@@ -38,27 +37,13 @@ export function StudySetupSheet({ onStart }: Props) {
         />
       </div>
 
-      <span style={label}>과목</span>
+      <span style={label}>복습 유형</span>
       <div style={{ display: 'flex', gap: 8 }}>
-        <TypeChip active={subject === 'ENGLISH'} label="영어" onClick={() => setSubject('ENGLISH')} />
-        <TypeChip active={subject === 'MATH'} label="수학" onClick={() => setSubject('MATH')} />
+        <TypeChip active={type === 'FLASHCARD'} label="플래시카드" onClick={() => setType('FLASHCARD')} />
+        <TypeChip active={type === 'CLOZE'} label="빈칸 퀴즈" onClick={() => setType('CLOZE')} />
       </div>
 
-      {subject === 'ENGLISH' ? (
-        <>
-          <span style={label}>복습 유형</span>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <TypeChip active={type === 'FLASHCARD'} label="플래시카드" onClick={() => setType('FLASHCARD')} />
-            <TypeChip active={type === 'CLOZE'} label="빈칸 퀴즈" onClick={() => setType('CLOZE')} />
-          </div>
-        </>
-      ) : (
-        <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
-          🧠 수학은 사고과정 복습으로 진행돼요
-        </span>
-      )}
-
-      <Button block size="lg" onClick={() => onStart(method, subject, type)}>
+      <Button block size="lg" onClick={() => onStart(method, type)}>
         학습 시작
       </Button>
     </>
