@@ -41,6 +41,19 @@ public class ExamTagService {
         examCardRepository.deleteByExamIdAndCardId(examId, cardId);
     }
 
+    /**
+     * 넛지 일괄 태깅(API-45) — 이미 검증된 카드 id들을 시험에 멱등하게 건다. 시험 소유·카드 대상 선정은 app이 마쳤다.
+     * source=MANUAL로 걸어 자동 재태깅에 덮이지 않게 한다.
+     */
+    @Transactional
+    public void tagRecent(Long examId, List<Long> cardIds) {
+        for (Long cardId : cardIds) {
+            if (!examCardRepository.existsByExamIdAndCardId(examId, cardId)) {
+                examCardRepository.save(ExamCard.manual(examId, cardId));
+            }
+        }
+    }
+
     private void assertExamOwned(Long userId, Long examId) {
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "NOT_FOUND", "대상을 찾을 수 없습니다."));
