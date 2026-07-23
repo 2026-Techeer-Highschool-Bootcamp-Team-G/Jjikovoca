@@ -1,8 +1,8 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import type { CSSProperties } from 'react'
 import { NavigationBar } from '@/shared/ui'
 import { MathProblemCard, VerdictView } from '@/features/math-review'
-import type { MathProblem } from '@/features/math-review'
+import type { MathProblem, MathJudge } from '@/features/math-review'
 import { GradeButtons } from '@/features/study-grade'
 import type { Grade } from '@/features/study-grade'
 
@@ -33,6 +33,12 @@ const pageStyle: CSSProperties = {
 export function MathVerdictWrongPage() {
   const navigate = useNavigate()
   const handleGrade = (_grade: Grade) => navigate(-1)
+  // 판정 결과(정답·해설·내 답)는 MathAnswerPage 판정 응답에서 전달받음. 없으면 데모 폴백
+  const { state } = useLocation() as { state: { judge?: MathJudge; answer?: string; title?: string } | null }
+  const answerValue = state?.judge?.answerValue ?? problem.answerValue
+  const explanation = state?.judge?.solutions?.[0]?.explanation ?? problem.explanation
+  const enteredAnswer = state?.answer ?? '−2, −3'
+  const view: MathProblem = state?.title ? { ...problem, title: state.title } : problem
 
   return (
     <div style={pageStyle}>
@@ -49,13 +55,8 @@ export function MathVerdictWrongPage() {
       <div
         style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, padding: '12px var(--spacing-xl)' }}
       >
-        <MathProblemCard problem={problem} slim />
-        <VerdictView
-          correct={false}
-          answerValue={problem.answerValue}
-          explanation={problem.explanation}
-          enteredAnswer="−2, −3"
-        />
+        <MathProblemCard problem={view} slim />
+        <VerdictView correct={false} answerValue={answerValue} explanation={explanation} enteredAnswer={enteredAnswer} />
 
         <div style={{ marginTop: 'auto', paddingTop: 8 }}>
           <GradeButtons onGrade={handleGrade} />

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { NavigationBar, Badge, Button } from '@/shared/ui'
+import { fetchMathQueue } from '@/features/math-review'
 
 type Reason = '개념' | '실수' | '오독' | '시간'
 const REASONS: Reason[] = ['개념', '실수', '오독', '시간']
@@ -9,6 +11,9 @@ const REASONS: Reason[] = ['개념', '실수', '오독', '시간']
 export function MathProblemPage() {
   const navigate = useNavigate()
   const [reason, setReason] = useState<Reason>('실수')
+  // 실 큐에서 문제 제목 — 미가동 시 데모 폴백
+  const math = useQuery({ queryKey: ['math'], queryFn: () => fetchMathQueue(), retry: 0 })
+  const title = math.data?.[0]?.latex ?? 'x² − 5x + 6 = 0 의 두 근을 구하시오.'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
@@ -33,7 +38,7 @@ export function MathProblemPage() {
         >
           <div style={{ background: 'var(--color-bg-secondary)', borderRadius: 8, padding: '24px 16px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
             <span style={{ fontSize: 18, fontWeight: 500, color: 'var(--color-text-primary)' }}>
-              x² − 5x + 6 = 0 의 두 근을 구하시오.
+              {title}
             </span>
             <span style={{ width: 260, height: 7, borderRadius: 3.5, background: '#d1d6db' }} />
             <span style={{ width: 180, height: 7, borderRadius: 3.5, background: '#d1d6db' }} />
