@@ -50,22 +50,27 @@ const MONTHS = [
   },
 ]
 
-const WEAK = [
-  { concept: '이차방정식 인수분해', ratio: 1, count: 5, to: '/math-answer' },
-  { concept: '가정법 과거완료', ratio: 0.6, count: 3, to: '/flashcard' },
-  { concept: '다의어 (sound 등)', ratio: 0.4, count: 2, to: '/flashcard' },
+// 약한 개념 — 과목별 분리 (왼쪽 영어 / 오른쪽 수학)
+const WEAK_ENG = [
+  { concept: '가정법 과거완료', count: 3, to: '/flashcard' },
+  { concept: '다의어 (sound 등)', count: 2, to: '/flashcard' },
+]
+const WEAK_MATH = [
+  { concept: '이차방정식 인수분해', count: 5, to: '/math-answer' },
+  { concept: '삼각함수 그래프', count: 3, to: '/math-answer' },
 ]
 
-// 일일 학습 시간 주간 막대 (F-10 v1.4) — min = 높이 비율(%), study_log.duration_ms 집계 대용
+// 일일 학습 시간 주간 막대 (F-10) — 과목별 분: 수학(파랑)+영어(초록) 누적, study_log.duration_ms 집계 대용
 const WEEK = [
-  { day: '월', min: 42 },
-  { day: '화', min: 68 },
-  { day: '수', min: 30 },
-  { day: '목', min: 84 },
-  { day: '금', min: 56 },
-  { day: '토', min: 22 },
-  { day: '일', min: 100, today: true },
+  { day: '월', eng: 24, math: 18 },
+  { day: '화', eng: 30, math: 38 },
+  { day: '수', eng: 12, math: 18 },
+  { day: '목', eng: 34, math: 50 },
+  { day: '금', eng: 30, math: 26 },
+  { day: '토', eng: 14, math: 8 },
+  { day: '일', eng: 46, math: 54, today: true },
 ]
+const WEEK_MAX = Math.max(...WEEK.map((d) => d.eng + d.math))
 
 /** 학습 리포트 (F-10) — 13 리포트 */
 export function ReportPage() {
@@ -189,76 +194,67 @@ export function ReportPage() {
         </Card>
 
         <Card>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>일일 학습 시간</span>
-            <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)' }}>평균 세션 24분</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>일일 학습 시간</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <SubjectDot color="var(--blue-500)" label="수학" />
+                <SubjectDot color="var(--teal-500)" label="영어" />
+              </span>
+            </div>
+            <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>평균 세션 24분</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'stretch', gap: 10, height: 96 }}>
-            {WEEK.map((d) => (
-              <div key={d.day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                <div style={{ flex: 1, width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-                  <div
-                    style={{
-                      width: '100%',
-                      maxWidth: 22,
-                      height: `${d.min}%`,
-                      minHeight: 4,
-                      borderRadius: 4,
-                      background: d.today ? 'var(--color-brand-primary)' : 'var(--color-brand-weak)',
-                    }}
-                  />
+            {WEEK.map((d) => {
+              const total = d.eng + d.math
+              const hPct = (total / WEEK_MAX) * 100
+              return (
+                <div key={d.day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                  <div style={{ flex: 1, width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+                    {/* 수학(파랑) 위 + 영어(초록) 아래 누적 */}
+                    <div
+                      style={{
+                        width: '100%',
+                        maxWidth: 22,
+                        height: `${hPct}%`,
+                        minHeight: 6,
+                        borderRadius: 4,
+                        overflow: 'hidden',
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
+                      <div style={{ height: `${(d.math / total) * 100}%`, background: 'var(--blue-500)' }} />
+                      <div style={{ height: `${(d.eng / total) * 100}%`, background: 'var(--teal-500)' }} />
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 10, color: d.today ? 'var(--color-text-brand)' : 'var(--color-text-tertiary)' }}>
+                    {d.day}
+                  </span>
                 </div>
-                <span style={{ fontSize: 10, color: d.today ? 'var(--color-text-brand)' : 'var(--color-text-tertiary)' }}>
-                  {d.day}
-                </span>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </Card>
 
         <Card>
           <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>지난달보다</span>
           <div style={{ display: 'flex', gap: 24 }}>
-            <GrowthItem label="외운 단어" value="24" delta="▲ +8" />
-            <GrowthItem label="정답률" value="78%" delta="▲ +6%p" />
-            <GrowthItem label="학습일" value="18일" delta="▲ +3" />
+            <GrowthItem label="외운 단어" value="24" delta="+8" up />
+            <GrowthItem label="정답률" value="78%" delta="-3%p" up={false} />
+            <GrowthItem label="학습일" value="18일" delta="+3" up />
           </div>
         </Card>
 
         <Card>
           <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>
-            나의 약한 개념 Top 3
+            나의 약한 개념
           </span>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {WEAK.map((w, i) => (
-              <button
-                key={w.concept}
-                type="button"
-                onClick={() => navigate(w.to)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  width: '100%',
-                  padding: 0,
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
-              >
-                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-brand)', width: 12 }}>
-                  {i + 1}
-                </span>
-                <span style={{ flex: 1, fontSize: 13, color: 'var(--color-text-primary)' }}>{w.concept}</span>
-                <div style={{ width: 76, height: 6, borderRadius: 3, background: 'var(--color-bg-secondary)', overflow: 'hidden' }}>
-                  <div style={{ width: `${w.ratio * 100}%`, height: '100%', borderRadius: 3, background: 'var(--color-danger-primary)' }} />
-                </div>
-                <span style={{ fontSize: 12, color: 'var(--color-text-secondary)', width: 24, textAlign: 'right' }}>
-                  {w.count}회
-                </span>
-              </button>
-            ))}
+          {/* 왼쪽 영어 / 오른쪽 수학 */}
+          <div style={{ display: 'flex', gap: 14 }}>
+            <WeakColumn title="영어" color="var(--teal-500)" items={WEAK_ENG} onPick={navigate} />
+            <div style={{ width: 1, background: 'var(--color-border-default)', alignSelf: 'stretch' }} aria-hidden />
+            <WeakColumn title="수학" color="var(--blue-500)" items={WEAK_MATH} onPick={navigate} />
           </div>
         </Card>
       </div>
@@ -454,7 +450,8 @@ function LegendRow({
   )
 }
 
-function GrowthItem({ label, value, delta }: { label: string; value: string; delta: string }) {
+// 지난달 대비 증감 — 상승 초록 ▲ / 하락 빨강 ▼
+function GrowthItem({ label, value, delta, up }: { label: string; value: string; delta: string; up: boolean }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)' }}>{label}</span>
@@ -464,15 +461,78 @@ function GrowthItem({ label, value, delta }: { label: string; value: string; del
           style={{
             fontSize: 10,
             fontWeight: 500,
-            color: '#0a8a55',
-            background: 'var(--color-success-weak)',
+            color: up ? '#0a8a55' : 'var(--color-danger-primary)',
+            background: up ? 'var(--color-success-weak)' : 'var(--color-danger-weak)',
             borderRadius: 'var(--radius-full)',
             padding: '2px 6px',
           }}
         >
-          {delta}
+          {up ? '▲' : '▼'} {delta}
         </span>
       </div>
+    </div>
+  )
+}
+
+// 일일 학습 시간 범례 점 (수학/영어)
+function SubjectDot({ color, label }: { color: string; label: string }) {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10, color: 'var(--color-text-tertiary)' }}>
+      <span style={{ width: 8, height: 8, borderRadius: '50%', background: color }} aria-hidden />
+      {label}
+    </span>
+  )
+}
+
+// 약한 개념 과목 열 (영어/수학)
+function WeakColumn({
+  title,
+  color,
+  items,
+  onPick,
+}: {
+  title: string
+  color: string
+  items: { concept: string; count: number; to: string }[]
+  onPick: (to: string) => void
+}) {
+  return (
+    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <span style={{ fontSize: 12, fontWeight: 700, color }}>{title}</span>
+      {items.map((w, i) => (
+        <button
+          key={w.concept}
+          type="button"
+          onClick={() => onPick(w.to)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            width: '100%',
+            padding: 0,
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            textAlign: 'left',
+          }}
+        >
+          <span style={{ fontSize: 12, fontWeight: 700, color, width: 10, flexShrink: 0 }}>{i + 1}</span>
+          <span
+            style={{
+              flex: 1,
+              minWidth: 0,
+              fontSize: 12,
+              color: 'var(--color-text-primary)',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {w.concept}
+          </span>
+          <span style={{ fontSize: 11, color: 'var(--color-text-secondary)', flexShrink: 0 }}>{w.count}회</span>
+        </button>
+      ))}
     </div>
   )
 }
