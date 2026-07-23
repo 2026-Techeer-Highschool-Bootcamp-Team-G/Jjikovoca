@@ -117,64 +117,6 @@ const WEEK = [
 ]
 const WEEK_MAX = Math.max(...WEEK.map((d) => d.eng + d.math))
 
-// 주간 학습 추이 선그래프 (SVG) — 진입 시 선이 왼쪽부터 그려지고 면적이 채워짐
-function TrendChart({ mounted }: { mounted: boolean }) {
-  const W = 320
-  const H = 96
-  const pad = 8
-  const vals = WEEK.map((d) => d.eng + d.math)
-  const max = Math.max(...vals, 1)
-  const pts = vals.map((v, i) => {
-    const x = pad + (i * (W - pad * 2)) / (vals.length - 1)
-    const y = H - pad - (v / max) * (H - pad * 2)
-    return [x, y] as const
-  })
-  const line = pts.map((p) => `${p[0]},${p[1]}`).join(' ')
-  const area = `${pad},${H - pad} ${line} ${W - pad},${H - pad}`
-  const DASH = 1000 // 폴리라인 전체 길이보다 크게 → offset DASH→0 으로 좌→우 그리기
-
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} preserveAspectRatio="none" aria-hidden>
-      <defs>
-        <linearGradient id="jjik-trend-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--color-brand-primary)" stopOpacity="0.22" />
-          <stop offset="100%" stopColor="var(--color-brand-primary)" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <polygon
-        points={area}
-        fill="url(#jjik-trend-fill)"
-        style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease-out 0.4s' }}
-      />
-      <polyline
-        points={line}
-        fill="none"
-        stroke="var(--color-brand-primary)"
-        strokeWidth={2.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        style={{
-          strokeDasharray: DASH,
-          strokeDashoffset: mounted ? 0 : DASH,
-          transition: 'stroke-dashoffset 1s ease-out 0.3s',
-        }}
-      />
-      {pts.map((p, i) => (
-        <circle
-          key={i}
-          cx={p[0]}
-          cy={p[1]}
-          r={3}
-          fill="var(--color-bg-primary)"
-          stroke="var(--color-brand-primary)"
-          strokeWidth={2}
-          style={{ opacity: mounted ? 1 : 0, transition: `opacity 0.3s ease-out ${0.5 + i * 0.06}s` }}
-        />
-      ))}
-    </svg>
-  )
-}
-
 /** 학습 리포트 (F-10) — 13 리포트 */
 export function ReportPage() {
   const navigate = useNavigate()
@@ -189,6 +131,7 @@ export function ReportPage() {
   const basic = report.data?.basic
   const newCards = basic ? `${basic.newCards}장` : '24장'
   const accuracyWord = basic?.accuracy.word != null ? `${Math.round(basic.accuracy.word * 100)}%` : '78%'
+  const accuracyMath = basic?.accuracy.problem != null ? `${Math.round(basic.accuracy.problem * 100)}%` : '65%'
   const dueCount = review.data?.dueCount ?? 12
 
   // 진입 시 카드/막대/잔디가 생성되듯 순차 등장
@@ -235,9 +178,10 @@ export function ReportPage() {
           <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-inverse)', opacity: 0.9 }}>지금 복습 ›</span>
         </button>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9, ...entrance(mounted, 0.06) }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 9, ...entrance(mounted, 0.06) }}>
           <StatCard label="새로 만든 카드" value={newCards} />
           <StatCard label="단어 정답률" value={accuracyWord} accent />
+          <StatCard label="수학 정답률" value={accuracyMath} accent />
         </div>
 
         <Card style={entrance(mounted, 0.12)}>
@@ -371,24 +315,6 @@ export function ReportPage() {
         </Card>
 
         <Card style={entrance(mounted, 0.3)}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>주간 학습 추이</span>
-            <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)' }}>하루 총 학습 시간</span>
-          </div>
-          <TrendChart mounted={mounted} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 6px' }}>
-            {WEEK.map((d) => (
-              <span
-                key={d.day}
-                style={{ fontSize: 10, color: d.today ? 'var(--color-text-brand)' : 'var(--color-text-tertiary)' }}
-              >
-                {d.day}
-              </span>
-            ))}
-          </div>
-        </Card>
-
-        <Card style={entrance(mounted, 0.36)}>
           <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>지난달보다</span>
           <div style={{ display: 'flex', gap: 24 }}>
             <GrowthItem label="외운 단어" value="24" delta="+8" up />
@@ -397,7 +323,7 @@ export function ReportPage() {
           </div>
         </Card>
 
-        <Card style={entrance(mounted, 0.42)}>
+        <Card style={entrance(mounted, 0.36)}>
           <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>
             나의 약한 개념
           </span>
