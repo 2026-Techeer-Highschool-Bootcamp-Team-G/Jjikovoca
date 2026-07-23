@@ -85,7 +85,18 @@ export function HomePage() {
       </div>
 
       <div style={{ padding: '16px var(--spacing-xl) 24px' }}>
-        <WordCard card={recentCard} result="WRONG" onClick={() => navigate('/wrong-note')} />
+        <WordCard
+          card={recentCard}
+          result="WRONG"
+          pronunciation="[saʊnd]"
+          conceptEmoji="⚖️"
+          tags={[
+            { label: '형용사', tone: 'grey' },
+            { label: '📚 학업', tone: 'blue' },
+            { label: '다의어', tone: 'blue' },
+          ]}
+          onClick={() => navigate('/wrong-note')}
+        />
       </div>
     </div>
   )
