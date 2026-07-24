@@ -21,10 +21,13 @@ class StudyController {
 
     private final StudyService studyService;
     private final StudyQueueService studyQueueService;
+    private final RecommendationService recommendationService;
 
-    StudyController(StudyService studyService, StudyQueueService studyQueueService) {
+    StudyController(StudyService studyService, StudyQueueService studyQueueService,
+                    RecommendationService recommendationService) {
         this.studyService = studyService;
         this.studyQueueService = studyQueueService;
+        this.recommendationService = recommendationService;
     }
 
     @PostMapping("/api/cards/{id}/study")
@@ -46,6 +49,12 @@ class StudyController {
         FlashcardQueueResponse response = FlashcardQueueResponse.of(
                 studyQueueService.getFlashcards(userId, subject, limit, mode, cardIds));
         return ResponseEntity.ok(ApiResponse.ok(response, "플래시카드 큐 조회가 완료되었습니다."));
+    }
+
+    @GetMapping("/api/study/recommendation")
+    ResponseEntity<ApiResponse<RecommendationResponse>> recommendation(@AuthenticationPrincipal Long userId) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                recommendationService.recommend(userId), "학습 추천 조회가 완료되었습니다."));
     }
 
     @GetMapping("/api/study/review-queue")
