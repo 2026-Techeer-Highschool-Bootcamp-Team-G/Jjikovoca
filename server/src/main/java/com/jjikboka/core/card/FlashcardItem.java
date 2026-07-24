@@ -18,12 +18,14 @@ public record FlashcardItem(
         String pronunciation,
         String pos,
         List<String> tags,
-        String emoji
+        String emoji,
+        String mnemonicImagePath
 ) {
 
     static FlashcardItem from(Card card, LocalDateTime now) {
         return new FlashcardItem(card.getId(), card.getWord(), card.getContextMeaning(),
                 card.getExample(), card.getBoxLevel(), card.currentRetrievability(now),
-                card.getPronunciation(), card.getPos(), card.getTags(), card.getEmoji());
+                card.getPronunciation(), card.getPos(), card.getTags(), card.getEmoji(),
+                card.getMnemonicImagePath());
     }
 }
