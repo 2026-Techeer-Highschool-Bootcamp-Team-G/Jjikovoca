@@ -15,7 +15,7 @@ spring:
     locations: classpath:db/migration   # V1__baseline.sql (03 ERD)
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8000}    # 기본 8000(프론트 proxy·05 §2-1 정합). SERVER_PORT env로 덮어쓰기 가능
 
 # 관측 초기 활성 (05 §2-2, 07) — 대시보드가 첫 배포부터 그려지도록
 management:
