@@ -41,10 +41,10 @@ interface StudyLogRepository extends JpaRepository<StudyLog, Long> {
                                    @Param("start") LocalDateTime start,
                                    @Param("end") LocalDateTime end);
 
-    /** 잔디(F-12) — 일자별 학습 수 [date, count]. */
-    @Query("SELECT FUNCTION('DATE', s.createdAt), COUNT(s) FROM StudyLog s WHERE s.userId = :userId "
-            + "AND s.createdAt >= :start AND s.createdAt < :end GROUP BY FUNCTION('DATE', s.createdAt) "
-            + "ORDER BY FUNCTION('DATE', s.createdAt)")
+    /** 잔디(F-12) — 일자별 [date, 학습 수, duration_ms 합]. minutes(막대)는 서비스에서 합/60000. */
+    @Query("SELECT FUNCTION('DATE', s.createdAt), COUNT(s), COALESCE(SUM(s.durationMs), 0) FROM StudyLog s "
+            + "WHERE s.userId = :userId AND s.createdAt >= :start AND s.createdAt < :end "
+            + "GROUP BY FUNCTION('DATE', s.createdAt) ORDER BY FUNCTION('DATE', s.createdAt)")
     List<Object[]> grassCounts(@Param("userId") Long userId,
                                @Param("start") LocalDateTime start,
                                @Param("end") LocalDateTime end);

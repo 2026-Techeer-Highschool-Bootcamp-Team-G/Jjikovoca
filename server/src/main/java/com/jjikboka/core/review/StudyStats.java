@@ -16,7 +16,7 @@ public record StudyStats(
         List<GrassPoint> grass
 ) {
 
-    /** 잔디 한 점(일자·학습 수). */
-    public record GrassPoint(LocalDate date, long count) {
+    /** 잔디 한 점(일자·학습 수·학습 분). minutes=해당 일자 duration_ms 합/60000. */
+    public record GrassPoint(LocalDate date, long count, int minutes) {
     }
 }
