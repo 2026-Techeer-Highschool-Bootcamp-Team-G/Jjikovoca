@@ -43,6 +43,15 @@ public class CardQueryService {
         return cards.stream().map(CardSummary::from).toList();
     }
 
+    /** 상태칩 카운트(API-7) — 전체·졸업·오늘복습 대기 수를 한 번에 집계한다. */
+    @Transactional(readOnly = true)
+    public CardCounts getCounts(Long userId) {
+        return new CardCounts(
+                cardRepository.countByUserIdAndDeletedAtIsNull(userId),
+                cardRepository.countGraduatedTotal(userId),
+                cardRepository.countReviewDue(userId, LocalDateTime.now()));
+    }
+
     /**
      * 내보내기 대상 카드 요약(API-25). cardIds가 비어 있으면 전체(soft-delete 제외), 있으면 그 중 소유 카드만.
      * 정답은 담지 않는다(13 §7) — 내보내기 렌더도 요약 기준.
