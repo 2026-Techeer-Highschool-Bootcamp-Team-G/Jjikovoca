@@ -16,6 +16,19 @@ export interface ApiEnvelope<T> {
   message: string
 }
 
+/**
+ * 이미지·미디어 URL 해석 — 백엔드 이미지 엔드포인트(/images/{파일명})로 정규화.
+ * archive imageUrl 등은 순수 파일명이라 그대로 <img src> 하면 깨진다.
+ * 배포 시 VITE_API_BASE_URL(별도 오리진)이 있으면 그 오리진의 /images 로 붙는다.
+ */
+export function mediaUrl(nameOrPath: string): string {
+  if (!nameOrPath) return ''
+  if (/^https?:\/\//.test(nameOrPath) || nameOrPath.startsWith('data:')) return nameOrPath
+  const clean = nameOrPath.replace(/^\/+/, '')
+  const withDir = clean.startsWith('images/') ? clean : `images/${clean}`
+  return `${API_BASE}/${withDir}`
+}
+
 export function getAccessToken(): string | null {
   return localStorage.getItem(ACCESS_KEY)
 }

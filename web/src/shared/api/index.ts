@@ -3,6 +3,7 @@ export {
   apiGet,
   apiPost,
   ApiError,
+  mediaUrl,
   getAccessToken,
   getRefreshToken,
   setTokens,
