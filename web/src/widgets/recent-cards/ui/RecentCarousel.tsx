@@ -37,10 +37,21 @@ const CARDS: RecentCard[] = [
 
 const CARD_H = 300
 
+// 데모 카드에 기본 유형·시험 태그 부여(저장 카드는 자체 태그 사용)
+function decorate(c: RecentCard): RecentCard {
+  const tags =
+    c.tags ??
+    (c.type === 'WORD'
+      ? [{ label: c.pos ?? '단어', tone: 'grey' as const }, { label: '다의어', tone: 'blue' as const }]
+      : [{ label: '수학', tone: 'grey' as const }, { label: '개념', tone: 'blue' as const }])
+  return { ...c, tags, exams: c.exams ?? ['중간고사'] }
+}
+const DECORATED = CARDS.map(decorate)
+
 /** 홈 최근 카드 — 좌우 스와이프 캐러셀 + 탭 플립(영어=뜻 / 수학=정답). 저장 카드가 앞에 연동 */
 export function RecentCarousel({ subject = 'ALL' }: { subject?: 'ALL' | 'ENGLISH' | 'MATH' }) {
   const saved = useSavedCards()
-  const all = [...saved, ...CARDS]
+  const all = [...saved, ...DECORATED]
   const cards = all.filter(
     (c) => subject === 'ALL' || (subject === 'ENGLISH' ? c.type === 'WORD' : c.type === 'PROBLEM'),
   )
@@ -124,12 +135,12 @@ const tapHint: CSSProperties = { marginTop: 'auto', textAlign: 'center', fontSiz
 function WordFront({ card }: { card: RecentCard }) {
   return (
     <>
-      <span style={chip('var(--color-text-brand)', 'var(--color-brand-weak)')}>영어 단어</span>
+      <CardTags card={card} />
       <div
         style={{
-          marginTop: 12,
+          marginTop: 10,
           width: '100%',
-          height: 96,
+          height: 78,
           borderRadius: 12,
           background: 'linear-gradient(90deg, #e8f3ff 0%, #e7f8f8 100%)',
           display: 'flex',
@@ -137,16 +148,16 @@ function WordFront({ card }: { card: RecentCard }) {
           justifyContent: 'center',
         }}
       >
-        <span style={{ fontSize: 44, lineHeight: 1 }} aria-hidden>
+        <span style={{ fontSize: 40, lineHeight: 1 }} aria-hidden>
           {card.emoji}
         </span>
       </div>
-      <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-        <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--color-text-primary)' }}>{card.word}</span>
+      <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+        <span style={{ fontSize: 26, fontWeight: 700, color: 'var(--color-text-primary)' }}>{card.word}</span>
         <span style={{ fontSize: 13, color: 'var(--color-text-tertiary)' }}>{card.pronunciation}</span>
       </div>
-      <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center' }}>
-        <SpeakButton text={card.word ?? ''} />
+      <div style={{ marginTop: 10 }}>
+        <AudioButtons text={card.word ?? ''} />
       </div>
       <span style={tapHint}>탭하면 뜻이 보여요</span>
     </>
@@ -170,7 +181,7 @@ function WordBack({ card }: { card: RecentCard }) {
 function ProblemFront({ card }: { card: RecentCard }) {
   return (
     <>
-      <span style={chip('var(--blue-500)', 'rgba(49,130,246,0.12)')}>수학 문제</span>
+      <CardTags card={card} />
       <div style={{ margin: 'auto 0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
         <span style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.5, color: 'var(--color-text-primary)', textAlign: 'center' }}>
           {card.problem}
@@ -231,36 +242,81 @@ function ProblemBack({ card }: { card: RecentCard }) {
   )
 }
 
-// 발음 재생 — 카드 플립과 겹치지 않게 stopPropagation
-function SpeakButton({ text }: { text: string }) {
+// 유형·특성 태그 + 시험 정보 태그 — 홈/오답노트 앞면 공용
+function CardTags({ card }: { card: RecentCard }) {
+  const tags = card.tags ?? []
+  const exams = card.exams ?? []
+  if (!tags.length && !exams.length) return null
   return (
-    <button
-      type="button"
-      aria-label="발음 듣기"
-      onClick={(e) => {
-        e.stopPropagation()
-        const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined
-        if (!synth || !text) return
-        synth.cancel()
-        const u = new SpeechSynthesisUtterance(text)
-        u.lang = 'en-US'
-        synth.speak(u)
-      }}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '6px 14px',
-        borderRadius: 999,
-        border: '1px solid var(--color-border-default)',
-        background: 'var(--color-bg-primary)',
-        color: 'var(--color-text-brand)',
-        fontSize: 12,
-        fontWeight: 500,
-        cursor: 'pointer',
-      }}
-    >
-      <IconSpeaker size={16} /> 발음
-    </button>
+    <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', justifyContent: 'center' }}>
+      {tags.map((t) => (
+        <span key={t.label} style={tagChip(t.tone)}>
+          {t.label}
+        </span>
+      ))}
+      {exams.map((e) => (
+        <span key={e} style={examChip}>
+          📅 {e}
+        </span>
+      ))}
+    </div>
   )
 }
+
+const tagChip = (tone: 'grey' | 'blue'): CSSProperties => ({
+  fontSize: 10,
+  fontWeight: 500,
+  padding: '2px 8px',
+  borderRadius: 6,
+  whiteSpace: 'nowrap',
+  background: tone === 'blue' ? 'var(--color-brand-weak)' : 'var(--color-bg-secondary)',
+  color: tone === 'blue' ? 'var(--color-text-brand)' : 'var(--color-text-secondary)',
+})
+
+const examChip: CSSProperties = {
+  fontSize: 10,
+  fontWeight: 500,
+  padding: '2px 8px',
+  borderRadius: 999,
+  whiteSpace: 'nowrap',
+  background: 'var(--color-brand-weak)',
+  color: 'var(--color-brand-primary)',
+}
+
+// 발음 재생 — 카드 플립과 겹치지 않게 stopPropagation
+function speak(text: string, lang: string) {
+  const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined
+  if (!synth || !text) return
+  synth.cancel()
+  const u = new SpeechSynthesisUtterance(text)
+  u.lang = lang
+  synth.speak(u)
+}
+
+// 미국/영국 발음 선택 재생 (카드 앞면)
+function AudioButtons({ text }: { text: string }) {
+  return (
+    <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+      <button type="button" onClick={(e) => { e.stopPropagation(); speak(text, 'en-US') }} style={audioBtn(true)}>
+        🇺🇸 미국 <IconSpeaker size={13} />
+      </button>
+      <button type="button" onClick={(e) => { e.stopPropagation(); speak(text, 'en-GB') }} style={audioBtn(false)}>
+        🇬🇧 영국 <IconSpeaker size={13} />
+      </button>
+    </div>
+  )
+}
+
+const audioBtn = (primary: boolean): CSSProperties => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 5,
+  padding: '6px 12px',
+  borderRadius: 999,
+  fontSize: 12,
+  fontWeight: 500,
+  cursor: 'pointer',
+  background: primary ? 'var(--color-brand-weak)' : 'var(--color-bg-primary)',
+  color: primary ? 'var(--color-text-brand)' : 'var(--color-text-secondary)',
+  border: primary ? '1px solid transparent' : '1px solid var(--color-border-default)',
+})

@@ -2,6 +2,9 @@
 export interface RecentCard {
   id: number
   type: 'WORD' | 'PROBLEM'
+  // 공통 — 유형·특성 태그 + 시험 정보 태그(등록한 시험명). 홈/오답노트 앞면 공용
+  tags?: { label: string; tone: 'grey' | 'blue' }[]
+  exams?: string[]
   // WORD
   word?: string
   pronunciation?: string

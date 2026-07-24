@@ -1,23 +1,29 @@
-import { useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { NavigationBar, Button } from '@/shared/ui'
 import { FlipCard } from '@/widgets/recent-cards'
 import { saveCards } from '@/entities/card'
 import type { RecentCard } from '@/entities/card'
+import { fetchExams } from '@/entities/exam'
 
 interface Props {
   isMath: boolean
   onBack: () => void
 }
 
-// 촬영·분석 결과 카드(데모) — 수학은 사고 단계 1~n + 정답이 뒷면에
-function buildCard(isMath: boolean): RecentCard {
-  const id = Date.now()
+// 촬영·분석 결과 카드(데모) — 유형·특성 태그 + 시험 태그. 수학은 사고 단계 1~n + 정답이 뒷면에
+function buildCard(isMath: boolean, examTitle: string, id: number): RecentCard {
   if (isMath) {
     return {
       id,
       type: 'PROBLEM',
+      tags: [
+        { label: '이차방정식', tone: 'grey' },
+        { label: '인수분해', tone: 'blue' },
+      ],
+      exams: [examTitle],
       problem: 'x² − 5x + 6 = 0 의 두 근을 구하시오.',
       answer: '2, 3',
       steps: [
@@ -31,6 +37,11 @@ function buildCard(isMath: boolean): RecentCard {
   return {
     id,
     type: 'WORD',
+    tags: [
+      { label: '형용사', tone: 'grey' },
+      { label: '다의어', tone: 'blue' },
+    ],
+    exams: [examTitle],
     word: 'sound',
     pronunciation: '[saʊnd]',
     emoji: '⚖️',
@@ -43,7 +54,11 @@ function buildCard(isMath: boolean): RecentCard {
 // 분석 완료 (130:905) — 생성된 카드(플립) + 오답노트 저장 + 토스식 축하
 export function AnalysisResult({ isMath, onBack }: Props) {
   const navigate = useNavigate()
-  const [card] = useState(() => buildCard(isMath))
+  // 등록한 시험(가장 가까운) 을 시험 태그로 — 미가동 시 데모 폴백
+  const exams = useQuery({ queryKey: ['exams'], queryFn: fetchExams, retry: 0 })
+  const examTitle = exams.data?.[0]?.title ?? '중간고사'
+  const idRef = useRef(Date.now())
+  const card = useMemo(() => buildCard(isMath, examTitle, idRef.current), [isMath, examTitle])
   const [celebrating, setCelebrating] = useState(false)
 
   const save = () => {

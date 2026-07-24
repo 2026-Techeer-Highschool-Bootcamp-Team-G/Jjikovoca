@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Tabs, Chip, Button, SearchBar, BottomSheet } from '@/shared/ui'
 import { CardRow } from '@/widgets/card-row'
 import type { CardRowView } from '@/widgets/card-row'
 import { StudySetupSheet } from '@/features/study-setup'
-import { fetchCards } from '@/entities/card'
-import type { Card, FeedSubject } from '@/entities/card'
+import { fetchCards, getSavedCards, subscribeSavedCards } from '@/entities/card'
+import type { Card, FeedSubject, RecentCard } from '@/entities/card'
 
 const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
   { key: 'ALL', label: '전체' },
@@ -62,6 +62,20 @@ const sampleRows: CardRowView[] = [
   },
 ]
 
+// 저장 카드(캡처) → 행 뷰. 홈 카드 앞면과 동일한 정보(제목·발음·유형/시험 태그). 뜻/정답은 숨김(리스트 탐색)
+function savedToRow(c: RecentCard): CardRowView {
+  const isWord = c.type === 'WORD'
+  return {
+    id: c.id,
+    title: isWord ? (c.word ?? '') : (c.problem ?? '문제'),
+    pronunciation: isWord ? c.pronunciation : undefined,
+    subtitle: '',
+    tags: c.tags,
+    exams: c.exams,
+    showSpeaker: isWord,
+  }
+}
+
 // 피드 Card → 행 뷰 매핑. pronunciation·품사 tags·유형 배지는 피드 미제공(후속 백엔드)
 function toRow(c: Card): CardRowView {
   const isWord = c.type === 'WORD'
@@ -82,7 +96,10 @@ export function WrongNotePage() {
   const [subject, setSubject] = useState<FeedSubject>('ALL')
   // 실 피드 조회 — 백엔드 실패/미가동 시 목업 폴백(데모 유지)
   const { data } = useQuery({ queryKey: ['cards', subject], queryFn: () => fetchCards(subject), retry: 0 })
-  const rows = data ? data.map(toRow) : sampleRows
+  // 캡처로 저장한 카드 — 오답노트 상단에 연동(홈 카드와 동일 정보)
+  const saved = useSyncExternalStore(subscribeSavedCards, getSavedCards, getSavedCards)
+  const feedRows = data ? data.map(toRow) : sampleRows
+  const rows = [...saved.map(savedToRow), ...feedRows]
   const [status, setStatus] = useState<Status>('ALL')
   const [setupOpen, setSetupOpen] = useState(false)
   // 스피커로 발음 재생 중인 단어 — 듣기 끝날 때까지 그 행을 강조 (오답노트 QA)
