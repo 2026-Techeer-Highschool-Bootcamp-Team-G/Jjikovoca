@@ -1,29 +1,41 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { IconChevronLeft, IconSearch } from '@/shared/ui'
 import { CardRow } from '@/widgets/card-row'
 import type { CardRowView } from '@/widgets/card-row'
+import { fetchCards } from '@/entities/card'
+import type { Card } from '@/entities/card'
 
-// 백엔드 연결 전 데모 (프로토타입 07 통합 검색) — 'plant' 결과
-const RESULTS: CardRowView[] = [
-  {
-    id: 1,
-    title: 'plant',
-    pronunciation: '[plænt]',
-    subtitle: '공장, 설비',
-    tags: [
-      { label: '명사', tone: 'grey' },
-      { label: '산업', tone: 'blue' },
-    ],
-    typeBadge: { label: '다의어', color: 'red' },
-    showSpeaker: true,
-  },
-]
+// 피드 Card → 행 뷰(검색 결과). 백엔드 q 파라미터 미제공 → 클라 부분일치 필터
+function toRow(c: Card): CardRowView {
+  const isWord = c.type === 'WORD'
+  return {
+    id: c.id,
+    title: isWord ? (c.word ?? '') : (c.latex ?? c.summary ?? '문제'),
+    subtitle: isWord ? (c.contextMeaning ?? '') : (c.summary ?? ''),
+    exams: (c.exams ?? []).map((e) => e.title),
+    showSpeaker: isWord,
+  }
+}
 
-/** 통합 검색 (07) */
+// 카드가 검색어를 포함하는지(제목·뜻·요약·개념)
+function matches(c: Card, q: string): boolean {
+  const hay = [c.word, c.contextMeaning, c.dictMeaning, c.latex, c.summary, c.concept]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+  return hay.includes(q)
+}
+
+/** 통합 검색 (07) — 백엔드 q 파라미터 미제공 → /api/cards 클라 필터 */
 export function SearchPage() {
   const navigate = useNavigate()
-  const [query, setQuery] = useState('plant')
+  const [query, setQuery] = useState('')
+
+  const { data } = useQuery({ queryKey: ['cards', 'ALL'], queryFn: () => fetchCards('ALL') })
+  const q = query.trim().toLowerCase()
+  const rows = q === '' ? [] : (data ?? []).filter((c) => matches(c, q)).map(toRow)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
@@ -61,9 +73,19 @@ export function SearchPage() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '16px var(--spacing-xl)' }}>
-        {RESULTS.map((row) => (
+        {rows.map((row) => (
           <CardRow key={row.id} row={row} onClick={() => navigate('/flashcard')} />
         ))}
+        {q === '' && (
+          <p style={{ margin: '32px 0', textAlign: 'center', fontSize: 13, color: 'var(--color-text-tertiary)' }}>
+            단어·문제·개념을 검색해보세요
+          </p>
+        )}
+        {q !== '' && rows.length === 0 && (
+          <p style={{ margin: '32px 0', textAlign: 'center', fontSize: 13, color: 'var(--color-text-tertiary)' }}>
+            "{query.trim()}" 검색 결과가 없어요
+          </p>
+        )}
       </div>
     </div>
   )
