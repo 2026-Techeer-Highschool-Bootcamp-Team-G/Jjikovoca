@@ -73,6 +73,9 @@ class Card {
     @Column
     private String emoji;
 
+    @Column(name = "mnemonic_image_path")   // Phase 6c: AI 연상 이미지 S3 키(온디맨드 생성 후 캐시). NULL=미생성
+    private String mnemonicImagePath;
+
     @Column
     private String latex;
 
@@ -230,6 +233,15 @@ class Card {
 
     String getEmoji() {
         return emoji;
+    }
+
+    String getMnemonicImagePath() {
+        return mnemonicImagePath;
+    }
+
+    /** AI 연상 이미지(Phase 6c) 저장 키를 붙인다 — 온디맨드 생성 후 1회 캐시. */
+    void assignMnemonicImage(String path) {
+        this.mnemonicImagePath = path;
     }
 
     String getLatex() {
