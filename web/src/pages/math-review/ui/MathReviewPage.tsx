@@ -17,47 +17,14 @@ import { recordStudy } from '@/features/study'
 import { GradeButtons } from '@/features/study-grade'
 import type { Grade } from '@/features/study-grade'
 
-// NUMERIC 정답 정규화 — 쉼표 분리·공백 무시·순서 무관 숫자 집합 비교 (폴백 로컬 판정)
-function normalize(input: string): string {
-  return input
-    .split(',')
-    .map((t) => t.trim())
-    .filter(Boolean)
-    .map(Number)
-    .filter((n) => !Number.isNaN(n))
-    .sort((a, b) => a - b)
-    .join(',')
-}
-
-// 백엔드 연결 전 데모 (프로토타입 12 수학 복습과 동일)
-const demo: MathProblem = {
-  title: 'x² − 5x + 6 = 0 의 두 근을 구하시오.',
-  tags: [
-    { label: '수학', tone: 'grey' },
-    { label: '이차방정식 · 인수분해', tone: 'blue' },
-  ],
-  wrongCount: 2,
-  diagnosis: { failedStep: 3, description: '3단계 이항에서 부호 실수가 있었어요. 이 단계 주의!' },
-  steps: [
-    { no: 1, title: '무엇을 구하는 문제인가요?', question: '무엇을 구하는 문제인가요?', content: 'x² − 5x + 6 = 0을 만족하는 x, 즉 이차방정식의 두 근을 구하는 문제예요.' },
-    { no: 2, title: '어떤 개념을 적용할까요?', question: '어떤 개념을 적용할까요?', content: '좌변을 (x−a)(x−b) 꼴로 바꾸는 인수분해 — 곱해서 6, 더해서 −5가 되는 두 수를 찾아요.' },
-    { no: 3, title: '이항할 때 부호는 어떻게 될까요?', question: '이항할 때 부호는 어떻게 될까요?', content: '이항 없이 그대로 인수분해하면 (x−2)(x−3) = 0. 지난번엔 여기서 부호가 뒤집혔어요.' },
-    { no: 4, title: '구한 근을 검산해 볼까요?', question: '구한 근을 검산해 볼까요?', content: 'x = 2, 3을 원식에 대입하면 좌변이 둘 다 0 — 근이 맞아요.' },
-  ],
-  answerValue: '2, 3',
-  explanation:
-    '곱해서 6, 더해서 −5가 되는 두 수는 −2와 −3. 따라서 (x−2)(x−3) = 0 → x = 2 또는 x = 3이에요. 이항할 땐 부호가 바뀐다는 것만 기억하면 완벽!',
-}
-
-/** 수학 사고과정 복습 (F-26) — 큐 → 단계 공개 → 판정 → 기록 */
+/** 수학 사고과정 복습 (F-26) — 큐 → 단계 공개 → 서버 판정 → 기록. 정답·단계 content 는 서버만 보유 */
 export function MathReviewPage() {
   const navigate = useNavigate()
 
-  // 실 큐 조회 — 미가동 시 데모 폴백
-  const queue = useQuery({ queryKey: ['math'], queryFn: () => fetchMathQueue(), retry: 0 })
+  // 실 큐 조회 — 단계 content·정답은 비노출(공개/판정 API 로만). 클라에 정답 미내장
+  const queue = useQuery({ queryKey: ['math'], queryFn: () => fetchMathQueue() })
   const card = queue.data?.[0] ?? null
-  const cardId = card?.cardId ?? -1
-  const total = queue.data?.length ?? 8
+  const total = queue.data?.length ?? 1
 
   const [phase, setPhase] = useState<MathPhase>('thinking')
   const [openSteps, setOpenSteps] = useState<Set<number>>(new Set())
@@ -67,28 +34,8 @@ export function MathReviewPage() {
   const [correct, setCorrect] = useState(false)
   const clickedRef = useRef<number[]>([]) // 회상(정답 입력) 전 연 단계 로그
 
-  // 표시용 문제 — 실 카드 or 데모. 실 카드의 단계 content 는 공개 API로 채운다(비노출 계약)
-  const steps: MathStep[] = card
-    ? (card.solutions[0]?.steps ?? []).map((s) => ({
-        no: s.no,
-        title: s.title,
-        question: s.question,
-        content: revealed[s.no] ?? '',
-      }))
-    : demo.steps
-  const view: MathProblem = card
-    ? {
-        title: card.latex,
-        tags: [{ label: '수학', tone: 'grey' }],
-        diagnosis: card.diagnosis,
-        steps,
-        answerValue: '',
-        explanation: '',
-      }
-    : demo
-
   const revealMut = useMutation({
-    mutationFn: (no: number) => revealStep(cardId, no),
+    mutationFn: (no: number) => revealStep(card!.cardId, no),
     onSuccess: (r) => setRevealed((m) => ({ ...m, [r.no]: r.content })),
   })
 
@@ -100,22 +47,13 @@ export function MathReviewPage() {
       } else {
         next.add(no)
         if (phase === 'thinking' && !clickedRef.current.includes(no)) clickedRef.current.push(no)
-        if (card && revealed[no] === undefined) revealMut.mutate(no) // 실 카드면 단계 content 공개
+        if (revealed[no] === undefined) revealMut.mutate(no) // 단계 content 는 공개 API 로만
       }
       return next
     })
 
   const judgeMut = useMutation({
-    mutationFn: (): Promise<MathJudge> => {
-      const a = answer.trim()
-      if (card) return judgeMath(cardId, a) // 서버 판정
-      const ok = normalize(a) === normalize(demo.answerValue) // 폴백 로컬 판정
-      return Promise.resolve({
-        correct: ok,
-        answerValue: demo.answerValue,
-        solutions: [{ index: 0, label: '', explanation: demo.explanation }],
-      })
-    },
+    mutationFn: (): Promise<MathJudge> => judgeMath(card!.cardId, answer.trim()),
     onSuccess: (r) => {
       setJudge(r)
       setCorrect(r.correct)
@@ -124,19 +62,47 @@ export function MathReviewPage() {
   })
 
   const handleGrade = (grade: Grade) => {
-    // MATH_REVIEW 기록(클릭로그) — 실 카드만. 백엔드 없으면 조용히 실패
-    if (cardId >= 0) {
-      recordStudy(cardId, {
+    if (card) {
+      recordStudy(card.cardId, {
         activity: 'MATH_REVIEW',
         result: grade,
-        detail: { stepsTotal: steps.length, clickedBeforeRecall: clickedRef.current, answerCorrect: correct },
+        detail: { stepsTotal: card.solutions[0]?.steps.length ?? 0, clickedBeforeRecall: clickedRef.current, answerCorrect: correct },
       }).catch(() => {})
     }
     navigate(-1)
   }
 
-  const answerValue = judge?.answerValue ?? demo.answerValue
-  const explanation = judge?.solutions[0]?.explanation ?? demo.explanation
+  // 풀 문제가 없으면(빈 큐) 데모 대신 빈 상태
+  if (!card) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
+        <NavigationBar title="수학" onBack={() => navigate(-1)} />
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 24px' }}>
+          <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--color-text-tertiary)' }}>
+            {queue.isLoading ? '문제를 불러오는 중…' : '복습할 수학 문제가 없어요 — 문제를 먼저 촬영해보세요'}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // 표시용 문제 — 단계 content 는 공개 API 응답(revealed)으로 채운다(비노출 계약)
+  const steps: MathStep[] = (card.solutions[0]?.steps ?? []).map((s) => ({
+    no: s.no,
+    title: s.title,
+    question: s.question,
+    content: revealed[s.no] ?? '',
+  }))
+  const view: MathProblem = {
+    title: card.latex,
+    tags: [{ label: '수학', tone: 'grey' }],
+    diagnosis: card.diagnosis,
+    steps,
+    answerValue: '',
+    explanation: '',
+  }
+  const answerValue = judge?.answerValue ?? ''
+  const explanation = judge?.solutions[0]?.explanation ?? ''
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>

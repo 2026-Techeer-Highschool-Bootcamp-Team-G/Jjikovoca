@@ -3,18 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { NavigationBar, Button, TextField } from '@/shared/ui'
 import { fetchClozeQueue, submitClozeAnswer } from '@/features/cloze'
-import type { ClozeItem, ClozeJudge } from '@/features/cloze'
+import type { ClozeJudge } from '@/features/cloze'
 
-// 백엔드 연결 전 데모 문항 (프로토타입 11 빈칸 퀴즈) + 폴백 로컬 판정용 정답
-const demoItem: ClozeItem = {
-  cardId: -1, // 음수 = 서버 없음(폴백 로컬 판정)
-  clozeText: 'Dr. Reyes, who had taken _ of the project, resolved the crisis early.',
-  meaning: 'take charge of — ~을 책임지다, 맡다',
-  hints: ['c', '6글자', '책임을 지다, ~을 관리하다'],
-}
-const DEMO_ANSWER = 'charge'
-
-/** 빈칸 퀴즈 (F-06) — 주관식 입력 + 서버 판정 */
+/** 빈칸 퀴즈 (F-06) — 주관식 입력 + 서버 판정(정답은 서버만 보유, 클라 미내장) */
 export function ClozePage() {
   const navigate = useNavigate()
   const [idx, setIdx] = useState(0)
@@ -22,27 +13,15 @@ export function ClozePage() {
   const [hintCount, setHintCount] = useState(1)
   const [result, setResult] = useState<ClozeJudge | null>(null)
 
-  // 실 큐 조회 — 미가동 시 데모 문항 폴백
-  const queue = useQuery({ queryKey: ['cloze'], queryFn: () => fetchClozeQueue(), retry: 0 })
-  const list = queue.data && queue.data.length > 0 ? queue.data : [demoItem]
+  // 실 큐 조회 — 정답 미포함(치팅 방지). 판정은 항상 서버
+  const queue = useQuery({ queryKey: ['cloze'], queryFn: () => fetchClozeQueue() })
+  const list = queue.data ?? []
   const total = list.length
-  const pos = Math.min(idx, total - 1)
+  const pos = Math.min(idx, Math.max(0, total - 1))
   const cur = list[pos]
 
   const submit = useMutation({
-    mutationFn: (): Promise<ClozeJudge> => {
-      const g = guess.trim()
-      // 서버 판정(실 카드) / 로컬 비교(데모 폴백)
-      if (cur.cardId >= 0) return submitClozeAnswer(cur.cardId, g)
-      return Promise.resolve({
-        correct: g.toLowerCase() === DEMO_ANSWER,
-        word: DEMO_ANSWER,
-        cardId: cur.cardId,
-        boxLevel: 0,
-        nextReviewAt: '',
-        graduated: false,
-      })
-    },
+    mutationFn: (): Promise<ClozeJudge> => submitClozeAnswer(cur.cardId, guess.trim()),
     onSuccess: (r) => setResult(r),
   })
 
@@ -57,7 +36,22 @@ export function ClozePage() {
     setResult(null)
   }
 
-  const [before, after] = cur.clozeText.split('_')
+  // 풀 문항이 없으면(빈 큐) 데모 대신 빈 상태
+  if (total === 0) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
+        <NavigationBar title="빈칸 퀴즈" onBack={() => navigate(-1)} />
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 24px' }}>
+          <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--color-text-tertiary)' }}>
+            {queue.isLoading ? '문항을 불러오는 중…' : '풀 빈칸 문항이 없어요 — 단어 카드를 먼저 만들어보세요'}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // 백엔드 clozeText 는 빈칸을 밑줄 여러 개(_____)로 표기 → 한 덩어리로 분리
+  const [before, after] = cur.clozeText.split(/_+/)
 
   return (
     <div
