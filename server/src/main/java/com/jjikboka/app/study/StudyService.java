@@ -4,6 +4,8 @@ import com.jjikboka.core.card.CardReviewService;
 import com.jjikboka.core.card.CardReviewState;
 import com.jjikboka.core.review.StudyLogService;
 import com.jjikboka.core.review.StudyRecordCommand;
+import com.jjikboka.core.stats.ExpDelta;
+import com.jjikboka.core.stats.ExpService;
 import com.jjikboka.shared.error.BusinessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,20 +28,24 @@ public class StudyService {
 
     private final CardReviewService cardReviewService;
     private final StudyLogService studyLogService;
+    private final ExpService expService;
 
-    StudyService(CardReviewService cardReviewService, StudyLogService studyLogService) {
+    StudyService(CardReviewService cardReviewService, StudyLogService studyLogService, ExpService expService) {
         this.cardReviewService = cardReviewService;
         this.studyLogService = studyLogService;
+        this.expService = expService;
     }
 
     @Transactional
-    public CardReviewState record(Long userId, Long cardId, StudyRecordRequest request) {
+    public StudyResultResponse record(Long userId, Long cardId, StudyRecordRequest request) {
         validate(request);
         CardReviewState state = cardReviewService.applyResult(userId, cardId, request.result());  // 404 · 403 + 전이
         studyLogService.record(new StudyRecordCommand(
                 userId, cardId, request.activity(), request.result(), request.reasonTag(),
                 request.durationMs(), request.detail() == null ? null : request.detail().toString()));
-        return state;
+        // 정답(KNOW)이면 exp 적립(source=CORRECT). 같은 트랜잭션이라 전이·기록·적립이 원자적으로 함께 커밋된다.
+        ExpDelta exp = expService.awardStudy(userId, "KNOW".equals(request.result()));
+        return StudyResultResponse.of(state, exp);
     }
 
     /** 허용값 밖 enum, RETRY+CONFUSED 조합은 400 INVALID_STUDY_RESULT. */

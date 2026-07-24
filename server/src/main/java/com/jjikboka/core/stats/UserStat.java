@@ -60,6 +60,14 @@ class UserStat {
         return level > previousLevel;
     }
 
+    /** 학습 정답 등 출석 외 적립 (API-11) — exp만 더하고 레벨을 재계산한다(streak·출석일 불변). 레벨업 여부 반환. */
+    boolean addExp(int earned) {
+        int previousLevel = level;
+        exp += earned;
+        level = exp / EXP_PER_LEVEL + 1;
+        return level > previousLevel;
+    }
+
     int getExp() {
         return exp;
     }
