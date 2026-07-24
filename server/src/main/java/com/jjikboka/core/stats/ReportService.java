@@ -4,16 +4,20 @@ import com.jjikboka.core.card.CardStatsService;
 import com.jjikboka.core.card.PremiumQueryService;
 import com.jjikboka.core.review.StudyStats;
 import com.jjikboka.core.review.StudyStatsService;
+import com.jjikboka.core.review.SubjectMinutes;
 import com.jjikboka.shared.error.BusinessException;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -56,7 +60,8 @@ public class ReportService {
         ReportBasic basic = new ReportBasic(
                 cardStatsService.newCards(userId, start, end),
                 stats.studyCount(),
-                new Accuracy(stats.accuracyWord(), stats.accuracyProblem()));
+                new Accuracy(stats.accuracyWord(), stats.accuracyProblem()),
+                subjectBreakdown(userId, start, end));
 
         List<GrassDay> grass = stats.grass().stream()
                 .map(point -> new GrassDay(point.date(), point.count()))
@@ -71,6 +76,19 @@ public class ReportService {
         }
 
         return new ReportView(target.format(MONTH), basic, full, grass);
+    }
+
+    /** 과목 도넛(API-17) — core.review 원장 집계에 전체 분 대비 비율(0~1, 소수 2자리)을 붙여 완성한다. 전체 0분이면 ratio 0. */
+    private List<SubjectStat> subjectBreakdown(Long userId, LocalDateTime start, LocalDateTime end) {
+        List<SubjectMinutes> minutes = studyStatsService.subjectBreakdown(userId, start, end);
+        int total = minutes.stream().mapToInt(SubjectMinutes::minutes).sum();
+        return minutes.stream()
+                .map(m -> new SubjectStat(m.subject(), m.minutes(), m.count(),
+                        total == 0 ? 0.0
+                                : BigDecimal.valueOf((double) m.minutes() / total)
+                                        .setScale(2, RoundingMode.HALF_UP).doubleValue()))
+                .sorted(Comparator.comparingInt(SubjectStat::minutes).reversed())   // 학습 시간 내림차순(명세 §6)
+                .toList();
     }
 
     private ReportFull buildFull(Long userId, LocalDateTime start, LocalDateTime end, StudyStats stats) {
