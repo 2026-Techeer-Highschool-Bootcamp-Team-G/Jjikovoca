@@ -3,6 +3,8 @@ package com.jjikboka.app.analysis;
 import com.jjikboka.analysis.AnalysisContent;
 import com.jjikboka.analysis.AnalyzeJobService;
 import com.jjikboka.analysis.GeminiClient;
+import com.jjikboka.analysis.GeminiImage;
+import com.jjikboka.app.image.ImageStorageService;
 import com.jjikboka.core.card.CardCreateCommand;
 import com.jjikboka.core.card.CardCreationService;
 import com.jjikboka.core.card.QuotaConsumeService;
@@ -14,6 +16,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 캡처 분석 워커 (API-6 처리, app 파사드). ArchUnit이 analysis↔core 직접참조를 막으므로 두 슬라이스를 여기서 조립한다.
@@ -31,17 +36,20 @@ class AnalysisWorker {
     private final AnalyzeJobService analyzeJobService;
     private final CardCreationService cardCreationService;
     private final QuotaConsumeService quotaConsumeService;
+    private final ImageStorageService imageStorageService;
     private final ApplicationEventPublisher eventPublisher;
 
     AnalysisWorker(GeminiClient geminiClient,
                    AnalyzeJobService analyzeJobService,
                    CardCreationService cardCreationService,
                    QuotaConsumeService quotaConsumeService,
+                   ImageStorageService imageStorageService,
                    ApplicationEventPublisher eventPublisher) {
         this.geminiClient = geminiClient;
         this.analyzeJobService = analyzeJobService;
         this.cardCreationService = cardCreationService;
         this.quotaConsumeService = quotaConsumeService;
+        this.imageStorageService = imageStorageService;
         this.eventPublisher = eventPublisher;
     }
 
@@ -52,7 +60,8 @@ class AnalysisWorker {
         try {
             analyzeJobService.markRunning(jobId);
             emitStages(jobId, event.type());
-            AnalysisContent content = geminiClient.generate(event.type());
+            List<GeminiImage> images = loadImages(event);
+            AnalysisContent content = geminiClient.generate(event.type(), images);
             cardCreationService.create(toCommand(event, content));
             analyzeJobService.markDone(jobId);
             eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeCompleted(jobId, content.model()));
@@ -77,10 +86,32 @@ class AnalysisWorker {
         }
     }
 
-    /** analysis 산출을 core.card 생성 커맨드로 옮긴다. 모의 단계라 imagePath는 null. */
+    /**
+     * 접수 때 저장한 크롭·지문을 로드해 비전 입력으로 만든다(크롭 먼저, 지문 뒤). 읽기 실패한 참조는 건너뛴다 —
+     * 이미지 없이도(모의) 흐름은 이어진다. mime은 파일명 확장자로 되돌린다.
+     */
+    private List<GeminiImage> loadImages(AnalyzeEvents.AnalyzeRequested event) {
+        List<String> refs = new ArrayList<>();
+        if (event.cropImageRefs() != null) {
+            refs.addAll(event.cropImageRefs());
+        }
+        if (event.fullImageRef() != null) {
+            refs.add(event.fullImageRef());
+        }
+        List<GeminiImage> images = new ArrayList<>();
+        for (String ref : refs) {
+            imageStorageService.readBytes(ref)
+                    .ifPresent(bytes -> images.add(new GeminiImage(ImageStorageService.mimeOf(ref), bytes)));
+        }
+        return images;
+    }
+
+    /** analysis 산출을 core.card 생성 커맨드로 옮긴다. image_path는 대표 크롭(첫 참조) — 보관함·서빙이 이를 쓴다. */
     private CardCreateCommand toCommand(AnalyzeEvents.AnalyzeRequested event, AnalysisContent content) {
+        String imagePath = (event.cropImageRefs() == null || event.cropImageRefs().isEmpty())
+                ? null : event.cropImageRefs().get(0);
         return new CardCreateCommand(
-                event.userId(), event.jobId(), event.type(), content.subject(), null,
+                event.userId(), event.jobId(), event.type(), content.subject(), imagePath,
                 content.word(), content.contextMeaning(), content.dictMeaning(), content.example(),
                 content.summary(), content.latex(), content.concept(),
                 content.hint1(), content.hint2(), content.hint3(), content.answerFormat(),
