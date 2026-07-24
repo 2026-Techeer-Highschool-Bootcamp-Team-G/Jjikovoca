@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { NavigationBar } from '@/shared/ui'
 import { FlashcardView } from '@/features/flashcard'
@@ -8,31 +8,6 @@ import { GradeButtons } from '@/features/study-grade'
 import type { Grade } from '@/features/study-grade'
 import { fetchFlashcards, recordStudy } from '@/features/study'
 import type { FlashcardQueueCard } from '@/features/study'
-
-// 백엔드 연결 전 데모 (프로토타입 10 플래시카드와 동일)
-const sample: FlashcardData = {
-  word: 'sound',
-  pronunciation: '[saʊnd]',
-  conceptEmoji: '⚖️',
-  pos: '형용사',
-  meaning: '타당한, 믿을 만한',
-  dictNote: '사전 뜻: 소리; 건전한; 타당한 — 이 지문에서는 ③',
-  frontTags: [
-    { label: '형용사', tone: 'grey' },
-    { label: '📚 학업', tone: 'blue' },
-    { label: '다의어', tone: 'blue' },
-  ],
-  backTags: [
-    { label: '📚 학업', tone: 'blue' },
-    { label: '다의어', tone: 'red' },
-  ],
-  example: {
-    pre: 'Her argument was ',
-    highlight: 'sound',
-    post: ' and convincing.',
-    translation: '그녀의 주장은 타당하고 설득력 있었다.',
-  },
-}
 
 // 큐 카드(얇은 응답) → 카드 뷰 매핑. pronunciation·품사·tags 등은 큐 미제공(후속)
 function toFlashcard(c: FlashcardQueueCard): FlashcardData {
@@ -59,31 +34,48 @@ function toFlashcard(c: FlashcardQueueCard): FlashcardData {
 /** 플래시카드 (F-05) — 10 플래시카드 */
 export function FlashcardPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [flipped, setFlipped] = useState(false)
   const [idx, setIdx] = useState(0)
 
-  // 실 큐 조회 — 미가동 시 데모 단일 카드 폴백
-  const queue = useQuery({ queryKey: ['flashcards'], queryFn: () => fetchFlashcards({ mode: 'TODAY' }), retry: 0 })
-  const list =
-    queue.data && queue.data.cards.length > 0
-      ? queue.data.cards.map((c) => ({ id: c.id as number | null, data: toFlashcard(c) }))
-      : [{ id: null as number | null, data: sample }]
+  // 직접선택(study-pick)에서 넘어온 cardIds 가 있으면 PICK 모드로 큐 구성
+  const cardIds = (location.state as { cardIds?: number[] } | null)?.cardIds
+  const mode = cardIds && cardIds.length > 0 ? 'PICK' : 'TODAY'
+  const queue = useQuery({
+    queryKey: ['flashcards', mode, cardIds ?? []],
+    queryFn: () => fetchFlashcards({ mode, cardIds }),
+  })
+  const list = (queue.data?.cards ?? []).map((c) => ({ id: c.id as number, data: toFlashcard(c) }))
   const total = list.length
-  const pos = Math.min(idx, total - 1)
+  const pos = Math.min(idx, Math.max(0, total - 1))
   const cur = list[pos]
 
   const record = useMutation({
-    mutationFn: (grade: Grade) => recordStudy(cur.id as number, { activity: 'FLASHCARD', result: grade }),
+    mutationFn: (grade: Grade) => recordStudy(cur.id, { activity: 'FLASHCARD', result: grade }),
   })
 
   const handleGrade = (grade: Grade) => {
-    if (cur.id != null) record.mutate(grade) // 실 학습 기록(백엔드 없으면 조용히 실패)
+    if (cur?.id != null) record.mutate(grade) // 실 학습 기록
     if (pos + 1 >= total) {
       navigate('/card-done')
       return
     }
     setIdx(pos + 1)
     setFlipped(false)
+  }
+
+  // 복습할 카드가 없으면(빈 큐) 데모 대신 빈 상태
+  if (total === 0) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
+        <NavigationBar title="플래시카드" onBack={() => navigate(-1)} />
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 24px' }}>
+          <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--color-text-tertiary)' }}>
+            {queue.isLoading ? '카드를 불러오는 중…' : '복습할 카드가 없어요 — 시험지를 촬영해 카드를 만들어보세요'}
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (

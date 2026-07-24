@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { Tabs, Chip, Button, SearchBar } from '@/shared/ui'
 import { CardRow } from '@/widgets/card-row'
 import type { CardRowView } from '@/widgets/card-row'
-import type { FeedSubject } from '@/entities/card'
+import { fetchCards } from '@/entities/card'
+import type { Card, FeedSubject } from '@/entities/card'
 
 const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
   { key: 'ALL', label: '전체' },
@@ -13,47 +15,35 @@ const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
 
 type Status = 'ALL' | 'GRADUATED' | 'WAITING' | 'WEAK'
 const STATUS_CHIPS: { key: Status; label: string }[] = [
-  { key: 'ALL', label: '전체 128' },
-  { key: 'GRADUATED', label: '졸업완료 13' },
-  { key: 'WAITING', label: '복습대기 15' },
+  { key: 'ALL', label: '전체' },
+  { key: 'GRADUATED', label: '졸업완료' },
+  { key: 'WAITING', label: '복습대기' },
   { key: 'WEAK', label: '약점유형' },
 ]
 
-const ROWS: CardRowView[] = [
-  {
-    id: 1,
-    title: 'sound',
-    pronunciation: '[saʊnd]',
-    subtitle: '타당한, 믿을 만한 · n. 소리',
-    tags: [{ label: '형용사', tone: 'grey' }, { label: '학업', tone: 'blue' }],
-    typeBadge: { label: '다의어', color: 'red' },
-    exams: ['중간고사'],
-    showSpeaker: true,
-  },
-  {
-    id: 2,
-    title: 'take charge of',
-    subtitle: '~을 책임지다, 맡다',
-    tags: [{ label: '동사구', tone: 'grey' }, { label: '회사', tone: 'blue' }],
-    typeBadge: { label: '숙어', color: 'blue' },
-    exams: ['중간고사'],
-    showSpeaker: true,
-  },
-  {
-    id: 3,
-    title: 'x² − 5x + 6 = 0 의 두 근',
-    subtitle: '이차방정식 · 인수분해 · 사고 단계 4개',
-    tags: [{ label: '수학', tone: 'grey' }, { label: '문제', tone: 'blue' }],
-    untagged: true,
-  },
-]
+// 피드 Card → 행 뷰(제목·뜻/요약·시험). pronunciation·품사는 피드 미제공
+function toRow(c: Card): CardRowView {
+  const isWord = c.type === 'WORD'
+  const exams = c.exams ?? []
+  return {
+    id: c.id,
+    title: isWord ? (c.word ?? '') : (c.latex ?? c.summary ?? '문제'),
+    subtitle: isWord ? (c.contextMeaning ?? '') : (c.summary ?? ''),
+    exams: exams.map((e) => e.title),
+    showSpeaker: isWord,
+  }
+}
 
 /** 직접 선택 모드 (09-2, F-28) — 카드를 체크로 골라 학습 세트 구성 */
 export function StudyPickPage() {
   const navigate = useNavigate()
   const [subject, setSubject] = useState<FeedSubject>('ALL')
   const [status, setStatus] = useState<Status>('ALL')
-  const [picked, setPicked] = useState<Set<number>>(new Set([1, 2]))
+  const [picked, setPicked] = useState<Set<number>>(new Set())
+
+  // 실 카드 목록 — 여기서 고른 cardIds 로 PICK 학습 큐를 만든다
+  const { data, isLoading } = useQuery({ queryKey: ['cards', subject], queryFn: () => fetchCards(subject) })
+  const rows = (data ?? []).map(toRow)
 
   const toggle = (id: number) =>
     setPicked((prev) => {
@@ -64,6 +54,7 @@ export function StudyPickPage() {
     })
 
   const count = picked.size
+  const start = () => navigate('/flashcard', { state: { cardIds: [...picked] } })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
@@ -96,7 +87,7 @@ export function StudyPickPage() {
         >
           시험 지정
         </Button>
-        <Button block size="lg" disabled={count === 0} style={{ opacity: count === 0 ? 0.4 : 1 }} onClick={() => navigate('/flashcard')}>
+        <Button block size="lg" disabled={count === 0} style={{ opacity: count === 0 ? 0.4 : 1 }} onClick={start}>
           선택({count}) 학습 시작
         </Button>
       </div>
@@ -117,9 +108,14 @@ export function StudyPickPage() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 var(--spacing-xl) 24px' }}>
-        {ROWS.map((row) => (
+        {rows.map((row) => (
           <CardRow key={row.id} row={row} selectable selected={picked.has(row.id)} onClick={() => toggle(row.id)} />
         ))}
+        {rows.length === 0 && (
+          <p style={{ margin: '32px 0', textAlign: 'center', fontSize: 13, color: 'var(--color-text-tertiary)' }}>
+            {isLoading ? '불러오는 중…' : '선택할 카드가 없어요 — 시험지를 촬영해보세요'}
+          </p>
+        )}
       </div>
     </div>
   )

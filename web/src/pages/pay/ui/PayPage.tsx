@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { NavigationBar, Button } from '@/shared/ui'
 import { activatePremium } from '@/entities/user'
 
@@ -9,13 +9,16 @@ type Method = 'TOSS' | 'CARD'
 /** 결제 (18) — 모의 결제(v1.3). 실 PG 미연동 */
 export function PayPage() {
   const navigate = useNavigate()
+  const qc = useQueryClient()
   const [method, setMethod] = useState<Method>('TOSS')
 
-  // 모의 결제 활성화 — 성공·실패 모두 완료 화면으로(폴백)
+  // 모의 결제 활성화 — 성공 시 프리미엄 상태(me) 갱신 후 완료. 실패는 성공으로 가리지 않음
   const pay = useMutation({
     mutationFn: activatePremium,
-    onSuccess: () => navigate('/pay-done'),
-    onError: () => navigate('/pay-done'),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['me'] })
+      navigate('/pay-done')
+    },
   })
 
   return (
@@ -74,6 +77,11 @@ export function PayPage() {
       </div>
 
       <div style={{ background: 'var(--color-bg-primary)', padding: '12px var(--spacing-xl) 32px' }}>
+        {pay.isError && (
+          <p style={{ margin: '0 0 10px', textAlign: 'center', fontSize: 12, color: 'var(--color-error-primary, #e5484d)' }}>
+            {pay.error instanceof Error ? pay.error.message : '결제에 실패했어요. 다시 시도해 주세요.'}
+          </p>
+        )}
         <Button block size="lg" onClick={() => pay.mutate()} disabled={pay.isPending}>
           {pay.isPending ? '결제 중…' : '₩4,900 결제하기'}
         </Button>
