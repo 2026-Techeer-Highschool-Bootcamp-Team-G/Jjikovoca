@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { NavigationBar } from '@/shared/ui'
+import { mediaUrl } from '@/shared/api'
 import { fetchArchive } from '@/entities/card'
 import type { ArchiveItem } from '@/entities/card'
 
@@ -70,7 +71,7 @@ function ArchiveThumb({ item }: { item: ArchiveItem }) {
       }}
     >
       <img
-        src={item.imageUrl}
+        src={mediaUrl(item.imageUrl)}
         alt="캡처 원문"
         loading="lazy"
         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
