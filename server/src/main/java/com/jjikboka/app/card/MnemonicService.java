@@ -4,6 +4,8 @@ import com.jjikboka.analysis.GeminiClient;
 import com.jjikboka.app.image.ImageStorageService;
 import com.jjikboka.core.card.CardMnemonicService;
 import com.jjikboka.core.card.MnemonicTarget;
+import com.jjikboka.shared.error.BusinessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,7 +33,14 @@ public class MnemonicService {
         if (target.existingPath() != null) {
             return target.existingPath();                                        // 캐시 히트 — 재생성 안 함(비용 절감)
         }
-        String dataUrl = geminiClient.generateMnemonicImage(target.word(), target.contextMeaning());
+        String dataUrl;
+        try {
+            dataUrl = geminiClient.generateMnemonicImage(target.word(), target.contextMeaning());
+        } catch (RuntimeException e) {
+            // 이미지 모델 실패(쿼터·타임아웃 등)는 클라에 깔끔한 503으로 — 그대로 새면 빈 본문 403이 된다.
+            throw new BusinessException(HttpStatus.SERVICE_UNAVAILABLE, "MNEMONIC_GENERATION_FAILED",
+                    "연상 이미지 생성에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+        }
         String key = imageStorageService.save(dataUrl);
         cardMnemonicService.savePath(userId, cardId, key);
         return key;
