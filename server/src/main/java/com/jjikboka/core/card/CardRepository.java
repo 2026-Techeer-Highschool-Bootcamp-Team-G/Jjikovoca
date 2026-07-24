@@ -22,6 +22,9 @@ interface CardRepository extends JpaRepository<Card, Long> {
     /** 상세 조회 — 삭제된 카드는 없는 것으로 본다(404). 소유자 검증은 조회 후 서비스에서(403). */
     Optional<Card> findByIdAndDeletedAtIsNull(Long id);
 
+    /** 플래시카드 PICK(API-12, F-28) — 직접 고른 카드(소유·soft-delete 제외). 상태 교차 혼합이라 due·졸업 무관. */
+    List<Card> findByUserIdAndIdInAndDeletedAtIsNullOrderByCreatedAtDesc(Long userId, List<Long> ids);
+
     /** 폴링(API-39) — 특정 분석 작업이 만든 카드들. soft-delete 제외·최신순. */
     List<Card> findByUserIdAndAnalyzeJobIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long userId, Long analyzeJobId);
 
