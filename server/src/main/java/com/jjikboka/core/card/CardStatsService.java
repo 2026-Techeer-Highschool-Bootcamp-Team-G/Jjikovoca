@@ -38,12 +38,11 @@ public class CardStatsService {
         return cardRepository.countReviewDue(userId, now);
     }
 
-    /** wrong_count 상위 카드의 concept를 중복 제거해 상위 N개. */
+    /** 약한 개념(API-17 full) — concept·subject 그룹의 wrong_count 합 상위 N개(내림차순). GROUP BY가 중복을 이미 제거. */
     @Transactional(readOnly = true)
-    public List<String> weakConcepts(Long userId) {
-        return cardRepository.findWeakConcepts(userId, PageRequest.of(0, 30)).stream()
-                .distinct()
-                .limit(WEAK_CONCEPT_LIMIT)
+    public List<WeakConcept> weakConcepts(Long userId) {
+        return cardRepository.findWeakConceptStats(userId, PageRequest.of(0, WEAK_CONCEPT_LIMIT)).stream()
+                .map(row -> new WeakConcept((String) row[0], (String) row[1], ((Number) row[2]).longValue()))
                 .toList();
     }
 }
