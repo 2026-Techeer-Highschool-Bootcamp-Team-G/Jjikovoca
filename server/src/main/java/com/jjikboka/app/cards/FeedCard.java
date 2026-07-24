@@ -21,12 +21,17 @@ public record FeedCard(
         int boxLevel,
         boolean graduated,
         LocalDateTime createdAt,
+        String pronunciation,
+        String pos,
+        List<String> tags,
+        String emoji,
         List<ExamTag> exams
 ) {
 
     static FeedCard of(CardSummary card, List<ExamTag> exams) {
         return new FeedCard(card.id(), card.type(), card.subject(), card.word(), card.contextMeaning(),
                 card.concept(), card.summary(), card.boxLevel(), card.graduated(), card.createdAt(),
+                card.pronunciation(), card.pos(), card.tags(), card.emoji(),
                 exams == null ? List.of() : exams);
     }
 }
