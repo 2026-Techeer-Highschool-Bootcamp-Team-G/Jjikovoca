@@ -56,4 +56,11 @@ interface StudyLogRepository extends JpaRepository<StudyLog, Long> {
     List<Object[]> subjectBreakdown(@Param("userId") Long userId,
                                     @Param("start") LocalDateTime start,
                                     @Param("end") LocalDateTime end);
+
+    /** 학습 리듬(API-17 rhythm) — 기간 내 학습 로그를 [createdAt, duration_ms] 시간순으로. 세션(30분 간격 묶음) 계산·분 합산은 서비스에서. */
+    @Query("SELECT s.createdAt, COALESCE(s.durationMs, 0) FROM StudyLog s WHERE s.userId = :userId "
+            + "AND s.createdAt >= :start AND s.createdAt < :end ORDER BY s.createdAt")
+    List<Object[]> sessionLogs(@Param("userId") Long userId,
+                               @Param("start") LocalDateTime start,
+                               @Param("end") LocalDateTime end);
 }
