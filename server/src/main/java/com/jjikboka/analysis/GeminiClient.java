@@ -20,4 +20,10 @@ public interface GeminiClient {
      * {@code {label, steps:[{no,title,question,content}], explanation}} 형태만 반환한다.
      */
     String generateSolutionJson(String latex);
+
+    /**
+     * 단어의 뜻을 기억할 AI 연상 이미지를 생성해 data URL({@code data:{mime};base64,...})로 돌려준다(API-6c, 온디맨드).
+     * 실 구현은 이미지 모델을 호출하고, 모의 구현은 고정 이미지를 돌려준다. meaning은 문맥 뜻(없으면 null).
+     */
+    String generateMnemonicImage(String word, String meaning);
 }
