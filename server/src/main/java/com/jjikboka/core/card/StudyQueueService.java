@@ -22,9 +22,21 @@ public class StudyQueueService {
         this.cardRepository = cardRepository;
     }
 
-    /** 플래시카드 큐(API-12) — subject가 ALL/미지정이면 전체. limit만큼 몰라요 빈도순→오래된 순. */
+    private static final String MODE_PICK = "PICK";
+
+    /**
+     * 플래시카드 큐(API-12). TODAY(기본)는 미졸업 WORD의 due를 몰라요 빈도순→오래된 순으로, PICK은 직접 고른 카드(cardIds)를
+     * 상태 무관하게(F-28) 돌려준다. subject가 ALL/미지정이면 전과목. PICK인데 cardIds가 없으면 빈 결과.
+     */
     @Transactional(readOnly = true)
-    public List<FlashcardItem> getFlashcards(Long userId, String subject, int limit) {
+    public List<FlashcardItem> getFlashcards(Long userId, String subject, int limit, String mode, List<Long> cardIds) {
+        if (MODE_PICK.equals(mode)) {
+            if (cardIds == null || cardIds.isEmpty()) {
+                return List.of();
+            }
+            return cardRepository.findByUserIdAndIdInAndDeletedAtIsNullOrderByCreatedAtDesc(userId, cardIds)
+                    .stream().limit(limit).map(FlashcardItem::from).toList();
+        }
         String subjectFilter = (subject == null || SUBJECT_ALL.equals(subject)) ? null : subject;
         return cardRepository.findFlashcardQueue(userId, subjectFilter, LocalDateTime.now(), PageRequest.of(0, limit))
                 .stream().map(FlashcardItem::from).toList();
