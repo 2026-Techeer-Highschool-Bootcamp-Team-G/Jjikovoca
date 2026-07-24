@@ -64,9 +64,17 @@ class Subscription {
         return subscription;
     }
 
-    /** premium 판정과 동일 기준: ACTIVE && 미만료. 멱등 활성화에서 재사용한다. */
-    boolean isActiveAt(LocalDateTime now) {
-        return "ACTIVE".equals(status) && expiresAt.isAfter(now);
+    /**
+     * premium 부여 기준: <b>미만료</b>. 해지(CANCELLED)해도 결제한 기간(expires_at)까지는 premium을 유지하므로(명세 §8)
+     * status가 아니라 만료로만 판정한다. 멱등 활성화 검사에서도 재사용한다.
+     */
+    boolean grantsPremiumAt(LocalDateTime now) {
+        return expiresAt.isAfter(now);
+    }
+
+    /** 해지 (DELETE /api/premium) — 재구독 의사 철회 표시(status=CANCELLED). 결제한 기간(만료)까지는 premium 유지(명세 §8). */
+    void cancel() {
+        this.status = "CANCELLED";
     }
 
     String getStatus() {
