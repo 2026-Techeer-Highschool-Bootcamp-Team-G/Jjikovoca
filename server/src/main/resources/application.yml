@@ -48,6 +48,19 @@ app:
   export:
     dir: ${APP_EXPORT_DIR:./data/exports}
 
+# Gemini 연동 (API-6·16·41). 기본은 모의(mock=true) — 키·원가 없이 흐름이 돌아간다.
+# 실 연동은 GEMINI_MOCK=false + GEMINI_API_KEY 주입 시 RealGeminiClient가 뜬다(계약 불변, 토글만 전환).
+# 키는 이미지에 굽지 않고 env로만(15 §7). models는 폴백 체인 — 앞에서부터 시도하고 실패 시 다음.
+gemini:
+  mock: ${GEMINI_MOCK:true}
+  api-key: ${GEMINI_API_KEY:}
+  base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta}
+  models:
+    - gemini-2.5-flash
+    - gemini-2.5-flash-lite
+    - gemini-2.0-flash
+  timeout-ms: 30000
+
 # 로그 JSON 구조화는 배포 프로파일에서 (07 규약) — traceId 주입 자리
 logging:
   level:
