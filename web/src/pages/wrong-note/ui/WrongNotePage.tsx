@@ -23,45 +23,6 @@ const STATUS_CHIPS: { key: Status; label: string }[] = [
   { key: 'UNTAGGED', label: '시험 미지정' },
 ]
 
-// 백엔드 연결 전 데모 데이터 (프로토타입 06 오답노트와 동일)
-const sampleRows: CardRowView[] = [
-  {
-    id: 1,
-    title: 'sound',
-    pronunciation: '[saʊnd]',
-    subtitle: '타당한, 믿을 만한 · n. 소리',
-    tags: [
-      { label: '형용사', tone: 'grey' },
-      { label: '학업', tone: 'blue' },
-    ],
-    typeBadge: { label: '다의어', color: 'red' },
-    exams: ['중간고사'],
-    showSpeaker: true,
-  },
-  {
-    id: 2,
-    title: 'take charge of',
-    subtitle: '~을 책임지다, 맡다',
-    tags: [
-      { label: '동사구', tone: 'grey' },
-      { label: '회사', tone: 'blue' },
-    ],
-    typeBadge: { label: '숙어', color: 'blue' },
-    exams: ['중간고사'],
-    showSpeaker: true,
-  },
-  {
-    id: 3,
-    title: 'x² − 5x + 6 = 0 의 두 근',
-    subtitle: '이차방정식 · 인수분해 · 사고 단계 4개',
-    tags: [
-      { label: '수학', tone: 'grey' },
-      { label: '문제', tone: 'blue' },
-    ],
-    untagged: true,
-  },
-]
-
 // 저장 카드(캡처) → 행 뷰. 홈 카드 앞면과 동일한 정보(제목·발음·유형/시험 태그). 뜻/정답은 숨김(리스트 탐색)
 function savedToRow(c: RecentCard): CardRowView {
   const isWord = c.type === 'WORD'
@@ -94,11 +55,11 @@ function toRow(c: Card): CardRowView {
 export function WrongNotePage() {
   const navigate = useNavigate()
   const [subject, setSubject] = useState<FeedSubject>('ALL')
-  // 실 피드 조회 — 백엔드 실패/미가동 시 목업 폴백(데모 유지)
-  const { data } = useQuery({ queryKey: ['cards', subject], queryFn: () => fetchCards(subject), retry: 0 })
+  // 실 피드 조회 — 실패/빈 응답을 데모로 가리지 않고 실제 카드만 표시
+  const { data, isLoading, isError } = useQuery({ queryKey: ['cards', subject], queryFn: () => fetchCards(subject) })
   // 캡처로 저장한 카드 — 오답노트 상단에 연동(홈 카드와 동일 정보)
   const saved = useSyncExternalStore(subscribeSavedCards, getSavedCards, getSavedCards)
-  const feedRows = data ? data.map(toRow) : sampleRows
+  const feedRows = (data ?? []).map(toRow)
   const rows = [...saved.map(savedToRow), ...feedRows]
   const [status, setStatus] = useState<Status>('ALL')
   const [setupOpen, setSetupOpen] = useState(false)
@@ -230,6 +191,11 @@ export function WrongNotePage() {
             }
           />
         ))}
+        {rows.length === 0 && (
+          <p style={{ margin: '40px 0', textAlign: 'center', fontSize: 13, color: 'var(--color-text-tertiary)' }}>
+            {isLoading ? '불러오는 중…' : isError ? '카드를 불러오지 못했어요' : '아직 카드가 없어요 — 시험지를 촬영해 오답 카드를 만들어보세요'}
+          </p>
+        )}
       </div>
 
       <div style={{ padding: '12px var(--spacing-xl) 24px' }}>

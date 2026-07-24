@@ -8,19 +8,19 @@ import { fetchExams } from '@/entities/exam'
 /** 마이페이지 (14 마이) — 프로필·프리미엄·학습·계정 */
 export function MyPage() {
   const navigate = useNavigate()
-  // 실 API — 미가동 시 목업 폴백(데모 유지)
-  const me = useQuery({ queryKey: ['me'], queryFn: fetchMe, retry: 0 })
-  const exp = useQuery({ queryKey: ['exp-summary'], queryFn: fetchExpSummary, retry: 0 })
-  const exams = useQuery({ queryKey: ['exams'], queryFn: fetchExams, retry: 0 })
+  // 실 API — 실패/빈 응답을 가짜값으로 가리지 않고 실값 또는 빈/0 상태로 표시
+  const me = useQuery({ queryKey: ['me'], queryFn: fetchMe })
+  const exp = useQuery({ queryKey: ['exp-summary'], queryFn: fetchExpSummary })
+  const exams = useQuery({ queryKey: ['exams'], queryFn: fetchExams })
 
-  const nickname = me.data?.nickname ?? '테스터'
-  const email = me.data?.email ?? 'test@edulens.kr'
-  const premium = me.data?.premium ?? true
-  const level = exp.data?.level ?? 5
-  const expVal = exp.data?.exp ?? 320
-  const nextExp = exp.data?.nextLevelExp ?? 400
+  const nickname = me.data?.nickname ?? ''
+  const email = me.data?.email ?? ''
+  const premium = me.data?.premium ?? false
+  const level = exp.data?.level ?? 0
+  const expVal = exp.data?.exp ?? 0
+  const nextExp = exp.data?.nextLevelExp ?? 0
   const nearest = exams.data?.[0]
-  const examLabel = nearest ? `${nearest.title} D-${nearest.dday}` : '중간고사 D-7'
+  const examLabel = nearest ? `${nearest.title} D-${nearest.dday}` : '시험 미등록'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -43,12 +43,7 @@ export function MyPage() {
         divider
         onClick={() => navigate('/exam')}
       />
-      <ListRow
-        title="📁 원문 보관함"
-        value="오늘 3장"
-        valueColor="var(--color-brand-primary)"
-        onClick={() => navigate('/archive')}
-      />
+      <ListRow title="📁 원문 보관함" showArrow onClick={() => navigate('/archive')} />
 
       <SectionLabel>계정</SectionLabel>
       <ListRow title="📢 공지사항" showArrow />

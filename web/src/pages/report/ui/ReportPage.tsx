@@ -130,12 +130,18 @@ export function ReportPage() {
   const m = MONTHS[monthIdx]
   const grassHours = m.grass.flat().reduce((a, l) => a + GRASS_HOURS[l], 0) // 이번 달 총 학습 시간(h)
 
-  // 실 API — 명세 제공 필드만 매핑, 미가동 시 목업 폴백(데모 유지)
-  const report = useQuery({ queryKey: ['report-summary'], queryFn: () => fetchReportSummary(), retry: 0 })
+  // 실 API — 백엔드는 period=YYYY-MM 요구(WEEK/MONTH 는 400). 이번 달을 전달
+  const period = (() => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  })()
+  // basic(새 카드·정답률)만 백엔드 제공 → 실값. null(데이터 없음)은 가짜 대신 '—'
+  // (도넛·잔디·약점·주간막대는 백엔드 필드 없음 → 클라 데모, Phase 5에서 문서화)
+  const report = useQuery({ queryKey: ['report-summary', period], queryFn: () => fetchReportSummary(period) })
   const basic = report.data?.basic
-  const newCards = basic ? `${basic.newCards}장` : '24장'
-  const accuracyWord = basic?.accuracy.word != null ? `${Math.round(basic.accuracy.word * 100)}%` : '78%'
-  const accuracyMath = basic?.accuracy.problem != null ? `${Math.round(basic.accuracy.problem * 100)}%` : '65%'
+  const newCards = `${basic?.newCards ?? 0}장`
+  const accuracyWord = basic?.accuracy.word != null ? `${Math.round(basic.accuracy.word * 100)}%` : '—'
+  const accuracyMath = basic?.accuracy.problem != null ? `${Math.round(basic.accuracy.problem * 100)}%` : '—'
 
   // 진입 시 카드/막대/잔디가 생성되듯 순차 등장
   const [mounted, setMounted] = useState(false)
