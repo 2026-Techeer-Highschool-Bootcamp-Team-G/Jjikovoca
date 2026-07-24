@@ -60,6 +60,13 @@ class MockGeminiClient implements GeminiClient {
     }
 
     @Override
+    public String generateMnemonicImage(String word, String meaning) {
+        // 모의 연상 이미지 — 1x1 투명 PNG data URL(비용·키 없이 흐름 검증). 실 전환 시 이 구현만 교체.
+        return "data:image/png;base64,"
+                + "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+    }
+
+    @Override
     public String generateSolutionJson(String latex) {
         // 모의 다른 풀이(근의 공식) — index는 core.card가 붙인다. 실 전환 시 이 구현만 교체.
         return """
