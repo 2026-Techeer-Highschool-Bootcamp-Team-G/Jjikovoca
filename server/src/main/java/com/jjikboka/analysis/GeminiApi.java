@@ -57,6 +57,36 @@ class GeminiApi {
         throw new IllegalStateException("모든 Gemini 모델 호출 실패", last);
     }
 
+    /**
+     * 이미지 모델(Phase 6c)로 이미지를 생성해 data URL({@code data:{mime};base64,...})로 돌려준다.
+     * responseModalities에 IMAGE를 요청하고, 응답 parts에서 inline_data(mime+base64)를 뽑는다. 실패면 예외(→ 호출부 처리).
+     */
+    String generateImageDataUrl(String prompt) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))));
+        body.put("generationConfig", Map.of("responseModalities", List.of("TEXT", "IMAGE")));
+        String raw = call(properties.getImageModel(), body);
+        return extractImageDataUrl(raw);
+    }
+
+    /** candidates[0].content.parts[*]에서 inline_data(image)를 찾아 data URL로 만든다. 없으면 예외. */
+    private String extractImageDataUrl(String raw) {
+        try {
+            JsonNode parts = objectMapper.readTree(raw).path("candidates").path(0).path("content").path("parts");
+            for (JsonNode part : parts) {
+                JsonNode inline = part.has("inlineData") ? part.path("inlineData") : part.path("inline_data");
+                JsonNode data = inline.path("data");
+                if (data.isTextual()) {
+                    String mime = inline.path("mimeType").asText(inline.path("mime_type").asText("image/png"));
+                    return "data:" + mime + ";base64," + data.asText();
+                }
+            }
+            throw new IllegalStateException("Gemini 이미지 응답에 inline_data 없음: " + raw);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            throw new IllegalStateException("Gemini 이미지 응답 파싱 실패", e);
+        }
+    }
+
     private String call(String model, Map<String, Object> body) {
         return webClient.post()
                 .uri("/models/{model}:generateContent", model)
