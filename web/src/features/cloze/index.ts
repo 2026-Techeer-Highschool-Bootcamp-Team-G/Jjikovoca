@@ -1,6 +1,2 @@
-export { ClozeCard } from './ui/ClozeCard'
-export { OptionGrid } from './ui/OptionGrid'
-export { ClozeFeedback } from './ui/ClozeFeedback'
-export { useCloze } from './model/useCloze'
-export type { ClozeQuestion, ClozeOption, ClozeItem, ClozeJudge } from './model/types'
+export type { ClozeItem, ClozeJudge } from './model/types'
 export { fetchClozeQueue, submitClozeAnswer, regenerateCloze } from './api/clozeApi'
