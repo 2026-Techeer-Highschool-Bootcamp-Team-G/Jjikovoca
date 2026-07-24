@@ -31,7 +31,7 @@ public class CardReviewService {
         if (!card.getUserId().equals(userId)) {
             throw new BusinessException(HttpStatus.FORBIDDEN, "FORBIDDEN", "접근 권한이 없습니다.");
         }
-        card.applyLightner(result, LocalDateTime.now());
+        card.review(result, LocalDateTime.now());
         return CardReviewState.from(card);
     }
 }
