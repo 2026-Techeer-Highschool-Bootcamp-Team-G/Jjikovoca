@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * JWT 액세스/리프레시 토큰 발급·검증 (13 §5 무상태). subject에 userId를 담는다.
@@ -51,6 +52,7 @@ class JwtProvider {
     private String build(Long userId, long expMs) {
         long now = System.currentTimeMillis();
         return Jwts.builder()
+                .id(UUID.randomUUID().toString())   // jti — 같은 초 발급이라도 토큰을 고유하게(refresh_token 해시 충돌 방지)
                 .subject(String.valueOf(userId))
                 .issuedAt(new Date(now))
                 .expiration(new Date(now + expMs))
