@@ -28,7 +28,7 @@ class ReportMonthly {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "char(7)", nullable = false)   // DB가 CHAR(7) — String 기본(varchar) 매핑과 달라 명시로 일치
     private String period;
 
     @Column(name = "new_cards")
