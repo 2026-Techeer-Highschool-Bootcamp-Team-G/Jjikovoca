@@ -48,7 +48,7 @@ public class ClozeService {
             throw new BusinessException(HttpStatus.FORBIDDEN, "FORBIDDEN", "접근 권한이 없습니다.");
         }
         boolean correct = ClozeMaker.judge(card.getWord(), guess);
-        card.applyLightner(correct ? "KNOW" : "DONT_KNOW", LocalDateTime.now());
+        card.review(correct ? "KNOW" : "DONT_KNOW", LocalDateTime.now());
         return new ClozeAnswerResult(correct, card.getWord(), CardReviewState.from(card));
     }
 
