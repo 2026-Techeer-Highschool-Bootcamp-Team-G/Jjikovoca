@@ -11,6 +11,7 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 카드 (03 card, STI: WORD/PROBLEM 단일 테이블). type으로 단어/문제를 가르고, 타입별 필드는 nullable.
@@ -57,6 +58,20 @@ class Card {
 
     @Column
     private String example;
+
+    // WORD enrichment (Phase 5) — 발음(IPA 표기)·품사·유형태그(JSON 배열)·이모지. 기존 카드는 NULL.
+    @Column
+    private String pronunciation;
+
+    @Column
+    private String pos;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "json")
+    private List<String> tags;
+
+    @Column
+    private String emoji;
 
     @Column
     private String latex;
@@ -140,6 +155,10 @@ class Card {
         card.contextMeaning = command.contextMeaning();
         card.dictMeaning = command.dictMeaning();
         card.example = command.example();
+        card.pronunciation = command.pronunciation();
+        card.pos = command.pos();
+        card.tags = command.tags();
+        card.emoji = command.emoji();
         card.summary = command.summary();
         card.latex = command.latex();
         card.concept = command.concept();
@@ -195,6 +214,22 @@ class Card {
 
     String getExample() {
         return example;
+    }
+
+    String getPronunciation() {
+        return pronunciation;
+    }
+
+    String getPos() {
+        return pos;
+    }
+
+    List<String> getTags() {
+        return tags;
+    }
+
+    String getEmoji() {
+        return emoji;
     }
 
     String getLatex() {

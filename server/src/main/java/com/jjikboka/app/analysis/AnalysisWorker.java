@@ -113,6 +113,7 @@ class AnalysisWorker {
         return new CardCreateCommand(
                 event.userId(), event.jobId(), event.type(), content.subject(), imagePath,
                 content.word(), content.contextMeaning(), content.dictMeaning(), content.example(),
+                content.pronunciation(), content.pos(), content.tags(), content.emoji(),
                 content.summary(), content.latex(), content.concept(),
                 content.hint1(), content.hint2(), content.hint3(), content.answerFormat(),
                 content.solutionsJson(), content.answerValue(), content.diagnosisJson());

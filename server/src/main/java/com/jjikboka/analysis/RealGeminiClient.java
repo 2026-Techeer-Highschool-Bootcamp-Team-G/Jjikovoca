@@ -29,7 +29,11 @@ class RealGeminiClient implements GeminiClient {
               "word": "표시된 표제어(원형)",
               "contextMeaning": "이 지문 문맥에서의 뜻(한국어)",
               "dictMeaning": "사전적 여러 뜻(한국어, ①②③ 번호)",
-              "example": "이 단어를 자연스럽게 포함한 새 영어 예문 한 문장"
+              "example": "이 단어를 자연스럽게 포함한 새 영어 예문 한 문장",
+              "pronunciation": "IPA 발음기호 (예: /saʊnd/)",
+              "pos": "품사(한국어, 예: 명사/동사/형용사/부사)",
+              "tags": ["유형 태그 2~4개(예: 수능, 빈출, 동사)"],
+              "emoji": "단어를 상징하는 이모지 1개"
             }
             """;
 
@@ -65,6 +69,7 @@ class RealGeminiClient implements GeminiClient {
             return new AnalysisContent(
                     MODEL, str(node, "subject", "MATH"),
                     null, null, null, null,
+                    null, null, null, null,   // WORD enrichment 미해당(PROBLEM)
                     str(node, "summary", null), str(node, "latex", null), str(node, "concept", null),
                     str(node, "hint1", null), str(node, "hint2", null), str(node, "hint3", null),
                     str(node, "answerFormat", null),
@@ -74,6 +79,7 @@ class RealGeminiClient implements GeminiClient {
                 MODEL, str(node, "subject", "ENGLISH"),
                 str(node, "word", null), str(node, "contextMeaning", null),
                 str(node, "dictMeaning", null), str(node, "example", null),
+                str(node, "pronunciation", null), str(node, "pos", null), strList(node, "tags"), str(node, "emoji", null),
                 null, null, null, null, null, null, null, null, null, null);
     }
 
@@ -111,6 +117,16 @@ class RealGeminiClient implements GeminiClient {
 
     private static String str(JsonNode node, String field, String fallback) {
         return node.hasNonNull(field) ? node.get(field).asText() : fallback;
+    }
+
+    /** JSON 배열 필드를 문자열 리스트로 — 없거나 배열이 아니면 null(카드 tags 미설정). */
+    private static List<String> strList(JsonNode node, String field) {
+        if (!node.hasNonNull(field) || !node.get(field).isArray()) {
+            return null;
+        }
+        List<String> list = new java.util.ArrayList<>();
+        node.get(field).forEach(element -> list.add(element.asText()));
+        return list;
     }
 
     private String jsonString(JsonNode node, String field) {

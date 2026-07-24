@@ -32,6 +32,7 @@ class MockGeminiClient implements GeminiClient {
             return new AnalysisContent(
                     MODEL, "MATH",
                     null, null, null, null,
+                    null, null, null, null,   // WORD enrichment 미해당(PROBLEM)
                     "이차방정식의 근과 계수의 관계를 묻는 문제",
                     "x^2 - 5x + 6 = 0",
                     "이차방정식",
@@ -47,6 +48,7 @@ class MockGeminiClient implements GeminiClient {
                 "타당한, 믿을 만한",
                 "① 소리 ② 건전한, 타당한 ③ (잠이) 깊은",
                 "That's a sound argument.",
+                "/saʊnd/", "형용사", java.util.List.of("수능", "빈출", "형용사"), "🔊",   // WORD enrichment
                 null, null, null, null, null, null, null,
                 null, null, null);
     }
