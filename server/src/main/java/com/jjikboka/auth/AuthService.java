@@ -85,6 +85,16 @@ class AuthService {
         return issueTokens(user);
     }
 
+    /**
+     * 계정 탈퇴 (DELETE /api/account) — app_user soft delete(deleted_at·이메일 툼스톤) + refresh token 전량 폐기.
+     * 정지형 JWT라 기존 access token은 만료까지 유효하나 refresh가 막혀 세션 연장은 불가. 멱등(이미 없으면 no-op).
+     */
+    @Transactional
+    void deleteAccount(Long userId) {
+        userRepository.findById(userId).ifPresent(user -> user.softDelete(LocalDateTime.now()));
+        refreshTokenRepository.deleteByUserId(userId);
+    }
+
     @Transactional
     void logout(Long userId, String refreshToken) {
         // 멱등: 이 userId의 refresh면 폐기, 없거나 이미 폐기됐어도 성공(재요청도 200 — Notion API-ID 38)
