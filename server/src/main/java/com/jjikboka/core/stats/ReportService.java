@@ -71,7 +71,7 @@ public class ReportService {
                 cardStatsService.reviewDue(userId, now));
 
         List<GrassDay> grass = stats.grass().stream()
-                .map(point -> new GrassDay(point.date(), point.count(), point.minutes()))
+                .map(point -> new GrassDay(point.date(), point.count(), point.minutes(), GrassDay.levelOf(point.count())))
                 .toList();
 
         ReportFull full = premiumQueryService.isPremium(userId) ? buildFull(userId, start, end, stats) : null;
