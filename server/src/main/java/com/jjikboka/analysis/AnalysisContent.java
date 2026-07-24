@@ -15,6 +15,11 @@ public record AnalysisContent(
         String contextMeaning,
         String dictMeaning,
         String example,
+        // WORD enrichment (Phase 5) — 발음(IPA)·품사·유형태그·이모지
+        String pronunciation,
+        String pos,
+        java.util.List<String> tags,
+        String emoji,
         // PROBLEM
         String summary,
         String latex,
