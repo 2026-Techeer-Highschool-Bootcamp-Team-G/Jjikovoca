@@ -15,7 +15,9 @@ import java.time.LocalDate;
 public class ExpService {
 
     private static final String SOURCE_ATTEND = "ATTEND";
+    private static final String SOURCE_CORRECT = "CORRECT";
     private static final int ATTEND_EXP = 10;
+    private static final int STUDY_EXP = 5;
     private static final int DAILY_CAP = 100;
 
     private final UserStatRepository userStatRepository;
@@ -59,6 +61,31 @@ public class ExpService {
             eventPublisher.publishEvent(new ExpEvents.StreakContinued(userId, newStreak));
         }
         return new AttendResult(earned, stat.getExp(), levelUp, newStreak);
+    }
+
+    /**
+     * 학습 정답 적립(API-11 study) — 정답(correct=KNOW)일 때만 source=CORRECT로 적립한다. 일일 한도(DAILY_CAP)를
+     * 출석과 공유하며 넘기면 earned=0. 출석과 달리 streak·출석일은 건드리지 않는다. 레벨업 시 알림 이벤트(AFTER_COMMIT).
+     * 정답이 아니면 적립 없이 현재 누적 exp를 담아 델타를 돌려준다(earned=0).
+     */
+    @Transactional
+    public ExpDelta awardStudy(Long userId, boolean correct) {
+        UserStat stat = userStatRepository.findById(userId).orElseGet(() -> UserStat.of(userId));
+        int earned = 0;
+        if (correct) {
+            LocalDate today = LocalDate.now();
+            int todaySum = expLogRepository.sumEarnedOn(userId, today);
+            earned = Math.max(0, Math.min(STUDY_EXP, DAILY_CAP - todaySum));
+            if (earned > 0) {
+                expLogRepository.save(ExpLog.of(userId, SOURCE_CORRECT, earned, today));
+            }
+        }
+        boolean levelUp = stat.addExp(earned);
+        userStatRepository.save(stat);
+        if (levelUp) {
+            eventPublisher.publishEvent(new ExpEvents.LeveledUp(userId, stat.getLevel()));
+        }
+        return new ExpDelta(earned, stat.getExp(), levelUp);
     }
 
     /** 경험치 현황(API-19). 통계 행이 없으면 기본 상태(레벨 1)로 응답한다. 오늘의 퀘스트=일일 XP 목표 진행도. */
