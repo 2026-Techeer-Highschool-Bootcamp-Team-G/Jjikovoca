@@ -1,5 +1,7 @@
 package com.jjikboka.core.stats;
 
+import com.jjikboka.shared.event.ExpEvents;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,10 +20,13 @@ public class ExpService {
 
     private final UserStatRepository userStatRepository;
     private final ExpLogRepository expLogRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    ExpService(UserStatRepository userStatRepository, ExpLogRepository expLogRepository) {
+    ExpService(UserStatRepository userStatRepository, ExpLogRepository expLogRepository,
+               ApplicationEventPublisher eventPublisher) {
         this.userStatRepository = userStatRepository;
         this.expLogRepository = expLogRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -45,6 +50,14 @@ public class ExpService {
         }
         boolean levelUp = stat.attend(earned, newStreak, today);
         userStatRepository.save(stat);
+
+        // 알림 소비자에게 신호(AFTER_COMMIT). 롤백되면 알림도 안 생기도록 커밋 이후 처리한다.
+        if (levelUp) {
+            eventPublisher.publishEvent(new ExpEvents.LeveledUp(userId, stat.getLevel()));
+        }
+        if (newStreak >= 2) {
+            eventPublisher.publishEvent(new ExpEvents.StreakContinued(userId, newStreak));
+        }
         return new AttendResult(earned, stat.getExp(), levelUp, newStreak);
     }
 
