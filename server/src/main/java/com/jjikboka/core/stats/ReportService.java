@@ -5,6 +5,7 @@ import com.jjikboka.core.card.PremiumQueryService;
 import com.jjikboka.core.review.StudyStats;
 import com.jjikboka.core.review.StudyStatsService;
 import com.jjikboka.shared.error.BusinessException;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,11 @@ public class ReportService {
         this.premiumQueryService = premiumQueryService;
     }
 
+    /**
+     * 월간 리포트(캐시-어사이드, 13 §9). 핫패스인 현재월(period 미지정)만 유저별로 캐싱한다 — 과거월(period 지정)은
+     * 조회가 드물고 캐시 정합 관리 비용이 커서 우회한다(condition). 무효화는 학습 기록 이벤트로(evict, {@code ReportCacheEvictor}).
+     */
+    @Cacheable(cacheNames = "report:monthly", key = "#userId", condition = "#period == null")
     @Transactional(readOnly = true)
     public ReportView getMonthlyReport(Long userId, String period) {
         YearMonth target = parsePeriod(period);
