@@ -76,22 +76,6 @@ export function StudySetupSheet({ onStart }: Props) {
           </span>
         )}
 
-        <span
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 4,
-            background: 'var(--color-brand-primary)',
-            color: 'var(--color-text-inverse)',
-            fontSize: 11,
-            fontWeight: 700,
-            padding: '4px 10px',
-            borderRadius: 999,
-          }}
-        >
-          ✨ AI 추천
-        </span>
-
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <span
             style={{
@@ -159,16 +143,14 @@ export function StudySetupSheet({ onStart }: Props) {
         <IconChevronRight size={18} />
       </button>
 
-      {/* 복습 유형 — 직접 선택 시에만. AI 추천은 학습법까지 AI가 정함 */}
-      {!aiPicked && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <span style={label}>복습 유형</span>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <TypeChip active={type === 'FLASHCARD'} label="플래시카드" onClick={() => setType('FLASHCARD')} />
-            <TypeChip active={type === 'CLOZE'} label="빈칸 퀴즈" onClick={() => setType('CLOZE')} />
-          </div>
+      {/* 복습 유형 — 두 방식 모두에서 선택 가능(오늘의 추천도 유형은 사용자가 고름) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <span style={label}>복습 유형</span>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <TypeChip active={type === 'FLASHCARD'} label="플래시카드" onClick={() => setType('FLASHCARD')} />
+          <TypeChip active={type === 'CLOZE'} label="빈칸 퀴즈" onClick={() => setType('CLOZE')} />
         </div>
-      )}
+      </div>
 
       <Button block size="lg" onClick={() => onStart(method, type)}>
         학습 시작
