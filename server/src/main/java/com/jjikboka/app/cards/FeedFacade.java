@@ -25,8 +25,13 @@ public class FeedFacade {
         this.examFeedService = examFeedService;
     }
 
-    public List<FeedCard> getFeed(Long userId, String subject, Long examId, boolean untagged) {
+    public List<FeedCard> getFeed(Long userId, String subject, Long examId, boolean untagged, String q) {
         List<CardSummary> cards = cardQueryService.getFeed(userId, subject);
+
+        if (q != null && !q.isBlank()) {
+            String needle = q.strip().toLowerCase();
+            cards = cards.stream().filter(card -> matches(card, needle)).toList();
+        }
 
         if (examId != null) {
             Set<Long> tagged = examFeedService.cardIdsForExam(examId);
@@ -38,5 +43,15 @@ public class FeedFacade {
 
         Map<Long, List<ExamTag>> examsByCard = examFeedService.examsFor(cards.stream().map(CardSummary::id).toList());
         return cards.stream().map(card -> FeedCard.of(card, examsByCard.get(card.id()))).toList();
+    }
+
+    /** 검색어 부분일치(대소문자 무시) — 단어·문맥 뜻·개념·요약 중 하나라도 포함하면 매치. */
+    private boolean matches(CardSummary card, String needle) {
+        return contains(card.word(), needle) || contains(card.contextMeaning(), needle)
+                || contains(card.concept(), needle) || contains(card.summary(), needle);
+    }
+
+    private boolean contains(String value, String needle) {
+        return value != null && value.toLowerCase().contains(needle);
     }
 }
