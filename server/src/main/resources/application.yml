@@ -38,11 +38,15 @@ jwt:
   access-exp-ms: 1800000       # 액세스 30분
   refresh-exp-ms: 1209600000   # 리프레시 14일
 
-# 크롭 이미지 저장소 (API-10). MVP는 로컬 파일 — 워커(Phase 2)가 여기 저장, /images/{file}이 여기서 서빙.
-# prod에선 env(APP_IMAGE_DIR)로 EBS/마운트 경로 주입. S3 전환 시 이 설정을 버킷/presigned로 대체.
+# 크롭 이미지 저장소 (API-10). 기본 local(파일) — 워커가 여기 저장, /images/{file}이 여기서 서빙.
+# storage=s3면 S3ImageStorageService가 뜬다(계약 불변, 토글만 전환). 자격은 env/IAM(15 §7), 이미지에 미탑재.
 app:
   image:
+    storage: ${APP_IMAGE_STORAGE:local}   # local | s3
     dir: ${APP_IMAGE_DIR:./data/images}
+    s3:
+      bucket: ${APP_IMAGE_S3_BUCKET:}
+      region: ${APP_IMAGE_S3_REGION:ap-northeast-2}
   # 내보내기 파일 저장소 (API-25·26). MVP는 로컬 파일 — 생성 파일을 여기 쓰고 /api/export/{id}/download가 서빙.
   # 실 렌더(headless Chromium) 전환·S3 이전 시 이 설정/저장 어댑터를 교체.
   export:
