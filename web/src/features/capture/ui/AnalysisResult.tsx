@@ -1,72 +1,33 @@
-import { useMemo, useRef, useState } from 'react'
-import type { CSSProperties } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { NavigationBar, Button } from '@/shared/ui'
 import { FlipCard } from '@/widgets/recent-cards'
-import { saveCards } from '@/entities/card'
-import type { RecentCard } from '@/entities/card'
-import { fetchExams } from '@/entities/exam'
+import { fetchCards, cardToRecent } from '@/entities/card'
+import type { Card, FeedSubject } from '@/entities/card'
 
 interface Props {
   isMath: boolean
+  /** 분석 결과 카드(폴링에서 전달). 없으면 방금 저장된 최신 카드를 조회 */
+  card?: Card | null
   onBack: () => void
 }
 
-// 촬영·분석 결과 카드(데모) — 유형·특성 태그 + 시험 태그. 수학은 사고 단계 1~n + 정답이 뒷면에
-function buildCard(isMath: boolean, examTitle: string, id: number): RecentCard {
-  if (isMath) {
-    return {
-      id,
-      type: 'PROBLEM',
-      tags: [
-        { label: '이차방정식', tone: 'grey' },
-        { label: '인수분해', tone: 'blue' },
-      ],
-      exams: [examTitle],
-      problem: 'x² − 5x + 6 = 0 의 두 근을 구하시오.',
-      answer: '2, 3',
-      steps: [
-        '무엇을 구하는 문제인지 파악한다 — 이차방정식의 두 근',
-        '곱해서 6, 더해서 5가 되는 두 수를 찾는다',
-        '(x − 2)(x − 3) = 0 으로 인수분해한다',
-        'x = 2 또는 x = 3, 원식에 대입해 검산한다',
-      ],
-    }
-  }
-  return {
-    id,
-    type: 'WORD',
-    tags: [
-      { label: '형용사', tone: 'grey' },
-      { label: '다의어', tone: 'blue' },
-    ],
-    exams: [examTitle],
-    word: 'sound',
-    pronunciation: '[saʊnd]',
-    emoji: '⚖️',
-    pos: '형용사',
-    meaning: '타당한, 믿을 만한',
-    example: 'Her argument was sound and convincing.',
-  }
-}
-
-// 분석 완료 (130:905) — 생성된 카드(플립) + 오답노트 저장 + 토스식 축하
-export function AnalysisResult({ isMath, onBack }: Props) {
+// 분석 완료 — 분석 카드는 이미 서버에 저장됨(/api/cards). 결과 카드를 보여주고 홈/오답노트로 유도
+export function AnalysisResult({ isMath, card, onBack }: Props) {
   const navigate = useNavigate()
-  // 등록한 시험(가장 가까운) 을 시험 태그로 — 미가동 시 데모 폴백
-  const exams = useQuery({ queryKey: ['exams'], queryFn: fetchExams, retry: 0 })
-  const examTitle = exams.data?.[0]?.title ?? '중간고사'
-  const idRef = useRef(Date.now())
-  const card = useMemo(() => buildCard(isMath, examTitle, idRef.current), [isMath, examTitle])
-  const [celebrating, setCelebrating] = useState(false)
+  const qc = useQueryClient()
+  const subject: FeedSubject = isMath ? 'MATH' : 'ENGLISH'
 
-  const save = () => {
-    if (celebrating) return
-    saveCards([card]) // 오답노트 기본 저장 + 홈 캐러셀 연동
-    setCelebrating(true)
-    window.setTimeout(() => navigate('/'), 1500)
-  }
+  // 분석 카드가 넘어오지 않으면(폴백/스킵) 방금 저장된 최신 카드를 조회
+  const latest = useQuery({ queryKey: ['cards', subject], queryFn: () => fetchCards(subject), enabled: !card })
+  const resolved = card ?? latest.data?.[0] ?? null
+  const recent = resolved ? cardToRecent(resolved) : null
+
+  // 새 카드가 홈 캐러셀/오답노트에 반영되도록 카드 목록 캐시 무효화
+  useEffect(() => {
+    qc.invalidateQueries({ queryKey: ['cards'] })
+  }, [qc, resolved?.id])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
@@ -74,94 +35,25 @@ export function AnalysisResult({ isMath, onBack }: Props) {
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, padding: '16px var(--spacing-xl)' }}>
         <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-secondary)' }}>
-          ✨ AI가 카드를 만들었어요 — 탭해서 {isMath ? '사고 단계·정답' : '뜻'}을 확인해요
+          ✨ AI가 카드를 만들어 오답노트에 저장했어요 — 탭해서 {isMath ? '풀이' : '뜻'}을 확인해요
         </p>
-        <FlipCard card={card} height={380} />
+        {recent ? (
+          <FlipCard card={recent} height={380} />
+        ) : (
+          <p style={{ margin: '40px 0', textAlign: 'center', fontSize: 13, color: 'var(--color-text-tertiary)' }}>
+            {latest.isLoading ? '카드를 불러오는 중…' : '카드를 불러오지 못했어요'}
+          </p>
+        )}
       </div>
 
-      <div style={{ padding: '0 var(--spacing-xl) 24px' }}>
-        <Button block size="lg" onClick={save} disabled={celebrating}>
-          오답노트에 저장
+      <div style={{ padding: '0 var(--spacing-xl) 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <Button block size="lg" onClick={() => navigate('/')}>
+          홈에서 확인하기
+        </Button>
+        <Button block size="lg" variant="weak" onClick={() => navigate('/wrong-note')}>
+          오답노트로 가기
         </Button>
       </div>
-
-      {celebrating && <SaveCelebration isMath={isMath} />}
-    </div>
-  )
-}
-
-// 컨페티 조각 — 중심에서 바깥으로 튀어 흩어진다
-const CONFETTI = [
-  { tx: '-70px', ty: '-56px', r: '-140deg', c: 'var(--color-brand-primary)', d: '0.12s' },
-  { tx: '66px', ty: '-62px', r: '160deg', c: '#f5a623', d: '0.18s' },
-  { tx: '-84px', ty: '8px', r: '-90deg', c: '#1bc1bd', d: '0.1s' },
-  { tx: '86px', ty: '0px', r: '120deg', c: '#e5484d', d: '0.22s' },
-  { tx: '-44px', ty: '64px', r: '-60deg', c: '#f5a623', d: '0.26s' },
-  { tx: '50px', ty: '68px', r: '90deg', c: 'var(--color-brand-primary)', d: '0.16s' },
-  { tx: '6px', ty: '-88px', r: '40deg', c: '#1bc1bd', d: '0.2s' },
-  { tx: '-8px', ty: '86px', r: '-30deg', c: '#e5484d', d: '0.14s' },
-] as const
-
-// 저장 성취 오버레이 — 스프링 팝 + 컨페티 (토스식)
-function SaveCelebration({ isMath }: { isMath: boolean }) {
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 200,
-        background: 'rgba(15,20,30,0.55)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 16,
-        animation: 'omc-overlay-in 0.2s ease-out',
-      }}
-    >
-      <div style={{ position: 'relative', width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {CONFETTI.map((p, i) => (
-          <span
-            key={i}
-            style={
-              {
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                width: 9,
-                height: 9,
-                borderRadius: 2,
-                background: p.c,
-                '--tx': p.tx,
-                '--ty': p.ty,
-                '--r': p.r,
-                animation: `jjik-confetti-burst 0.9s ease-out ${p.d} both`,
-              } as CSSProperties
-            }
-          />
-        ))}
-        <div
-          style={{
-            width: 96,
-            height: 96,
-            borderRadius: '50%',
-            background: 'var(--color-success-primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 50,
-            animation: 'jjik-pop-spring 0.6s cubic-bezier(0.2,0.9,0.3,1.2) both',
-          }}
-        >
-          🎉
-        </div>
-      </div>
-      <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--common-white, #fff)', animation: 'jjik-rise-in 0.5s ease-out 0.2s both' }}>
-        오답노트에 저장 완료!
-      </span>
-      <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.85)', animation: 'jjik-rise-in 0.5s ease-out 0.3s both' }}>
-        {isMath ? '수학' : '영어'} 카드 +5 XP · 홈에서 바로 확인해요
-      </span>
     </div>
   )
 }
