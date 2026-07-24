@@ -47,10 +47,11 @@ app:
     s3:
       bucket: ${APP_IMAGE_S3_BUCKET:}
       region: ${APP_IMAGE_S3_REGION:ap-northeast-2}
-  # 내보내기 파일 저장소 (API-25·26). MVP는 로컬 파일 — 생성 파일을 여기 쓰고 /api/export/{id}/download가 서빙.
-  # 실 렌더(headless Chromium) 전환·S3 이전 시 이 설정/저장 어댑터를 교체.
+  # 내보내기 (API-25·26). 저장은 로컬 파일 — 생성 파일을 여기 쓰고 /api/export/{id}/download가 서빙.
+  # renderer=stub(기본)은 텍스트 .txt, chromium은 Playwright headless Chromium으로 PDF/PNG(브라우저 바이너리 필요).
   export:
     dir: ${APP_EXPORT_DIR:./data/exports}
+    renderer: ${APP_EXPORT_RENDERER:stub}   # stub | chromium
 
 # Gemini 연동 (API-6·16·41). 기본은 모의(mock=true) — 키·원가 없이 흐름이 돌아간다.
 # 실 연동은 GEMINI_MOCK=false + GEMINI_API_KEY 주입 시 RealGeminiClient가 뜬다(계약 불변, 토글만 전환).
