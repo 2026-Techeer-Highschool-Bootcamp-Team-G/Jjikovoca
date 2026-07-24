@@ -8,6 +8,7 @@ import com.jjikboka.app.image.ImageStorageService;
 import com.jjikboka.core.card.CardCreateCommand;
 import com.jjikboka.core.card.CardCreationService;
 import com.jjikboka.core.card.QuotaConsumeService;
+import com.jjikboka.core.stats.ExpService;
 import com.jjikboka.shared.event.AnalyzeEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,19 +39,22 @@ class AnalysisWorker {
     private final QuotaConsumeService quotaConsumeService;
     private final ImageStorageService imageStorageService;
     private final ApplicationEventPublisher eventPublisher;
+    private final ExpService expService;
 
     AnalysisWorker(GeminiClient geminiClient,
                    AnalyzeJobService analyzeJobService,
                    CardCreationService cardCreationService,
                    QuotaConsumeService quotaConsumeService,
                    ImageStorageService imageStorageService,
-                   ApplicationEventPublisher eventPublisher) {
+                   ApplicationEventPublisher eventPublisher,
+                   ExpService expService) {
         this.geminiClient = geminiClient;
         this.analyzeJobService = analyzeJobService;
         this.cardCreationService = cardCreationService;
         this.quotaConsumeService = quotaConsumeService;
         this.imageStorageService = imageStorageService;
         this.eventPublisher = eventPublisher;
+        this.expService = expService;
     }
 
     @Async("analysisExecutor")
@@ -65,11 +69,21 @@ class AnalysisWorker {
             cardCreationService.create(toCommand(event, content));
             analyzeJobService.markDone(jobId);
             eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeCompleted(jobId, content.model()));
+            awardCaptureQuietly(event.userId());   // 오답 기록 보상(best-effort) — 실패해도 분석은 완료 유지
         } catch (Exception e) {
             log.error("분석 처리 실패 — jobId={}, quota 환불", jobId, e);
             analyzeJobService.markFailed(jobId);
             quotaConsumeService.refund(event.userId());
             eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeFailed(jobId, e.getMessage()));
+        }
+    }
+
+    /** 캡처 exp 적립(F3) — 카드는 이미 저장·완료됐으므로 적립 실패가 분석을 되돌리지 않게 별도 try로 격리(로그만). */
+    private void awardCaptureQuietly(Long userId) {
+        try {
+            expService.awardCapture(userId);
+        } catch (RuntimeException e) {
+            log.warn("캡처 exp 적립 실패(무시) — userId={}: {}", userId, e.getMessage());
         }
     }
 
