@@ -50,3 +50,25 @@ tasks.withType<Test> { useJUnitPlatform() }
 tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
     archiveFileName.set("app.jar")
 }
+
+// 로컬 편의: bootRun 시 server/.env가 있으면 그 KEY=VALUE를 프로세스 env로 주입한다(GEMINI_API_KEY 등).
+// .env는 gitignore라 커밋되지 않고, 없으면 아무 일도 안 한다 — CI·prod(SSM 주입)에는 영향이 없다.
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    val envFile = file(".env")
+    if (envFile.exists()) {
+        envFile.readLines()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() && !it.startsWith("#") && it.contains("=") }
+            .forEach { line ->
+                val key = line.substringBefore("=").trim()
+                var value = line.substringAfter("=").trim()
+                if (value.length >= 2 &&
+                    ((value.startsWith("\"") && value.endsWith("\"")) ||
+                        (value.startsWith("'") && value.endsWith("'")))
+                ) {
+                    value = value.substring(1, value.length - 1)
+                }
+                if (key.isNotEmpty()) environment(key, value)
+            }
+    }
+}
