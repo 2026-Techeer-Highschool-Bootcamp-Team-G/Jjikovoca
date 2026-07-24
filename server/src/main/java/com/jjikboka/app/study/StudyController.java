@@ -3,6 +3,7 @@ package com.jjikboka.app.study;
 import com.jjikboka.core.card.CardReviewState;
 import com.jjikboka.core.card.StudyQueueService;
 import com.jjikboka.shared.response.ApiResponse;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,9 +41,11 @@ class StudyController {
     ResponseEntity<ApiResponse<FlashcardQueueResponse>> flashcards(
             @AuthenticationPrincipal Long userId,
             @RequestParam(required = false) String subject,
-            @RequestParam(defaultValue = "20") int limit) {
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "TODAY") String mode,
+            @RequestParam(required = false) List<Long> cardIds) {
         FlashcardQueueResponse response = FlashcardQueueResponse.of(
-                studyQueueService.getFlashcards(userId, subject, limit));
+                studyQueueService.getFlashcards(userId, subject, limit, mode, cardIds));
         return ResponseEntity.ok(ApiResponse.ok(response, "플래시카드 큐 조회가 완료되었습니다."));
     }
 
