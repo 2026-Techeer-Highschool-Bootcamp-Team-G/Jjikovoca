@@ -98,6 +98,14 @@ class RealGeminiClient implements GeminiClient {
         return geminiApi.generate(prompt, List.of(), true).strip();
     }
 
+    @Override
+    public String generateMnemonicImage(String word, String meaning) {
+        String prompt = "영어 단어 '" + word + "'"
+                + (meaning == null || meaning.isBlank() ? "" : "(뜻: " + meaning + ")")
+                + "의 의미를 기억하기 좋은 연상 일러스트를 그려라. 밝고 단순한 그림체, 글자·텍스트 없이 이미지만.";
+        return geminiApi.generateImageDataUrl(prompt);
+    }
+
     private JsonNode readJson(String raw) {
         try {
             return objectMapper.readTree(stripFences(raw));
