@@ -25,6 +25,7 @@ public record CardDetail(
         String pos,
         List<String> tags,
         String emoji,
+        String mnemonicImagePath,
         // PROBLEM
         String summary,
         String latex,
@@ -53,6 +54,7 @@ public record CardDetail(
                 card.getPos(),
                 card.getTags(),
                 card.getEmoji(),
+                card.getMnemonicImagePath(),
                 card.getSummary(),
                 card.getLatex(),
                 card.getConcept(),

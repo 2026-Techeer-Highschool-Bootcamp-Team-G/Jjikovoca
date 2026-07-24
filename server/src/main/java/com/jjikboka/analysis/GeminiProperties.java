@@ -31,6 +31,9 @@ public class GeminiProperties {
     /** 단일 호출 타임아웃(ms). 워커 전용 풀에서 블로킹 호출하므로 상한을 둔다. */
     private long timeoutMs = 30000;
 
+    /** 연상 이미지 생성 모델(Phase 6c) — nano-banana 계열. 텍스트 폴백 체인과 별개(이미지 전용). */
+    private String imageModel = "gemini-2.5-flash-image";
+
     public boolean isMock() {
         return mock;
     }
@@ -69,5 +72,13 @@ public class GeminiProperties {
 
     public void setTimeoutMs(long timeoutMs) {
         this.timeoutMs = timeoutMs;
+    }
+
+    public String getImageModel() {
+        return imageModel;
+    }
+
+    public void setImageModel(String imageModel) {
+        this.imageModel = imageModel;
     }
 }
