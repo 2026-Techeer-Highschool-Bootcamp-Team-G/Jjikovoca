@@ -89,16 +89,19 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retried 
 
   const res = await fetch(`${API_BASE}${path}`, { ...init, headers })
 
-  if (res.status === 401) {
-    // access 만료 → refresh 로 재발급 후 원요청 1회 재시도
+  const body = (await res.json().catch(() => null)) as ApiEnvelope<T> | null
+
+  // 인증 실패 → refresh 로 재발급 후 원요청 1회 재시도.
+  // 백엔드는 만료/무효 토큰에 401 이 아니라 403+빈 본문(Spring 필터 거부)을 주므로 이 403 도 포함한다.
+  // 단, 업무 거부(PREMIUM_REQUIRED 등)는 { success:false } 봉투 403 이므로 refresh 하지 않는다(오작동 로그아웃 방지).
+  const authFailed = res.status === 401 || (res.status === 403 && body?.success !== false)
+  if (authFailed) {
     if (!retried && (await refreshTokens())) {
       return apiFetch<T>(path, init, true)
     }
     clearTokens()
-    throw new ApiError(401, '로그인이 필요합니다.')
+    throw new ApiError(res.status, '로그인이 필요합니다.')
   }
-
-  const body = (await res.json().catch(() => null)) as ApiEnvelope<T> | null
 
   // 실패: HTTP 오류 또는 봉투 success:false → message 로 정규화
   if (!res.ok || (body != null && body.success === false)) {
