@@ -27,9 +27,6 @@ import { ExportDonePage } from '@/pages/export-done'
 import { StudyPickPage } from '@/pages/study-pick'
 import { CardDonePage } from '@/pages/card-done'
 import { MathProblemPage } from '@/pages/math-problem'
-import { MathAnswerPage } from '@/pages/math-answer'
-import { MathVerdictCorrectPage } from '@/pages/math-verdict-correct'
-import { MathVerdictWrongPage } from '@/pages/math-verdict-wrong'
 import { ExamSelectPage } from '@/pages/exam-select'
 
 /**
@@ -83,9 +80,6 @@ export const router = createBrowserRouter([
           { path: 'card-done', element: <CardDonePage /> },
           { path: 'math-problem', element: <MathProblemPage /> },
           { path: 'capture', element: <CapturePage /> },
-          { path: 'math-answer', element: <MathAnswerPage /> },
-          { path: 'math-verdict-correct', element: <MathVerdictCorrectPage /> },
-          { path: 'math-verdict-wrong', element: <MathVerdictWrongPage /> },
           { path: 'exam-select', element: <ExamSelectPage /> },
         ],
       },
