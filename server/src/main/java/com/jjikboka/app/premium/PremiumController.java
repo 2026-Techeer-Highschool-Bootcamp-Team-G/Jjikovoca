@@ -4,6 +4,7 @@ import com.jjikboka.core.card.PremiumActivationService;
 import com.jjikboka.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,5 +28,13 @@ class PremiumController {
         boolean premium = premiumActivationService.activate(userId);
         return ResponseEntity.ok(ApiResponse.ok(
                 new PremiumResponse(premium), "프리미엄이 활성화되었습니다."));
+    }
+
+    /** 프리미엄 해지 (멱등) — 활성 구독을 해지해 premium=false로 만든다. */
+    @DeleteMapping
+    ResponseEntity<ApiResponse<PremiumResponse>> cancel(@AuthenticationPrincipal Long userId) {
+        boolean premium = premiumActivationService.cancel(userId);
+        return ResponseEntity.ok(ApiResponse.ok(
+                new PremiumResponse(premium), "프리미엄이 해지되었습니다."));
     }
 }
