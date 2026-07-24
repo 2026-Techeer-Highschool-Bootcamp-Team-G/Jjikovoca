@@ -19,7 +19,16 @@ interface ExamCardRepository extends JpaRepository<ExamCard, ExamCardId> {
     @Query("SELECT e FROM Exam e, ExamCard ec WHERE ec.examId = e.id AND ec.cardId = :cardId ORDER BY e.examDate ASC")
     List<Exam> findExamsByCardId(@Param("cardId") Long cardId);
 
-    /** 시험에 태깅된 카드 id들(시험복습 42용). */
+    /** 시험에 태깅된 카드 id들(시험복습 42·피드 examId 필터용). */
     @Query("SELECT ec.cardId FROM ExamCard ec WHERE ec.examId = :examId")
     List<Long> findCardIdsByExamId(@Param("examId") Long examId);
+
+    /** 이 사용자의 카드 중 시험에 태깅된 카드 id들(피드 untagged 필터용 — 이 집합의 여집합이 미태깅). */
+    @Query("SELECT DISTINCT ec.cardId FROM ExamCard ec, Card c WHERE ec.cardId = c.id AND c.userId = :userId")
+    List<Long> findTaggedCardIdsByUser(@Param("userId") Long userId);
+
+    /** 여러 카드에 걸린 시험들(피드 exams 칩 배치 enrich) — [cardId, Exam]. */
+    @Query("SELECT ec.cardId, e FROM Exam e, ExamCard ec WHERE ec.examId = e.id AND ec.cardId IN :cardIds "
+            + "ORDER BY e.examDate ASC")
+    List<Object[]> findExamsByCardIds(@Param("cardIds") List<Long> cardIds);
 }
