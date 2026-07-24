@@ -53,6 +53,15 @@ class AppUser {
         return new AppUser(email, passwordHash, nickname);
     }
 
+    /**
+     * 계정 탈퇴 (DELETE /api/account) — soft delete. deleted_at을 찍고 이메일을 툼스톤으로 치환한다.
+     * 원 이메일을 비워 재가입을 허용하고(unique 충돌 방지), 원 이메일로는 더 이상 로그인·조회되지 않게 한다.
+     */
+    void softDelete(LocalDateTime now) {
+        this.deletedAt = now;
+        this.email = "deleted_" + id + "@deleted.jjikboka";
+    }
+
     Long getId() {
         return id;
     }
