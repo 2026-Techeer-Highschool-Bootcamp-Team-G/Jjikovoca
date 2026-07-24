@@ -62,13 +62,14 @@ export function RecentCarousel({ subject = 'ALL' }: { subject?: 'ALL' | 'ENGLISH
         gap: 12,
         overflowX: 'auto',
         scrollSnapType: 'x mandatory',
-        padding: '4px var(--spacing-xl) 8px',
+        // 카드를 화면 중앙에 정렬 — 좌우 균등 peek. (100% - 84%)/2 만큼 좌우 여백
+        padding: '4px calc((100% - 84%) / 2) 8px',
         scrollbarWidth: 'none',
         WebkitOverflowScrolling: 'touch',
       }}
     >
       {cards.map((c) => (
-        <div key={c.id} style={{ flex: '0 0 84%', scrollSnapAlign: 'start' }}>
+        <div key={c.id} style={{ flex: '0 0 84%', scrollSnapAlign: 'center' }}>
           <FlipCard card={c} />
         </div>
       ))}
