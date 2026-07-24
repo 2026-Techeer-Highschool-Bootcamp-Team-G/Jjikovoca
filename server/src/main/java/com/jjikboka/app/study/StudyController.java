@@ -1,6 +1,5 @@
 package com.jjikboka.app.study;
 
-import com.jjikboka.core.card.CardReviewState;
 import com.jjikboka.core.card.StudyQueueService;
 import com.jjikboka.shared.response.ApiResponse;
 import java.util.List;
@@ -29,12 +28,12 @@ class StudyController {
     }
 
     @PostMapping("/api/cards/{id}/study")
-    ResponseEntity<ApiResponse<CardReviewState>> study(
+    ResponseEntity<ApiResponse<StudyResultResponse>> study(
             @AuthenticationPrincipal Long userId,
             @PathVariable Long id,
             @RequestBody StudyRecordRequest request) {
-        CardReviewState state = studyService.record(userId, id, request);
-        return ResponseEntity.ok(ApiResponse.ok(state, "학습 기록이 저장되었습니다."));
+        StudyResultResponse result = studyService.record(userId, id, request);
+        return ResponseEntity.ok(ApiResponse.ok(result, "학습 기록이 저장되었습니다."));
     }
 
     @GetMapping("/api/study/flashcards")
