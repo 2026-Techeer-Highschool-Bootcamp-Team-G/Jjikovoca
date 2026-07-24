@@ -32,8 +32,12 @@ public class StudyStatsService {
                 toGrass(studyLogRepository.grassCounts(userId, start, end)));
     }
 
-    /** [KNOW 수, 전체 수] → 정확도. 전체 0이면 null. */
-    private Double accuracy(Object[] row) {
+    /** [KNOW 수, 전체 수] → 정확도. 집계라 항상 1행이지만 방어적으로 빈 결과면 null. 전체 0 또는 KNOW=null(대상 없음)이면 null. */
+    private Double accuracy(List<Object[]> rows) {
+        if (rows.isEmpty()) {
+            return null;
+        }
+        Object[] row = rows.get(0);
         Number know = (Number) row[0];
         long total = ((Number) row[1]).longValue();
         if (total == 0 || know == null) {

@@ -21,15 +21,18 @@ interface StudyLogRepository extends JpaRepository<StudyLog, Long> {
 
     /**
      * 카드 타입별 정확도 집계 — [정답(KNOW) 수, 전체 수]. Card와 조인해 type으로 좁힌다(정확도.word/problem).
-     * total=0이면 정확도는 null(호출부에서 판단).
+     * total=0이면 정확도는 null(호출부에서 판단). 집계라 항상 1행 — 호출부가 get(0)로 튜플을 꺼낸다.
+     *
+     * <p>반환은 {@code List<Object[]>}다: 다중 컬럼 집계를 단일 {@code Object[]}로 선언하면 Hibernate 6가
+     * 결과 행을 한 번 더 감싸({@code Object[]{Object[]{know,total}}}) 캐스팅이 깨진다 — reasonBreakdown·grassCounts와 같은 형태로 통일.
      */
     @Query("SELECT SUM(CASE WHEN s.result = 'KNOW' THEN 1 ELSE 0 END), COUNT(s) "
             + "FROM StudyLog s, Card c WHERE s.cardId = c.id AND c.type = :type "
             + "AND s.userId = :userId AND s.createdAt >= :start AND s.createdAt < :end")
-    Object[] accuracyByType(@Param("userId") Long userId,
-                            @Param("type") String type,
-                            @Param("start") LocalDateTime start,
-                            @Param("end") LocalDateTime end);
+    List<Object[]> accuracyByType(@Param("userId") Long userId,
+                                  @Param("type") String type,
+                                  @Param("start") LocalDateTime start,
+                                  @Param("end") LocalDateTime end);
 
     /** 오답 사유별 집계 — [reasonTag, count]. reason_tag가 있는 것만. */
     @Query("SELECT s.reasonTag, COUNT(s) FROM StudyLog s WHERE s.userId = :userId "
