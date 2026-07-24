@@ -46,6 +46,25 @@ function entrance(mounted: boolean, delay: number): CSSProperties {
   }
 }
 
+// 백엔드 미제공 시각화 표식 — reports/summary 에 없는 데이터라 데모임을 명시(backend-requests §3)
+function DemoTag() {
+  return (
+    <span
+      style={{
+        fontSize: 10,
+        fontWeight: 600,
+        padding: '2px 6px',
+        borderRadius: 6,
+        background: 'var(--color-bg-secondary)',
+        color: 'var(--color-text-tertiary)',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      데모
+    </span>
+  )
+}
+
 // 과목별 학습 비중 — 오늘 / 이번 달 (백엔드 연결 전 데모)
 const SUBJECT = {
   TODAY: {
@@ -169,8 +188,8 @@ export function ReportPage() {
 
         <Card style={entrance(mounted, 0.12)}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-primary)' }}>
-              {scope === 'TODAY' ? '오늘' : '이번 달'} 과목별 학습 비중
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: 'var(--color-text-primary)' }}>
+              {scope === 'TODAY' ? '오늘' : '이번 달'} 과목별 학습 비중 <DemoTag />
             </span>
             <Segmented
               options={[
@@ -194,7 +213,7 @@ export function ReportPage() {
         <Card style={entrance(mounted, 0.18)}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>학습 잔디</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>학습 잔디 <DemoTag /></span>
               <MonthNav
                 label={m.label}
                 canPrev={monthIdx > 0}
@@ -247,7 +266,7 @@ export function ReportPage() {
         <Card style={entrance(mounted, 0.24)}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>일일 학습 시간</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>일일 학습 시간 <DemoTag /></span>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                 <SubjectDot color="var(--blue-500)" label="수학" />
                 <SubjectDot color="var(--teal-500)" label="영어" />
@@ -355,8 +374,8 @@ export function ReportPage() {
         </Card>
 
         <Card style={entrance(mounted, 0.3)}>
-          <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>
-            나의 약한 개념
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>
+            나의 약한 개념 <DemoTag />
           </span>
           {/* 왼쪽 영어 / 오른쪽 수학 */}
           <div style={{ display: 'flex', gap: 14 }}>
