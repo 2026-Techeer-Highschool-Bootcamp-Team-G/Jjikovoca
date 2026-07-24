@@ -67,6 +67,16 @@
 - **프리미엄 해지**: `DELETE /api/premium` 연동 + 해지 UI(현재 해지 화면 없음)
 - **탈퇴**: 계정 삭제 엔드포인트 + `withdraw` 실연동(현재 `/login` 이동만)
 
+## 6-1. 배포 — 별도 오리진(VITE_API_BASE_URL) 시 백엔드 CORS 필요
+
+프론트를 백엔드와 **다른 오리진**(예: Vercel + 원격 백엔드)에 배포하면 `VITE_API_BASE_URL`로 백엔드를 직접 호출한다. 이때 백엔드가 아래를 허용해야 브라우저가 차단하지 않는다:
+
+- **CORS**: 프론트 오리진(`https://<vercel-app>.vercel.app` 등)에 대해 `Access-Control-Allow-Origin` 허용, `Authorization` 헤더 허용, `credentials` 정책 정합
+- **`/images` 정적 리소스에도 CORS 헤더**(`<img>` cross-origin 로드) — 보관함 썸네일 등
+- 프리플라이트(`OPTIONS`) 처리
+- (대안) **동일 오리진 배포**(nginx가 SPA+`/api`+`/images` 한 오리진 서빙)면 CORS 불필요 — `VITE_API_BASE_URL` 비워두면 됨
+- 프론트 측: `client.ts`(API)·`mediaUrl`(이미지) 모두 `VITE_API_BASE_URL`을 접두하므로 env만 설정하면 됨
+
 ## 7. 프론트 선행 작업(백엔드 아님, FE TODO)
 
 - **CaptureEditor 크롭 추출**: 편집기가 크롭 **개수**만 반환. `analyze` 의 `cropImages` base64를 만들려면 실제 크롭 이미지 추출 필요(현재 `fullImage` best-effort)
