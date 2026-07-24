@@ -2,6 +2,7 @@ package com.jjikboka.app.notification;
 
 import com.jjikboka.core.card.CardStatsService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -47,8 +48,11 @@ public class NotificationService {
         repository.findByUserIdAndReadFalse(userId).forEach(Notification::markRead);
     }
 
-    /** 발생형 알림 생성 (이벤트 리스너가 호출) — streak·레벨업 등. */
-    @Transactional
+    /**
+     * 발생형 알림 생성 (이벤트 리스너가 호출) — streak·레벨업 등.
+     * 호출부가 AFTER_COMMIT 리스너(원 트랜잭션이 이미 커밋됨)라 <b>새 트랜잭션</b>으로 독립 커밋해야 실제로 저장된다.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void create(Long userId, String type, String message) {
         repository.save(Notification.of(userId, type, message));
     }
