@@ -24,6 +24,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     // analysis — Gemini REST(WebClient)
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    // 이미지 저장소 S3(API-10) — app.image.storage=s3일 때만 사용, 기본 local. 자격은 env/IAM(15 §7)
+    implementation(platform("software.amazon.awssdk:bom:2.28.29"))
+    implementation("software.amazon.awssdk:s3")
     // API 문서 — SpringDoc OpenAPI(Swagger UI). 04 명세와 실제 구현을 상호 대조(04 §자동 문서)
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
     // 관측 — /actuator/health가 15 §2 k8s readiness/liveness probe가 됨
