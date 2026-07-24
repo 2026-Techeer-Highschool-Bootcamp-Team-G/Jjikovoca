@@ -1,6 +1,9 @@
 package com.jjikboka.app.config;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +29,21 @@ public class RedisCacheConfig {
 
     @Bean
     RedisCacheManager cacheManager(RedisConnectionFactory cf, ObjectMapper objectMapper) {
-        var json = new GenericJackson2JsonRedisSerializer(objectMapper);
+        // 캐시 값은 @class 타입정보(디폴트 타이핑)로 저장해야 역직렬화 시 원래 DTO로 복원된다.
+        // 앱 공용 매퍼(MVC용)를 그대로 넘기면 @class가 안 붙어 LinkedHashMap으로 복원→CCE(#213).
+        // DTO가 전부 Java record(=final)라 NON_FINAL은 루트에 @class를 안 붙인다 → EVERYTHING으로
+        // record까지 타입정보를 강제한다. 공용 매퍼를 오염시키지 않도록 사본에만 적용하고,
+        // 역직렬화 가젯 공격을 막기 위해 우리 DTO와 캐시가 담는 표준 타입만 허용한다
+        // (java.lang은 String·숫자 등 스칼라 복원용 — EVERYTHING이 스칼라도 태깅하기 때문).
+        PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+                .allowIfSubType("com.jjikboka.")
+                .allowIfSubType("java.util.")
+                .allowIfSubType("java.time.")
+                .allowIfSubType("java.lang.")
+                .build();
+        ObjectMapper cacheMapper = objectMapper.copy()
+                .activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.EVERYTHING, JsonTypeInfo.As.PROPERTY);
+        var json = new GenericJackson2JsonRedisSerializer(cacheMapper);
         RedisCacheConfiguration base = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(json))
                 .disableCachingNullValues() // null 캐싱은 캐시별로 필요 시 개별 허용(penetration 방어, §9-2)
