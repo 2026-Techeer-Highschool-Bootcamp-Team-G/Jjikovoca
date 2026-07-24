@@ -98,7 +98,8 @@ public class StudyStatsService {
 
     private List<StudyStats.GrassPoint> toGrass(List<Object[]> rows) {
         return rows.stream()
-                .map(row -> new StudyStats.GrassPoint(((Date) row[0]).toLocalDate(), ((Number) row[1]).longValue()))
+                .map(row -> new StudyStats.GrassPoint(((Date) row[0]).toLocalDate(), ((Number) row[1]).longValue(),
+                        (int) (((Number) row[2]).longValue() / 60000)))
                 .toList();
     }
 }
