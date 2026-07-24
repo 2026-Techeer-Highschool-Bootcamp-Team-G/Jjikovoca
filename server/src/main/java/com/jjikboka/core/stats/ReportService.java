@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -56,12 +57,18 @@ public class ReportService {
         LocalDateTime start = target.atDay(1).atStartOfDay();
         LocalDateTime end = target.plusMonths(1).atDay(1).atStartOfDay();
 
+        // rhythm·todayDue는 기간과 무관한 "오늘" 값(홈 위젯) — 과거월 조회여도 오늘 기준으로 낸다.
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime todayStart = LocalDate.now().atStartOfDay();
+
         StudyStats stats = studyStatsService.getStudyStats(userId, start, end);
         ReportBasic basic = new ReportBasic(
                 cardStatsService.newCards(userId, start, end),
                 stats.studyCount(),
                 new Accuracy(stats.accuracyWord(), stats.accuracyProblem()),
-                subjectBreakdown(userId, start, end));
+                subjectBreakdown(userId, start, end),
+                studyStatsService.todayRhythm(userId, todayStart, todayStart.plusDays(1)),
+                cardStatsService.reviewDue(userId, now));
 
         List<GrassDay> grass = stats.grass().stream()
                 .map(point -> new GrassDay(point.date(), point.count()))
