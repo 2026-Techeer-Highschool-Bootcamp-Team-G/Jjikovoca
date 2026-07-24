@@ -27,6 +27,9 @@ dependencies {
     // 이미지 저장소 S3(API-10) — app.image.storage=s3일 때만 사용, 기본 local. 자격은 env/IAM(15 §7)
     implementation(platform("software.amazon.awssdk:bom:2.28.29"))
     implementation("software.amazon.awssdk:s3")
+    // 내보내기 실 렌더(API-25) — headless Chromium(Playwright). app.export.renderer=chromium일 때만 사용, 기본 stub.
+    // 브라우저 바이너리는 첫 렌더에 자동 다운로드되거나 `playwright install chromium`으로 준비.
+    implementation("com.microsoft.playwright:playwright:1.47.0")
     // API 문서 — SpringDoc OpenAPI(Swagger UI). 04 명세와 실제 구현을 상호 대조(04 §자동 문서)
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
     // 관측 — /actuator/health가 15 §2 k8s readiness/liveness probe가 됨
