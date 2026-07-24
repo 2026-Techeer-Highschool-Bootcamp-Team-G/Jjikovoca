@@ -152,4 +152,9 @@ interface CardRepository extends JpaRepository<Card, Long> {
     @Query("SELECT COUNT(c) FROM Card c WHERE c.userId = :userId AND c.deletedAt IS NULL "
             + "AND c.graduatedAt IS NULL AND c.nextReviewAt IS NOT NULL AND c.nextReviewAt <= :now")
     long countReviewDue(@Param("userId") Long userId, @Param("now") LocalDateTime now);
+
+    /** 추천(API-6b) — 회상확률 계산 가능한 활성 FSRS 카드(미졸업·soft-delete 제외·stability·last_reviewed 有). 평균 R은 서비스에서. */
+    @Query("SELECT c FROM Card c WHERE c.userId = :userId AND c.deletedAt IS NULL AND c.graduatedAt IS NULL "
+            + "AND c.fsrsStability IS NOT NULL AND c.lastReviewedAt IS NOT NULL")
+    List<Card> findActiveFsrsCards(@Param("userId") Long userId);
 }
