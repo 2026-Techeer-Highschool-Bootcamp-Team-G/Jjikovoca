@@ -24,17 +24,21 @@ class CardController {
 
     private final CardQueryService cardQueryService;
     private final CardCommandService cardCommandService;
+    private final FeedFacade feedFacade;
 
-    CardController(CardQueryService cardQueryService, CardCommandService cardCommandService) {
+    CardController(CardQueryService cardQueryService, CardCommandService cardCommandService, FeedFacade feedFacade) {
         this.cardQueryService = cardQueryService;
         this.cardCommandService = cardCommandService;
+        this.feedFacade = feedFacade;
     }
 
     @GetMapping
     ResponseEntity<ApiResponse<CardFeedResponse>> feed(
             @AuthenticationPrincipal Long userId,
-            @RequestParam(required = false) String subject) {
-        CardFeedResponse response = new CardFeedResponse(cardQueryService.getFeed(userId, subject));
+            @RequestParam(required = false) String subject,
+            @RequestParam(required = false) Long examId,
+            @RequestParam(defaultValue = "false") boolean untagged) {
+        CardFeedResponse response = new CardFeedResponse(feedFacade.getFeed(userId, subject, examId, untagged));
         return ResponseEntity.ok(ApiResponse.ok(response, "카드 목록 조회가 완료되었습니다."));
     }
 
