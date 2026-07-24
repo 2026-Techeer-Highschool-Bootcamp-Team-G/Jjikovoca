@@ -120,8 +120,8 @@ const WEAK_ENG = [
   { concept: '다의어 (sound 등)', count: 2, to: '/flashcard' },
 ]
 const WEAK_MATH = [
-  { concept: '이차방정식 인수분해', count: 5, to: '/math-answer' },
-  { concept: '삼각함수 그래프', count: 3, to: '/math-answer' },
+  { concept: '이차방정식 인수분해', count: 5, to: '/math-review' },
+  { concept: '삼각함수 그래프', count: 3, to: '/math-review' },
 ]
 
 // 일일 학습 시간 주간 막대 (F-10) — 과목별 분(분 단위): 수학(파랑)+영어(초록) 누적
