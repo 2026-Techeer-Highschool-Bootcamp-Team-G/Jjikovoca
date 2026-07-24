@@ -1,12 +1,17 @@
 package com.jjikboka.analysis;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
  * 모의 Gemini (API-6, 모의 우선). 키·원가 없이 카드 생성 흐름을 끝까지 돌리기 위한 고정 응답이다.
- * 타입별로 그럴듯한 필드를 채우고 model은 "mock"으로 표시한다 — 실 전환 시 이 클래스만 실 구현으로 교체한다.
+ * 타입별로 그럴듯한 필드를 채우고 model은 "mock"으로 표시한다.
+ *
+ * <p>{@code gemini.mock=true}(기본, 미설정 포함)일 때 활성. false면 {@link RealGeminiClient}가 대신 뜬다 —
+ * 계약이 같아 app 워커는 어느 쪽이 주입돼도 그대로 동작한다(13 §2).
  */
 @Component
+@ConditionalOnProperty(prefix = "gemini", name = "mock", havingValue = "true", matchIfMissing = true)
 class MockGeminiClient implements GeminiClient {
 
     private static final String MODEL = "mock";
