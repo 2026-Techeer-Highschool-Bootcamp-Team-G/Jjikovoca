@@ -48,12 +48,13 @@ public class ExpService {
         return new AttendResult(earned, stat.getExp(), levelUp, newStreak);
     }
 
-    /** 경험치 현황(API-19). 통계 행이 없으면 기본 상태(레벨 1)로 응답한다. */
+    /** 경험치 현황(API-19). 통계 행이 없으면 기본 상태(레벨 1)로 응답한다. 오늘의 퀘스트=일일 XP 목표 진행도. */
     @Transactional(readOnly = true)
     public ExpSummary getSummary(Long userId) {
         UserStat stat = userStatRepository.findById(userId).orElseGet(() -> UserStat.of(userId));
         int todayEarned = expLogRepository.sumEarnedOn(userId, LocalDate.now());
+        Quest quest = new Quest("오늘의 학습 목표", todayEarned, DAILY_CAP, todayEarned >= DAILY_CAP);
         return new ExpSummary(stat.getLevel(), stat.getExp(), stat.nextLevelExp(),
-                todayEarned, DAILY_CAP, stat.getStreakDays());
+                todayEarned, DAILY_CAP, stat.getStreakDays(), quest);
     }
 }
