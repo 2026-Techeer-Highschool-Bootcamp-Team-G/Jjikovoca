@@ -60,10 +60,9 @@ gemini:
   mock: ${GEMINI_MOCK:true}
   api-key: ${GEMINI_API_KEY:}
   base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta}
-  models:
-    - gemini-2.5-flash
-    - gemini-2.5-flash-lite
-    - gemini-2.0-flash
+  models:                    # 폐기 안 되는 -latest 별칭(구 gemini-2.5-flash 등은 신규 사용자 폐기 → 404)
+    - gemini-flash-latest
+    - gemini-flash-lite-latest
   timeout-ms: 30000
 
 # 로그 JSON 구조화는 배포 프로파일에서 (07 규약) — traceId 주입 자리

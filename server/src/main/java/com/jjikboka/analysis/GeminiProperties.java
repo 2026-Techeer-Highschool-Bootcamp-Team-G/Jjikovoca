@@ -22,8 +22,11 @@ public class GeminiProperties {
     /** generateContent 베이스 URL(버전 포함). */
     private String baseUrl = "https://generativelanguage.googleapis.com/v1beta";
 
-    /** 폴백 체인 — 앞 모델부터 시도, 실패 시 다음. */
-    private List<String> models = List.of("gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash");
+    /**
+     * 폴백 체인 — 앞 모델부터 시도, 실패 시 다음. 폐기되지 않는 {@code -latest} 별칭을 쓴다(구버전 gemini-2.5-flash 등은
+     * 신규 사용자에게 폐기돼 404). flash-latest→3.6-flash, flash-lite-latest→3.5-flash-lite로 자동 최신 추적.
+     */
+    private List<String> models = List.of("gemini-flash-latest", "gemini-flash-lite-latest");
 
     /** 단일 호출 타임아웃(ms). 워커 전용 풀에서 블로킹 호출하므로 상한을 둔다. */
     private long timeoutMs = 30000;
