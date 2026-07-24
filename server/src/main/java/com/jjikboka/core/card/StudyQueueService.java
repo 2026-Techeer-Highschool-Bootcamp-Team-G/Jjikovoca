@@ -30,16 +30,17 @@ public class StudyQueueService {
      */
     @Transactional(readOnly = true)
     public List<FlashcardItem> getFlashcards(Long userId, String subject, int limit, String mode, List<Long> cardIds) {
+        LocalDateTime now = LocalDateTime.now();   // recallProb(R) 계산·due 판정에 같은 기준시각 사용
         if (MODE_PICK.equals(mode)) {
             if (cardIds == null || cardIds.isEmpty()) {
                 return List.of();
             }
             return cardRepository.findByUserIdAndIdInAndDeletedAtIsNullOrderByCreatedAtDesc(userId, cardIds)
-                    .stream().limit(limit).map(FlashcardItem::from).toList();
+                    .stream().limit(limit).map(card -> FlashcardItem.from(card, now)).toList();
         }
         String subjectFilter = (subject == null || SUBJECT_ALL.equals(subject)) ? null : subject;
-        return cardRepository.findFlashcardQueue(userId, subjectFilter, LocalDateTime.now(), PageRequest.of(0, limit))
-                .stream().map(FlashcardItem::from).toList();
+        return cardRepository.findFlashcardQueue(userId, subjectFilter, now, PageRequest.of(0, limit))
+                .stream().map(card -> FlashcardItem.from(card, now)).toList();
     }
 
     /** 오늘의 복습 큐(API-13) — next_review_at 도래한 미졸업 카드를 이른 순으로 limit만큼. */
