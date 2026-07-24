@@ -32,6 +32,17 @@ public class StudyStatsService {
                 toGrass(studyLogRepository.grassCounts(userId, start, end)));
     }
 
+    /** 과목별 학습 집계(API-17 도넛) — [subject, duration_ms 합, 학습 수] → 분·개수. 비율은 core.stats가 조합 시 붙인다. */
+    @Transactional(readOnly = true)
+    public List<SubjectMinutes> subjectBreakdown(Long userId, LocalDateTime start, LocalDateTime end) {
+        return studyLogRepository.subjectBreakdown(userId, start, end).stream()
+                .map(row -> new SubjectMinutes(
+                        (String) row[0],
+                        (int) (((Number) row[1]).longValue() / 60000),
+                        ((Number) row[2]).longValue()))
+                .toList();
+    }
+
     /** [KNOW 수, 전체 수] → 정확도. 집계라 항상 1행이지만 방어적으로 빈 결과면 null. 전체 0 또는 KNOW=null(대상 없음)이면 null. */
     private Double accuracy(List<Object[]> rows) {
         if (rows.isEmpty()) {

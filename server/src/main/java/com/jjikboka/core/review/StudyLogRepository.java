@@ -48,4 +48,12 @@ interface StudyLogRepository extends JpaRepository<StudyLog, Long> {
     List<Object[]> grassCounts(@Param("userId") Long userId,
                                @Param("start") LocalDateTime start,
                                @Param("end") LocalDateTime end);
+
+    /** 과목별 학습 집계(API-17 도넛) — [subject, duration_ms 합, 학습 수]. Card와 조인해 subject로 그룹. duration null은 0으로. */
+    @Query("SELECT c.subject, COALESCE(SUM(s.durationMs), 0), COUNT(s) "
+            + "FROM StudyLog s, Card c WHERE s.cardId = c.id AND s.userId = :userId "
+            + "AND s.createdAt >= :start AND s.createdAt < :end GROUP BY c.subject")
+    List<Object[]> subjectBreakdown(@Param("userId") Long userId,
+                                    @Param("start") LocalDateTime start,
+                                    @Param("end") LocalDateTime end);
 }
