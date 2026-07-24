@@ -19,11 +19,10 @@ export function ExportPage() {
   const [type, setType] = useState<ExportType>('WORD')
   const [range, setRange] = useState<Range>('DONT')
 
-  // 생성 요청 — 성공 시 downloadUrl 전달, 실패/미가동 시에도 결과 화면으로(폴백)
+  // 생성 요청 — 성공 시 실제 downloadUrl 전달. 실패는 성공으로 가리지 않고 에러 표시
   const create = useMutation({
     mutationFn: () => createExport({ type: type === 'WORD' ? 'PDF_WORDTEST' : 'PDF_NOTE' }),
-    onSuccess: (r) => navigate('/export-done', { state: { downloadUrl: r.downloadUrl } }),
-    onError: () => navigate('/export-done'),
+    onSuccess: (r) => navigate('/export-done', { state: { downloadUrl: r.downloadUrl, kind: type } }),
   })
 
   return (
@@ -97,6 +96,11 @@ export function ExportPage() {
       </div>
 
       <div style={{ background: 'var(--color-bg-primary)', padding: '12px var(--spacing-xl) 32px' }}>
+        {create.isError && (
+          <p style={{ margin: '0 0 10px', textAlign: 'center', fontSize: 12, color: 'var(--color-error-primary, #e5484d)' }}>
+            {create.error instanceof Error ? create.error.message : 'PDF 생성에 실패했어요. 다시 시도해 주세요.'}
+          </p>
+        )}
         <Button block size="lg" onClick={() => create.mutate()} disabled={create.isPending}>
           {create.isPending ? '생성 중…' : '📄 PDF 만들기'}
         </Button>
