@@ -8,8 +8,13 @@ package com.jjikboka.shared.event;
  */
 public final class AnalyzeEvents {
 
-    /** core.card 발행 — quota 차감·job 접수 후 AFTER_COMMIT (outbox 인프로세스 유사물) */
-    public record AnalyzeRequested(Long jobId, Long userId, String type) {}
+    /**
+     * core.card 발행 — quota 차감·job 접수 후 AFTER_COMMIT (outbox 인프로세스 유사물).
+     * cropImageRefs는 저장된 크롭 파일명들(첫 개가 card.image_path), fullImageRef는 지문 파일명(WORD 문맥 판별용, 없으면 null).
+     * 워커가 이 참조로 이미지를 로드해 비전 입력으로 넘긴다(base64 원문은 이벤트에 싣지 않는다 — 큐 전환 대비).
+     */
+    public record AnalyzeRequested(Long jobId, Long userId, String type,
+                                   java.util.List<String> cropImageRefs, String fullImageRef) {}
 
     /** analysis 발행 — 진행 단계마다 (SSE 단계 이벤트, 05 §5-3) */
     public record AnalyzeProgressed(Long jobId, String stage) {}
