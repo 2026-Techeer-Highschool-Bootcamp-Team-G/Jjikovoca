@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Tabs, Chip, Button, SearchBar, BottomSheet } from '@/shared/ui'
 import { CardRow } from '@/widgets/card-row'
 import type { CardRowView } from '@/widgets/card-row'
-import { fetchCards, tagCardExams } from '@/entities/card'
+import { fetchCards, tagCardExams, untagCardExam } from '@/entities/card'
 import type { Card, FeedSubject } from '@/entities/card'
 import { fetchExams } from '@/entities/exam'
 
@@ -16,46 +16,11 @@ const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
 
 type Status = 'ALL' | 'GRADUATED' | 'WAITING' | 'WEAK' | 'UNTAGGED'
 const STATUS_CHIPS: { key: Status; label: string }[] = [
-  { key: 'ALL', label: '전체 128' },
-  { key: 'GRADUATED', label: '졸업완료 13' },
-  { key: 'WAITING', label: '복습대기 15' },
+  { key: 'ALL', label: '전체' },
+  { key: 'GRADUATED', label: '졸업완료' },
+  { key: 'WAITING', label: '복습대기' },
   { key: 'WEAK', label: '약점유형' },
   { key: 'UNTAGGED', label: '시험 미지정' },
-]
-
-const ROWS: CardRowView[] = [
-  {
-    id: 1,
-    title: 'sound',
-    pronunciation: '[saʊnd]',
-    subtitle: '타당한, 믿을 만한 · n. 소리',
-    tags: [{ label: '형용사', tone: 'grey' }, { label: '학업', tone: 'blue' }],
-    typeBadge: { label: '다의어', color: 'red' },
-    exams: ['중간고사'],
-    showSpeaker: true,
-  },
-  {
-    id: 2,
-    title: 'take charge of',
-    subtitle: '~을 책임지다, 맡다',
-    tags: [{ label: '동사구', tone: 'grey' }, { label: '회사', tone: 'blue' }],
-    typeBadge: { label: '숙어', color: 'blue' },
-    exams: ['중간'],
-    showSpeaker: true,
-  },
-  {
-    id: 3,
-    title: 'x² − 5x + 6 = 0 의 두 근',
-    subtitle: '이차방정식 · 인수분해 · 사고 단계 4개',
-    tags: [{ label: '수학', tone: 'grey' }, { label: '문제', tone: 'blue' }],
-    untagged: true,
-  },
-]
-
-const EXAMS = [
-  { id: 'mid', name: '중간고사', detail: '수학 · D-7' },
-  { id: 'final', name: '기말고사', detail: '전과목 · D-38' },
-  { id: 'mock', name: '9월 모의고사', detail: '전과목 · D-52' },
 ]
 
 // 피드 Card → 행 뷰 (오답노트와 동일 매핑)
@@ -72,35 +37,47 @@ function toRow(c: Card): CardRowView {
   }
 }
 
-/** 시험 선택 시트 (14-4, F-29) — 카드에 시험 지정. 마이/오답노트 딤 위 BottomSheet 복수 선택 */
+/** 시험 선택 시트 (14-4, F-29) — 카드에 시험 지정/해제. 실 카드·시험 기반 */
 export function ExamSelectPage() {
   const navigate = useNavigate()
+  const qc = useQueryClient()
   const [subject, setSubject] = useState<FeedSubject>('ALL')
   const [status, setStatus] = useState<Status>('ALL')
-  const [open, setOpen] = useState(true)
-  const [checked, setChecked] = useState<Set<string>>(new Set(['mid']))
+  const [open, setOpen] = useState(false)
+  const [checked, setChecked] = useState<Set<number>>(new Set())
   const [activeCardId, setActiveCardId] = useState<number | null>(null)
+  const originalRef = useRef<Set<number>>(new Set()) // 시트 열 때 카드의 기존 시험(차분 계산용)
 
-  // 실 데이터 — 미가동 시 데모 폴백
-  const cardsQ = useQuery({ queryKey: ['cards', subject], queryFn: () => fetchCards(subject), retry: 0 })
-  const rows = cardsQ.data && cardsQ.data.length > 0 ? cardsQ.data.map(toRow) : ROWS
-  const examsQ = useQuery({ queryKey: ['exams'], queryFn: fetchExams, retry: 0 })
-  const examList =
-    examsQ.data && examsQ.data.length > 0
-      ? examsQ.data.map((e) => ({ id: String(e.id), name: e.title, detail: `${e.subject ?? '전과목'} · D-${e.dday}` }))
-      : EXAMS
-  const tag = useMutation({
-    mutationFn: (v: { cardId: number; examIds: number[] }) => tagCardExams(v.cardId, v.examIds),
-    onSuccess: () => setOpen(false),
+  const cardsQ = useQuery({ queryKey: ['cards', subject], queryFn: () => fetchCards(subject) })
+  const cards = cardsQ.data ?? []
+  const examsQ = useQuery({ queryKey: ['exams'], queryFn: fetchExams })
+  const examList = (examsQ.data ?? []).map((e) => ({ id: e.id, name: e.title, detail: `${e.subject ?? '전과목'} · D-${e.dday}` }))
+
+  // 완료 — 추가(tagCardExams)·해제(untagCardExam) 차분을 반영
+  const save = useMutation({
+    mutationFn: async () => {
+      if (activeCardId == null) return
+      const orig = originalRef.current
+      const added = [...checked].filter((id) => !orig.has(id))
+      const removed = [...orig].filter((id) => !checked.has(id))
+      if (added.length) await tagCardExams(activeCardId, added)
+      for (const id of removed) await untagCardExam(activeCardId, id)
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['cards'] })
+      setOpen(false)
+    },
   })
 
-  const done = () => {
-    const examIds = [...checked].map(Number).filter((n) => !Number.isNaN(n))
-    if (activeCardId != null && examIds.length) tag.mutate({ cardId: activeCardId, examIds })
-    else setOpen(false)
+  const openSheet = (card: Card) => {
+    const ids = new Set((card.exams ?? []).map((e) => e.id))
+    originalRef.current = ids
+    setChecked(new Set(ids))
+    setActiveCardId(card.id)
+    setOpen(true)
   }
 
-  const toggle = (id: string) =>
+  const toggle = (id: number) =>
     setChecked((prev) => {
       const next = new Set(prev)
       if (next.has(id)) next.delete(id)
@@ -113,7 +90,7 @@ export function ExamSelectPage() {
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', padding: '12px var(--spacing-xl) 0' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--color-text-primary)' }}>오답노트</h1>
-          <span style={{ fontSize: 13, color: 'var(--color-text-tertiary)' }}>128장</span>
+          <span style={{ fontSize: 13, color: 'var(--color-text-tertiary)' }}>{cards.length}장</span>
         </div>
         <button type="button" style={{ background: 'none', border: 'none', fontSize: 13, fontWeight: 500, color: 'var(--color-text-brand)', cursor: 'pointer' }}>
           PDF ↗
@@ -121,7 +98,7 @@ export function ExamSelectPage() {
       </div>
 
       <div style={{ padding: '12px var(--spacing-xl) 0' }}>
-        <SearchBar placeholder="단어 · 문제 · 개념 검색" />
+        <SearchBar placeholder="단어 · 문제 · 개념 검색" onClick={() => navigate('/search')} />
       </div>
 
       <div style={{ marginTop: 12, background: 'var(--color-bg-primary)' }}>
@@ -135,7 +112,7 @@ export function ExamSelectPage() {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px var(--spacing-xl) 8px' }}>
-        <span style={{ fontSize: 12, color: 'var(--color-text-tertiary)' }}>졸업 카드 표시 ✓</span>
+        <span style={{ fontSize: 12, color: 'var(--color-text-tertiary)' }}>카드를 탭해 시험을 지정/해제하세요</span>
         <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-text-brand)' }}>몰라요 빈도순 ▾</span>
       </div>
 
@@ -150,25 +127,29 @@ export function ExamSelectPage() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 var(--spacing-xl) 24px' }}>
-        {rows.map((row) => (
-          <CardRow
-            key={row.id}
-            row={row}
-            onClick={() => {
-              setActiveCardId(row.id)
-              setOpen(true)
-            }}
-          />
+        {cards.map((c) => (
+          <CardRow key={c.id} row={toRow(c)} onClick={() => openSheet(c)} />
         ))}
+        {cards.length === 0 && (
+          <p style={{ margin: '32px 0', textAlign: 'center', fontSize: 13, color: 'var(--color-text-tertiary)' }}>
+            {cardsQ.isLoading ? '불러오는 중…' : '카드가 없어요 — 시험지를 촬영해보세요'}
+          </p>
+        )}
       </div>
 
       <BottomSheet open={open} onClose={() => setOpen(false)}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)' }}>시험 지정</span>
           <span style={{ fontSize: 12, color: 'var(--color-text-tertiary)' }}>
-            이 카드가 포함될 시험을 선택하세요 (복수 가능)
+            이 카드가 포함될 시험을 선택하세요 (복수 가능 · 해제하려면 다시 탭)
           </span>
         </div>
+
+        {examList.length === 0 && (
+          <p style={{ margin: '16px 0', textAlign: 'center', fontSize: 13, color: 'var(--color-text-tertiary)' }}>
+            등록된 시험이 없어요 — 시험 일정에서 먼저 등록해주세요
+          </p>
+        )}
 
         {examList.map((e) => {
           const on = checked.has(e.id)
@@ -217,8 +198,8 @@ export function ExamSelectPage() {
           )
         })}
 
-        <Button block size="lg" onClick={done} disabled={tag.isPending}>
-          {tag.isPending ? '지정 중…' : '완료'}
+        <Button block size="lg" onClick={() => save.mutate()} disabled={save.isPending}>
+          {save.isPending ? '반영 중…' : '완료'}
         </Button>
       </BottomSheet>
     </div>
