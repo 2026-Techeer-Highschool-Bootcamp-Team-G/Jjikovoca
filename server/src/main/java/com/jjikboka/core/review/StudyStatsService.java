@@ -38,6 +38,12 @@ public class StudyStatsService {
                 toGrass(studyLogRepository.grassCounts(userId, start, end)));
     }
 
+    /** 기간 내 학습 수(API-19 퀘스트) — study_log 카운트만 가볍게. 오늘 복습 진행도 계산에 쓴다. */
+    @Transactional(readOnly = true)
+    public long studyCount(Long userId, LocalDateTime start, LocalDateTime end) {
+        return studyLogRepository.countInPeriod(userId, start, end);
+    }
+
     /** 과목별 학습 집계(API-17 도넛) — [subject, duration_ms 합, 학습 수] → 분·개수. 비율은 core.stats가 조합 시 붙인다. */
     @Transactional(readOnly = true)
     public List<SubjectMinutes> subjectBreakdown(Long userId, LocalDateTime start, LocalDateTime end) {
