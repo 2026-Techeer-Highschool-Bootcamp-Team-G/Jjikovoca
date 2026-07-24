@@ -12,6 +12,7 @@ import {
   pollAnalyzeJob,
 } from '@/features/capture'
 import type { CaptureResult } from '@/features/capture'
+import type { Card } from '@/entities/card'
 import { fetchMe } from '@/entities/user'
 
 type Phase = 'method' | 'camera' | 'edit' | 'analyzing' | 'done'
@@ -30,16 +31,21 @@ export function CapturePage() {
   const [phase, setPhase] = useState<Phase>(params.get('phase') === 'analyzing' ? 'analyzing' : 'method')
   const [isMath, setIsMath] = useState(params.get('subject') === 'math')
   const [imageSrc, setImageSrc] = useState<string | null>(null)
+  // 분석 결과 카드(폴링에서 수신) — 결과 화면에 실 카드로 전달
+  const [resultCards, setResultCards] = useState<Card[] | null>(null)
 
-  // 영어·수학 모두 결과 카드 화면으로 (수학도 카드로 저장)
-  const finish = () => setPhase('done')
+  // 영어·수학 모두 결과 카드 화면으로. 폴링이 카드를 주면 그 카드를 결과에 전달
+  const finish = (cards?: Card[]) => {
+    if (cards && cards.length > 0) setResultCards(cards)
+    setPhase('done')
+  }
 
   // 분석: 한도 확인 → analyze 접수(202) → 폴링. 실패/미가동 시 데모 타이머 폴백(탭하면 즉시 결과)
   useEffect(() => {
     if (phase !== 'analyzing') return
     let cancelled = false
     let pollTimer: ReturnType<typeof setTimeout> | undefined
-    const fallback = setTimeout(finish, 2800) // 폴백: 백엔드 실패/미가동 시 데모 결과
+    const fallback = setTimeout(() => finish(), 2800) // 폴백: 응답 지연 시 결과 화면(최신 카드 조회)
     ;(async () => {
       try {
         const me = await fetchMe()
@@ -58,7 +64,10 @@ export function CapturePage() {
         const poll = async () => {
           if (cancelled) return
           const r = await pollAnalyzeJob(jobId)
-          if (r.status === 'COMPLETED' || r.status === 'FAILED') {
+          if (r.status === 'COMPLETED') {
+            clearTimeout(fallback)
+            finish(r.cards) // 실제 분석 카드 전달(서버에 이미 저장됨)
+          } else if (r.status === 'FAILED') {
             clearTimeout(fallback)
             finish()
           } else {
@@ -132,11 +141,11 @@ export function CapturePage() {
 
   if (phase === 'analyzing') {
     return (
-      <div onClick={finish} style={{ cursor: 'pointer' }}>
+      <div onClick={() => finish()} style={{ cursor: 'pointer' }}>
         <AnalyzingView subject={isMath ? 'MATH' : 'ENGLISH'} />
       </div>
     )
   }
 
-  return <AnalysisResult isMath={isMath} onBack={() => navigate(-1)} />
+  return <AnalysisResult isMath={isMath} card={resultCards?.[0] ?? null} onBack={() => navigate(-1)} />
 }
