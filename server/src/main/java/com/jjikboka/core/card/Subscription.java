@@ -73,6 +73,10 @@ class Subscription {
         return status;
     }
 
+    String getPlan() {
+        return plan;
+    }
+
     LocalDateTime getExpiresAt() {
         return expiresAt;
     }
