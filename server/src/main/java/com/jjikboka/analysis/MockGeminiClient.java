@@ -21,7 +21,8 @@ class MockGeminiClient implements GeminiClient {
             "{\"failedStep\":3,\"description\":\"이항 부호 오류\",\"suggestedReason\":\"MISTAKE\"}";
 
     @Override
-    public AnalysisContent generate(String type) {
+    public AnalysisContent generate(String type, java.util.List<GeminiImage> images) {
+        // 모의 구현은 이미지를 쓰지 않는다(고정 응답). 실 전환 시 RealGeminiClient가 images를 비전 입력으로 넣는다.
         if ("PROBLEM".equals(type)) {
             return new AnalysisContent(
                     MODEL, "MATH",
