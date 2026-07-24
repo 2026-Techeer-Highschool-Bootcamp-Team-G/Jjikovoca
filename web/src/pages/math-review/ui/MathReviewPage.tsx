@@ -11,8 +11,9 @@ import {
   fetchMathQueue,
   revealStep,
   judgeMath,
+  generateSolution,
 } from '@/features/math-review'
-import type { MathProblem, MathStep, MathPhase, MathJudge } from '@/features/math-review'
+import type { MathProblem, MathStep, MathPhase, MathJudge, MathSolutionMeta } from '@/features/math-review'
 import { recordStudy } from '@/features/study'
 import { GradeButtons } from '@/features/study-grade'
 import type { Grade } from '@/features/study-grade'
@@ -32,6 +33,7 @@ export function MathReviewPage() {
   const [revealed, setRevealed] = useState<Record<number, string>>({})
   const [judge, setJudge] = useState<MathJudge | null>(null)
   const [correct, setCorrect] = useState(false)
+  const [extraSolutions, setExtraSolutions] = useState<MathSolutionMeta[]>([]) // 생성한 다른 풀이(프리미엄)
   const clickedRef = useRef<number[]>([]) // 회상(정답 입력) 전 연 단계 로그
 
   const revealMut = useMutation({
@@ -59,6 +61,12 @@ export function MathReviewPage() {
       setCorrect(r.correct)
       setPhase('verdict')
     },
+  })
+
+  // 다른 풀이 생성(프리미엄) — 성공 시 접근법 라벨 추가
+  const genSol = useMutation({
+    mutationFn: (): Promise<MathSolutionMeta> => generateSolution(card!.cardId),
+    onSuccess: (s) => setExtraSolutions((prev) => [...prev, s]),
   })
 
   const handleGrade = (grade: Grade) => {
@@ -103,6 +111,7 @@ export function MathReviewPage() {
   }
   const answerValue = judge?.answerValue ?? ''
   const explanation = judge?.solutions[0]?.explanation ?? ''
+  const solutionLabels = [...card.solutions.map((s) => s.label), ...extraSolutions.map((s) => s.label)]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
@@ -155,7 +164,16 @@ export function MathReviewPage() {
         {phase === 'verdict' && (
           <>
             <MathProblemCard problem={view} slim />
-            <VerdictView correct={correct} answerValue={answerValue} explanation={explanation} enteredAnswer={answer} />
+            <VerdictView
+              correct={correct}
+              answerValue={answerValue}
+              explanation={explanation}
+              enteredAnswer={answer}
+              solutionLabels={solutionLabels}
+              onGenerateSolution={() => genSol.mutate()}
+              generating={genSol.isPending}
+              genError={genSol.isError ? '프리미엄 전용이거나 생성에 실패했어요' : null}
+            />
             <div style={{ marginTop: 'auto', paddingTop: 8 }}>
               <GradeButtons onGrade={handleGrade} />
               <p style={{ margin: '8px 0 0', textAlign: 'center', fontSize: 11, color: 'var(--grey-500)' }}>

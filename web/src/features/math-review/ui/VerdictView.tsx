@@ -3,6 +3,11 @@ interface Props {
   answerValue: string
   explanation: string
   enteredAnswer: string
+  // 다른 풀이 — 접근법 라벨(첫 번째=현재), 생성 버튼 콜백(프리미엄)
+  solutionLabels?: string[]
+  onGenerateSolution?: () => void
+  generating?: boolean
+  genError?: string | null
 }
 
 const cardStyle = {
@@ -13,7 +18,16 @@ const cardStyle = {
 } as const
 
 // 판정 결과 (12-4 정답 / 12-5 오답) — 피드백 + 정답 + 해설 + 다른 풀이
-export function VerdictView({ correct, answerValue, explanation, enteredAnswer }: Props) {
+export function VerdictView({
+  correct,
+  answerValue,
+  explanation,
+  enteredAnswer,
+  solutionLabels,
+  onGenerateSolution,
+  generating,
+  genError,
+}: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div
@@ -67,46 +81,56 @@ export function VerdictView({ correct, answerValue, explanation, enteredAnswer }
         </p>
       </div>
 
-      <OtherSolutions />
+      <OtherSolutions
+        labels={solutionLabels ?? []}
+        onGenerate={onGenerateSolution}
+        generating={generating}
+        genError={genError}
+      />
     </div>
   )
 }
 
-// 다른 풀이 (118:771, F-26 v1.8) — 접근법 탭 전환 + 프리미엄 생성 버튼
-function OtherSolutions() {
+// 다른 풀이 (118:771, F-26 v1.8) — 생성된 접근법 라벨 + 프리미엄 생성 버튼
+function OtherSolutions({
+  labels,
+  onGenerate,
+  generating,
+  genError,
+}: {
+  labels: string[]
+  onGenerate?: () => void
+  generating?: boolean
+  genError?: string | null
+}) {
   return (
     <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column', gap: 10 }}>
       <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
         다른 풀이 — 수학은 접근이 여러 가지예요
       </span>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <span
-          style={{
-            fontSize: 12,
-            fontWeight: 700,
-            padding: '7px 14px',
-            borderRadius: 'var(--radius-full)',
-            background: 'var(--color-brand-primary)',
-            color: 'var(--color-text-inverse)',
-          }}
-        >
-          인수분해
-        </span>
-        <span
-          style={{
-            fontSize: 12,
-            fontWeight: 500,
-            padding: '7px 14px',
-            borderRadius: 'var(--radius-full)',
-            background: 'var(--grey-100)',
-            color: 'var(--grey-500)',
-          }}
-        >
-          🔒 근의 공식
-        </span>
-      </div>
+      {labels.length > 0 && (
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {labels.map((l, i) => (
+            <span
+              key={l + i}
+              style={{
+                fontSize: 12,
+                fontWeight: i === 0 ? 700 : 500,
+                padding: '7px 14px',
+                borderRadius: 'var(--radius-full)',
+                background: i === 0 ? 'var(--color-brand-primary)' : 'var(--color-brand-weak)',
+                color: i === 0 ? 'var(--color-text-inverse)' : 'var(--color-text-brand)',
+              }}
+            >
+              {l}
+            </span>
+          ))}
+        </div>
+      )}
       <button
         type="button"
+        onClick={onGenerate}
+        disabled={generating}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -117,14 +141,18 @@ function OtherSolutions() {
           borderRadius: 12,
           border: 'none',
           background: 'var(--color-brand-weak)',
-          cursor: 'pointer',
+          cursor: generating ? 'default' : 'pointer',
+          opacity: generating ? 0.6 : 1,
         }}
       >
         <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-brand-primary)' }}>
-          ✨ 다른 풀이 보기
+          {generating ? '생성 중…' : '✨ 다른 풀이 보기'}
         </span>
         <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--grey-500)' }}>프리미엄</span>
       </button>
+      {genError && (
+        <span style={{ fontSize: 12, textAlign: 'center', color: 'var(--color-text-danger)' }}>{genError}</span>
+      )}
     </div>
   )
 }

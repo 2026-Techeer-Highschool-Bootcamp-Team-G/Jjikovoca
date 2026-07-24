@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { NavigationBar, Button, TextField } from '@/shared/ui'
-import { fetchClozeQueue, submitClozeAnswer } from '@/features/cloze'
+import { fetchClozeQueue, submitClozeAnswer, regenerateCloze } from '@/features/cloze'
 import type { ClozeJudge } from '@/features/cloze'
 
 /** 빈칸 퀴즈 (F-06) — 주관식 입력 + 서버 판정(정답은 서버만 보유, 클라 미내장) */
@@ -12,6 +12,8 @@ export function ClozePage() {
   const [guess, setGuess] = useState('')
   const [hintCount, setHintCount] = useState(1)
   const [result, setResult] = useState<ClozeJudge | null>(null)
+  // AI 재생성한 예문 오버라이드 (cardId → 새 clozeText/hints)
+  const [overrides, setOverrides] = useState<Record<number, { clozeText: string; hints: string[] }>>({})
 
   // 실 큐 조회 — 정답 미포함(치팅 방지). 판정은 항상 서버
   const queue = useQuery({ queryKey: ['cloze'], queryFn: () => fetchClozeQueue() })
@@ -23,6 +25,15 @@ export function ClozePage() {
   const submit = useMutation({
     mutationFn: (): Promise<ClozeJudge> => submitClozeAnswer(cur.cardId, guess.trim()),
     onSuccess: (r) => setResult(r),
+  })
+
+  // AI 예문 재생성(프리미엄) — 새 clozeText/hints 로 교체
+  const regen = useMutation({
+    mutationFn: () => regenerateCloze(cur.cardId),
+    onSuccess: (r) => {
+      setOverrides((o) => ({ ...o, [cur.cardId]: { clozeText: r.clozeText, hints: r.hints } }))
+      setHintCount(1)
+    },
   })
 
   const next = () => {
@@ -50,8 +61,10 @@ export function ClozePage() {
     )
   }
 
+  // 재생성 오버라이드가 있으면 그 예문/힌트를 사용(meaning 은 원본 유지)
+  const item = overrides[cur.cardId] ? { ...cur, ...overrides[cur.cardId] } : cur
   // 백엔드 clozeText 는 빈칸을 밑줄 여러 개(_____)로 표기 → 한 덩어리로 분리
-  const [before, after] = cur.clozeText.split(/_+/)
+  const [before, after] = item.clozeText.split(/_+/)
 
   return (
     <div
@@ -110,7 +123,7 @@ export function ClozePage() {
 
         {/* 힌트 */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          {cur.hints.slice(0, hintCount).map((h, i) => (
+          {item.hints.slice(0, hintCount).map((h, i) => (
             <span
               key={i}
               style={{
@@ -125,7 +138,7 @@ export function ClozePage() {
               힌트 {i + 1}: {h}
             </span>
           ))}
-          {!result && hintCount < cur.hints.length && (
+          {!result && hintCount < item.hints.length && (
             <button
               type="button"
               onClick={() => setHintCount((n) => n + 1)}
@@ -147,7 +160,31 @@ export function ClozePage() {
 
         {/* 입력 or 결과 */}
         {!result ? (
-          <TextField value={guess} onChange={setGuess} placeholder="단어를 입력하세요" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <TextField value={guess} onChange={setGuess} placeholder="단어를 입력하세요" />
+            <button
+              type="button"
+              onClick={() => regen.mutate()}
+              disabled={regen.isPending}
+              style={{
+                alignSelf: 'flex-start',
+                fontSize: 12,
+                fontWeight: 500,
+                padding: '6px 12px',
+                borderRadius: 'var(--radius-full)',
+                background: 'transparent',
+                border: '1px solid var(--color-border-default)',
+                color: 'var(--color-text-secondary)',
+                cursor: regen.isPending ? 'default' : 'pointer',
+                opacity: regen.isPending ? 0.6 : 1,
+              }}
+            >
+              {regen.isPending ? '재생성 중…' : '🔄 다른 예문으로 (프리미엄)'}
+            </button>
+            {regen.isError && (
+              <span style={{ fontSize: 12, color: 'var(--color-text-danger)' }}>프리미엄 전용이거나 재생성에 실패했어요</span>
+            )}
+          </div>
         ) : (
           <div
             style={{
