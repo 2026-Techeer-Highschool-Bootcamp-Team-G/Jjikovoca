@@ -133,10 +133,13 @@ interface CardRepository extends JpaRepository<Card, Long> {
                         @Param("start") LocalDateTime start,
                         @Param("end") LocalDateTime end);
 
-    /** 리포트(API-17) — 약한 개념 후보: wrong_count 높은 카드의 concept(중복 가능, 상위부터). 서비스에서 distinct·상위 N. */
-    @Query("SELECT c.concept FROM Card c WHERE c.userId = :userId AND c.deletedAt IS NULL "
-            + "AND c.concept IS NOT NULL AND c.wrongCount > 0 ORDER BY c.wrongCount DESC")
-    List<String> findWeakConcepts(@Param("userId") Long userId, Pageable pageable);
+    /**
+     * 리포트(API-17) — 약한 개념: concept·subject 그룹의 wrong_count 합 [concept, subject, 합]. 내림차순, 서비스에서 상위 N.
+     * 다중 컬럼 집계라 {@code List<Object[]>}(단일 Object[]는 Hibernate 6가 이중 래핑 — 다른 집계와 통일).
+     */
+    @Query("SELECT c.concept, c.subject, SUM(c.wrongCount) FROM Card c WHERE c.userId = :userId AND c.deletedAt IS NULL "
+            + "AND c.concept IS NOT NULL AND c.wrongCount > 0 GROUP BY c.concept, c.subject ORDER BY SUM(c.wrongCount) DESC")
+    List<Object[]> findWeakConceptStats(@Param("userId") Long userId, Pageable pageable);
 
     /** 상태칩(API-7) — 전체 카드 수(soft-delete 제외). */
     long countByUserIdAndDeletedAtIsNull(Long userId);
