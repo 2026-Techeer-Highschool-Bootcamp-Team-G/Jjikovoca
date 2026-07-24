@@ -29,13 +29,16 @@ public class ReportService {
     private final StudyStatsService studyStatsService;
     private final CardStatsService cardStatsService;
     private final PremiumQueryService premiumQueryService;
+    private final ReportSnapshotService reportSnapshotService;
 
     ReportService(StudyStatsService studyStatsService,
                   CardStatsService cardStatsService,
-                  PremiumQueryService premiumQueryService) {
+                  PremiumQueryService premiumQueryService,
+                  ReportSnapshotService reportSnapshotService) {
         this.studyStatsService = studyStatsService;
         this.cardStatsService = cardStatsService;
         this.premiumQueryService = premiumQueryService;
+        this.reportSnapshotService = reportSnapshotService;
     }
 
     /**
@@ -60,6 +63,13 @@ public class ReportService {
                 .toList();
 
         ReportFull full = premiumQueryService.isPremium(userId) ? buildFull(userId, start, end, stats) : null;
+
+        // 완료된 과거 월이면 스냅샷을 durable하게 남긴다(멱등 upsert, 별도 트랜잭션). 현재/미래 월은 아직 진행 중이라 제외.
+        if (target.isBefore(YearMonth.now())) {
+            long graduated = cardStatsService.graduated(userId, start, end);
+            reportSnapshotService.snapshot(userId, target.format(MONTH), basic, stats, graduated);
+        }
+
         return new ReportView(target.format(MONTH), basic, full, grass);
     }
 
