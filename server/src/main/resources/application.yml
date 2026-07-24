@@ -43,6 +43,10 @@ jwt:
 app:
   image:
     dir: ${APP_IMAGE_DIR:./data/images}
+  # 내보내기 파일 저장소 (API-25·26). MVP는 로컬 파일 — 생성 파일을 여기 쓰고 /api/export/{id}/download가 서빙.
+  # 실 렌더(headless Chromium) 전환·S3 이전 시 이 설정/저장 어댑터를 교체.
+  export:
+    dir: ${APP_EXPORT_DIR:./data/exports}
 
 # 로그 JSON 구조화는 배포 프로파일에서 (07 규약) — traceId 주입 자리
 logging:

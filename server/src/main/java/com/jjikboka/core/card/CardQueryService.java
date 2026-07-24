@@ -43,6 +43,20 @@ public class CardQueryService {
         return cards.stream().map(CardSummary::from).toList();
     }
 
+    /**
+     * 내보내기 대상 카드 요약(API-25). cardIds가 비어 있으면 전체(soft-delete 제외), 있으면 그 중 소유 카드만.
+     * 정답은 담지 않는다(13 §7) — 내보내기 렌더도 요약 기준.
+     */
+    @Transactional(readOnly = true)
+    public List<CardSummary> getSummaries(Long userId, List<Long> cardIds) {
+        List<CardSummary> all = getFeed(userId, SUBJECT_ALL);
+        if (cardIds == null || cardIds.isEmpty()) {
+            return all;
+        }
+        java.util.Set<Long> wanted = new java.util.HashSet<>(cardIds);
+        return all.stream().filter(card -> wanted.contains(card.id())).toList();
+    }
+
     /** 폴링(API-39) — 특정 분석 작업이 만든 카드 목록(요약). soft-delete 제외·최신순. */
     @Transactional(readOnly = true)
     public List<CardSummary> getCardsByJob(Long userId, Long analyzeJobId) {
