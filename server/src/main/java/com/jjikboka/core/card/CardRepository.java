@@ -137,4 +137,16 @@ interface CardRepository extends JpaRepository<Card, Long> {
     @Query("SELECT c.concept FROM Card c WHERE c.userId = :userId AND c.deletedAt IS NULL "
             + "AND c.concept IS NOT NULL AND c.wrongCount > 0 ORDER BY c.wrongCount DESC")
     List<String> findWeakConcepts(@Param("userId") Long userId, Pageable pageable);
+
+    /** 상태칩(API-7) — 전체 카드 수(soft-delete 제외). */
+    long countByUserIdAndDeletedAtIsNull(Long userId);
+
+    /** 상태칩(API-7) — 졸업 완료 수(soft-delete 제외, 전 기간). */
+    @Query("SELECT COUNT(c) FROM Card c WHERE c.userId = :userId AND c.deletedAt IS NULL AND c.graduatedAt IS NOT NULL")
+    long countGraduatedTotal(@Param("userId") Long userId);
+
+    /** 상태칩(API-7) — 오늘 복습 대기 수(next_review 도래·미졸업·soft-delete 제외). */
+    @Query("SELECT COUNT(c) FROM Card c WHERE c.userId = :userId AND c.deletedAt IS NULL "
+            + "AND c.graduatedAt IS NULL AND c.nextReviewAt IS NOT NULL AND c.nextReviewAt <= :now")
+    long countReviewDue(@Param("userId") Long userId, @Param("now") LocalDateTime now);
 }
