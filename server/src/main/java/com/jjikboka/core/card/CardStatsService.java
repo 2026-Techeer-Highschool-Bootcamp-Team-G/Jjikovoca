@@ -32,6 +32,12 @@ public class CardStatsService {
         return cardRepository.countGraduated(userId, start, end);
     }
 
+    /** 오늘 복습 대기 수(API-17 todayDue) — FSRS next_review_at 도래·미졸업 카드. 복습 큐 dueCount와 동일 값. */
+    @Transactional(readOnly = true)
+    public long reviewDue(Long userId, LocalDateTime now) {
+        return cardRepository.countReviewDue(userId, now);
+    }
+
     /** wrong_count 상위 카드의 concept를 중복 제거해 상위 N개. */
     @Transactional(readOnly = true)
     public List<String> weakConcepts(Long userId) {
