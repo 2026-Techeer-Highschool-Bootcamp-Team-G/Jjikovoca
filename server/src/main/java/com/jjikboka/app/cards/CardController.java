@@ -1,6 +1,7 @@
 package com.jjikboka.app.cards;
 
 import com.jjikboka.core.card.CardCommandService;
+import com.jjikboka.core.card.CardCounts;
 import com.jjikboka.core.card.CardDetail;
 import com.jjikboka.core.card.CardQueryService;
 import com.jjikboka.shared.response.ApiResponse;
@@ -37,9 +38,16 @@ class CardController {
             @AuthenticationPrincipal Long userId,
             @RequestParam(required = false) String subject,
             @RequestParam(required = false) Long examId,
-            @RequestParam(defaultValue = "false") boolean untagged) {
-        CardFeedResponse response = new CardFeedResponse(feedFacade.getFeed(userId, subject, examId, untagged));
+            @RequestParam(defaultValue = "false") boolean untagged,
+            @RequestParam(required = false) String q) {
+        CardFeedResponse response = new CardFeedResponse(feedFacade.getFeed(userId, subject, examId, untagged, q));
         return ResponseEntity.ok(ApiResponse.ok(response, "카드 목록 조회가 완료되었습니다."));
+    }
+
+    /** 상태칩 카운트(API-7) — 전체·졸업·오늘복습 대기 수. /{id}보다 먼저 매칭되는 리터럴 경로. */
+    @GetMapping("/counts")
+    ResponseEntity<ApiResponse<CardCounts>> counts(@AuthenticationPrincipal Long userId) {
+        return ResponseEntity.ok(ApiResponse.ok(cardQueryService.getCounts(userId), "카드 카운트 조회가 완료되었습니다."));
     }
 
     @GetMapping("/archive")
