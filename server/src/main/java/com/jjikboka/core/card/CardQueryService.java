@@ -89,8 +89,9 @@ public class CardQueryService {
         if (cardIds.isEmpty()) {
             return List.of();
         }
-        return cardRepository.findDueAmong(userId, cardIds, LocalDateTime.now(), PageRequest.of(0, limit))
-                .stream().map(ExamReviewItem::from).toList();
+        LocalDateTime now = LocalDateTime.now();
+        return cardRepository.findDueAmong(userId, cardIds, now, PageRequest.of(0, limit))
+                .stream().map(card -> ExamReviewItem.from(card, now)).toList();
     }
 
     /**
