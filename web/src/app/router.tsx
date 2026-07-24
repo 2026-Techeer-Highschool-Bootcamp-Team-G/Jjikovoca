@@ -27,17 +27,9 @@ import { ExportDonePage } from '@/pages/export-done'
 import { StudyPickPage } from '@/pages/study-pick'
 import { CardDonePage } from '@/pages/card-done'
 import { MathProblemPage } from '@/pages/math-problem'
-import { CaptureTwoPage } from '@/pages/capture-2'
-import { CaptureThreePage } from '@/pages/capture-3'
-import { CaptureFourPage } from '@/pages/capture-4'
-import { CaptureFivePage } from '@/pages/capture-5'
-import { ClozeCorrectPage } from '@/pages/cloze-correct'
-import { ClozeWrongPage } from '@/pages/cloze-wrong'
 import { MathAnswerPage } from '@/pages/math-answer'
 import { MathVerdictCorrectPage } from '@/pages/math-verdict-correct'
 import { MathVerdictWrongPage } from '@/pages/math-verdict-wrong'
-import { StudyPickThreePage } from '@/pages/study-pick-3'
-import { ReportScrollPage } from '@/pages/report-scroll'
 import { ExamSelectPage } from '@/pages/exam-select'
 
 /**
@@ -91,17 +83,9 @@ export const router = createBrowserRouter([
           { path: 'card-done', element: <CardDonePage /> },
           { path: 'math-problem', element: <MathProblemPage /> },
           { path: 'capture', element: <CapturePage /> },
-          { path: 'capture-2', element: <CaptureTwoPage /> },
-          { path: 'capture-3', element: <CaptureThreePage /> },
-          { path: 'capture-4', element: <CaptureFourPage /> },
-          { path: 'capture-5', element: <CaptureFivePage /> },
-          { path: 'cloze-correct', element: <ClozeCorrectPage /> },
-          { path: 'cloze-wrong', element: <ClozeWrongPage /> },
           { path: 'math-answer', element: <MathAnswerPage /> },
           { path: 'math-verdict-correct', element: <MathVerdictCorrectPage /> },
           { path: 'math-verdict-wrong', element: <MathVerdictWrongPage /> },
-          { path: 'study-pick-3', element: <StudyPickThreePage /> },
-          { path: 'report-scroll', element: <ReportScrollPage /> },
           { path: 'exam-select', element: <ExamSelectPage /> },
         ],
       },
