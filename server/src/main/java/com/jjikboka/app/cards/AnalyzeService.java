@@ -1,11 +1,14 @@
 package com.jjikboka.app.cards;
 
 import com.jjikboka.analysis.AnalyzeJobService;
+import com.jjikboka.app.image.ImageStorageService;
 import com.jjikboka.core.card.QuotaConsumeService;
 import com.jjikboka.shared.event.AnalyzeEvents;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 캡처 분석 접수 조립 (API-6, app 파사드). ArchUnit이 core·analysis 상호참조를 막으므로
@@ -19,13 +22,16 @@ class AnalyzeService {
 
     private final QuotaConsumeService quotaConsumeService;
     private final AnalyzeJobService analyzeJobService;
+    private final ImageStorageService imageStorageService;
     private final ApplicationEventPublisher eventPublisher;
 
     AnalyzeService(QuotaConsumeService quotaConsumeService,
                    AnalyzeJobService analyzeJobService,
+                   ImageStorageService imageStorageService,
                    ApplicationEventPublisher eventPublisher) {
         this.quotaConsumeService = quotaConsumeService;
         this.analyzeJobService = analyzeJobService;
+        this.imageStorageService = imageStorageService;
         this.eventPublisher = eventPublisher;
     }
 
@@ -33,7 +39,19 @@ class AnalyzeService {
     AnalyzeAcceptedResponse submit(Long userId, AnalyzeRequest request) {
         quotaConsumeService.consume(userId);
         Long jobId = analyzeJobService.create(userId);
-        eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeRequested(jobId, userId, request.type()));
+        List<String> cropImageRefs = saveCrops(request);
+        String fullImageRef = (request.fullImage() == null || request.fullImage().isBlank())
+                ? null : imageStorageService.save(request.fullImage());
+        eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeRequested(
+                jobId, userId, request.type(), cropImageRefs, fullImageRef));
         return AnalyzeAcceptedResponse.pending(jobId);
+    }
+
+    /** WORD는 cropImages(다중, 첫 개가 대표), PROBLEM은 cropImage(단일)를 저장한다. 검증은 이미 통과한 상태다. */
+    private List<String> saveCrops(AnalyzeRequest request) {
+        if ("PROBLEM".equals(request.type())) {
+            return List.of(imageStorageService.save(request.cropImage()));
+        }
+        return request.cropImages().stream().map(imageStorageService::save).toList();
     }
 }
