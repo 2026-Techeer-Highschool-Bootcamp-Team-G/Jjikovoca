@@ -50,7 +50,8 @@ export function ClozePage() {
     )
   }
 
-  const [before, after] = cur.clozeText.split('_')
+  // 백엔드 clozeText 는 빈칸을 밑줄 여러 개(_____)로 표기 → 한 덩어리로 분리
+  const [before, after] = cur.clozeText.split(/_+/)
 
   return (
     <div
