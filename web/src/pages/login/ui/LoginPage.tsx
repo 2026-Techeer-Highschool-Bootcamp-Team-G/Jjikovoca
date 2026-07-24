@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { Button, TextField } from '@/shared/ui'
 import { login } from '@/features/auth'
@@ -10,11 +10,14 @@ const GRADIENT = 'linear-gradient(180deg, var(--color-brand-weak) 0%, var(--colo
 /** 로그인 (F-01) — 01 로그인 */
 export function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  // 가드가 넘긴 원래 목적지로 복귀(없으면 홈)
+  const from = (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? '/'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const { mutate, isPending, error } = useMutation({
     mutationFn: () => login(email, password),
-    onSuccess: () => navigate('/'),
+    onSuccess: () => navigate(from, { replace: true }),
   })
   const canSubmit = email.trim() !== '' && password !== '' && !isPending
 
