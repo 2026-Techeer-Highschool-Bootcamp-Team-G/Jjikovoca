@@ -15,8 +15,8 @@
 
 | 기능 | 화면 | 필요한 것 | 현재 처리 |
 |---|---|---|---|
-| 단어·문제 텍스트 검색 | `pages/search` | `/api/cards` `q` 파라미터, 또는 검색 엔드포인트 | `/api/cards` 전체 조회 후 **클라 부분일치 필터** |
-| 알림 피드 | `pages/notifications` | 알림 목록 조회(아이콘·제목·시각) | **빈 상태** |
+| ~~단어·문제 텍스트 검색~~ | `GET /api/cards?q=` 서버 검색 | 텍스트 검색 | ✅ **실연동 완료**(PR #248) |
+| ~~알림 피드~~ | `GET /api/notifications`·`POST .../read` | 알림 목록·읽음 | ✅ **실연동 완료**(PR #250) |
 | ~~일일 퀘스트~~ | 홈 `GameStatusCard` | exp `quest{label,progress,target,completed}` | ✅ **실연동 완료**(PR #244) |
 | 기억률(memoryRate) | 홈 D-day·학습 설정 | 시험 범위 집계 기억률 | 홈 D-day에서 **제거**(카드별 recallProb는 v2) |
 
