@@ -12,6 +12,7 @@ import com.jjikboka.core.stats.ExpService;
 import com.jjikboka.shared.event.AnalyzeEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,9 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 /**
  * 캡처 분석 워커 (API-6 처리, app 파사드). ArchUnit이 analysis↔core 직접참조를 막으므로 두 슬라이스를 여기서 조립한다.
@@ -40,6 +44,7 @@ class AnalysisWorker {
     private final ImageStorageService imageStorageService;
     private final ApplicationEventPublisher eventPublisher;
     private final ExpService expService;
+    private final Executor geminiCallExecutor;   // WORD 크롭별 Gemini 호출 병렬화 전용 풀(상한 4)
 
     AnalysisWorker(GeminiClient geminiClient,
                    AnalyzeJobService analyzeJobService,
@@ -47,7 +52,8 @@ class AnalysisWorker {
                    QuotaConsumeService quotaConsumeService,
                    ImageStorageService imageStorageService,
                    ApplicationEventPublisher eventPublisher,
-                   ExpService expService) {
+                   ExpService expService,
+                   @Qualifier("geminiCallExecutor") Executor geminiCallExecutor) {
         this.geminiClient = geminiClient;
         this.analyzeJobService = analyzeJobService;
         this.cardCreationService = cardCreationService;
@@ -55,6 +61,7 @@ class AnalysisWorker {
         this.imageStorageService = imageStorageService;
         this.eventPublisher = eventPublisher;
         this.expService = expService;
+        this.geminiCallExecutor = geminiCallExecutor;
     }
 
     @Async("analysisExecutor")
@@ -101,30 +108,48 @@ class AnalysisWorker {
      */
     private String analyzeWordsPerCrop(AnalyzeEvents.AnalyzeRequested event) {
         GeminiImage full = event.fullImageRef() == null ? null : loadOne(event.fullImageRef());
-        String model = null;
-        int failed = 0;
-        for (String cropRef : event.cropImageRefs()) {
-            try {
-                List<GeminiImage> images = new ArrayList<>();
-                GeminiImage crop = loadOne(cropRef);
-                if (crop != null) {
-                    images.add(crop);
-                }
-                if (full != null) {
-                    images.add(full);   // 지문은 문맥(contextMeaning)용으로 매 호출에 함께 넣는다
-                }
-                AnalysisContent content = geminiClient.generate("WORD", images);
-                cardCreationService.create(toCommand(event, content, cropRef));
-                model = content.model();
-            } catch (RuntimeException e) {
-                failed++;
-                log.warn("단어 크롭 분석 실패(건너뜀) — jobId={}, crop={}: {}", event.jobId(), cropRef, e.getMessage());
+
+        // 크롭(단어)마다 Gemini 호출을 전용 풀에 동시에 던진다(팬아웃) — 지연이 N배 대신 ≈1콜.
+        // 동시성은 geminiCallExecutor의 상한(4)이 제어한다(429 방어).
+        List<CompletableFuture<String>> futures = event.cropImageRefs().stream()
+                .map(cropRef -> CompletableFuture.supplyAsync(
+                        () -> analyzeOneCrop(event, cropRef, full), geminiCallExecutor))
+                .toList();
+
+        // 전부 join 후 성공(model != null)만 수집. 실패는 analyzeOneCrop에서 흡수(null)돼 격리된다.
+        List<String> models = futures.stream()
+                .map(CompletableFuture::join)
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (models.isEmpty()) {   // 카드 0개 = 전부 실패 → 상위 catch로 FAILED·환불
+            throw new IllegalStateException("모든 단어 크롭 분석 실패(" + event.cropImageRefs().size() + "개)");
+        }
+        return models.get(models.size() - 1);   // 대표 model(동일 클라이언트라 값 동일)
+    }
+
+    /**
+     * 크롭 하나 분석 + 카드 생성. 예외는 여기서 흡수(로그 후 null)해 <b>단어별 실패를 격리</b>한다 —
+     * 하나가 실패해도 다른 크롭의 future는 영향받지 않는다. {@code cardCreationService.create}는 @Transactional이라
+     * 각 스레드가 독립 트랜잭션으로 INSERT(병렬 안전). 성공 시 content.model 반환, 실패 시 null.
+     */
+    private String analyzeOneCrop(AnalyzeEvents.AnalyzeRequested event, String cropRef, GeminiImage full) {
+        try {
+            List<GeminiImage> images = new ArrayList<>();
+            GeminiImage crop = loadOne(cropRef);
+            if (crop != null) {
+                images.add(crop);
             }
+            if (full != null) {
+                images.add(full);   // 지문은 문맥(contextMeaning)용으로 매 호출에 함께 넣는다
+            }
+            AnalysisContent content = geminiClient.generate("WORD", images);
+            cardCreationService.create(toCommand(event, content, cropRef));
+            return content.model();
+        } catch (RuntimeException e) {
+            log.warn("단어 크롭 분석 실패(건너뜀) — jobId={}, crop={}: {}", event.jobId(), cropRef, e.getMessage());
+            return null;
         }
-        if (model == null) {   // 카드 0개 = 전부 실패 → 상위 catch로 FAILED·환불
-            throw new IllegalStateException("모든 단어 크롭 분석 실패(" + failed + "개)");
-        }
-        return model;
     }
 
     /** 참조 하나를 비전 입력으로 로드한다(읽기 실패면 null — 모의/부분 흐름 허용). */
