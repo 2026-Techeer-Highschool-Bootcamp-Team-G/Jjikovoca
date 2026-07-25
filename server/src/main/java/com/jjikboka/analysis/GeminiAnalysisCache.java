@@ -34,6 +34,25 @@ public class GeminiAnalysisCache {
         return geminiClient.generate(type, images);
     }
 
+    /**
+     * OCR 단어 힌트 기반 캐시 — "다른 사진(다른 바이트)의 같은 단어"까지 히트한다(이미지 해시보다 앞단).
+     * 사전적 필드(뜻·발음·품사·예문)는 단어 고유라 정확하지만, contextMeaning은 지문 의존이라 다른 지문의 뜻이
+     * 재사용될 수 있다(교차사진 재사용을 얻는 대가의 트레이드오프). 힌트가 신뢰 가능할 때만 호출부가 진입한다.
+     */
+    @Cacheable(cacheNames = "analysis", key = "'word:' + #word")
+    public AnalysisContent generateByWord(String word, List<GeminiImage> images) {
+        return geminiClient.generate("WORD", images);
+    }
+
+    /** 단어 힌트 정규화(trim·소문자). 비었으면 null → 호출부가 단어키 캐시를 건너뛰고 이미지 해시 경로로 간다. */
+    public static String normalizeWord(String word) {
+        if (word == null) {
+            return null;
+        }
+        String normalized = word.strip().toLowerCase();
+        return normalized.isEmpty() ? null : normalized;
+    }
+
     /** 비전 입력(크롭+지문) 바이트를 순서대로 이어 SHA-256으로 해시 — 같은 내용이면 같은 키. */
     public static String hash(List<GeminiImage> images) {
         try {
