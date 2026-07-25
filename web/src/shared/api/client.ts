@@ -109,11 +109,17 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retried 
   // 단, 업무 거부(PREMIUM_REQUIRED 등)는 { success:false } 봉투 403 이므로 refresh 하지 않는다(오작동 로그아웃 방지).
   const authFailed = res.status === 401 || (res.status === 403 && body?.success !== false)
   if (authFailed) {
-    if (!retried && (await refreshTokens())) {
-      return apiFetch<T>(path, init, true)
+    if (!retried) {
+      // 아직 재시도 전: refresh 로 재발급 후 원요청 1회 재시도
+      if (await refreshTokens()) return apiFetch<T>(path, init, true)
+      // refresh 실패(refresh 토큰 없음/만료) = 진짜 인증 만료 → 토큰 폐기 후 로그인 유도
+      clearTokens()
+      throw new ApiError(res.status, '로그인이 필요합니다.')
     }
-    clearTokens()
-    throw new ApiError(res.status, '로그인이 필요합니다.')
+    // 이미 refresh 후 재시도까지 했는데 또 403/401 로 보임 → 토큰은 방금 갱신되어 유효하다.
+    // 즉 인증 만료가 아니라 요청/입력 문제(예: 잘못된 이미지를 보내 서버가 403 반환)일 가능성이 크다.
+    // 여기서 토큰을 지우면 정상 로그인 사용자가 로그아웃되는 오작동이 되므로, 토큰을 보존하고 일반 오류로 전달한다.
+    throw new ApiError(res.status, body?.message ?? `요청이 실패했습니다 (${res.status})`)
   }
 
   // 실패: HTTP 오류 또는 봉투 success:false → message 로 정규화
