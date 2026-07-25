@@ -11,6 +11,7 @@ type Region = Stroke | Box
 export interface CaptureResult {
   regions: number
   hasBox: boolean // 네모 박스(문제)가 있으면 수학으로 분석
+  cropImages: string[] // 형광펜 영역별 원본 크롭(base64) — WORD 다중 단어 분석용
 }
 
 interface Props {
@@ -48,6 +49,7 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
   const [draftBox, setDraftBox] = useState<Box | null>(null)
   const [tip, setTip] = useState<Pt | null>(null)
   const areaRef = useRef<HTMLDivElement>(null)
+  const imgRef = useRef<HTMLImageElement>(null)
   const strokeRef = useRef<Pt[] | null>(null)
   const startRef = useRef<Pt | null>(null)
   const boxRef = useRef<Box | null>(null) // 그리는 중인 박스 — 커밋 이중 실행(두 겹) 방지
@@ -114,6 +116,49 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
   const strokes = regions.filter((r): r is Stroke => r.mode === 'highlighter')
   const boxes = regions.filter((r): r is Box => r.mode === 'box')
 
+  // 형광펜 stroke 별 바운딩박스로 원본 이미지를 canvas 크롭 → base64 배열.
+  // stroke 좌표는 areaRef(=이미지 요소) 로컬. img 의 objectFit:contain 배치를 반영해 원본 픽셀로 환산한다.
+  const buildCrops = (): string[] => {
+    const img = imgRef.current
+    if (!img || !img.naturalWidth) return []
+    const nw = img.naturalWidth
+    const nh = img.naturalHeight
+    const rect = img.getBoundingClientRect()
+    const scale = Math.min(rect.width / nw, rect.height / nh)
+    if (!(scale > 0)) return []
+    const offX = (rect.width - nw * scale) / 2 // contain 레터박스 여백
+    const offY = (rect.height - nh * scale) / 2
+    const PAD = 8 // 단어 가장자리 여유(px, 표시 기준)
+    const crops: string[] = []
+    for (const s of strokes) {
+      let minX = Infinity
+      let minY = Infinity
+      let maxX = -Infinity
+      let maxY = -Infinity
+      for (const p of s.points) {
+        if (p.x < minX) minX = p.x
+        if (p.y < minY) minY = p.y
+        if (p.x > maxX) maxX = p.x
+        if (p.y > maxY) maxY = p.y
+      }
+      // 표시 로컬 좌표 → 원본 픽셀 좌표
+      const sx = Math.max(0, (minX - PAD - offX) / scale)
+      const sy = Math.max(0, (minY - PAD - offY) / scale)
+      const ex = Math.min(nw, (maxX + PAD - offX) / scale)
+      const ey = Math.min(nh, (maxY + PAD - offY) / scale)
+      const sw = Math.max(1, ex - sx)
+      const sh = Math.max(1, ey - sy)
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round(sw)
+      canvas.height = Math.round(sh)
+      const ctx = canvas.getContext('2d')
+      if (!ctx) continue
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
+      crops.push(canvas.toDataURL('image/jpeg', 0.9))
+    }
+    return crops
+  }
+
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: 'var(--grey-900)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 56, width: '100%', position: 'relative' }}>
@@ -155,6 +200,7 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
           }}
         >
           <img
+            ref={imgRef}
             src={imageSrc}
             alt="촬영한 시험지"
             draggable={false}
@@ -272,7 +318,7 @@ export function CaptureEditor({ imageSrc, onDone, onClose }: Props) {
           size="lg"
           disabled={regions.length === 0}
           style={{ opacity: regions.length === 0 ? 0.4 : 1 }}
-          onClick={() => onDone({ regions: regions.length, hasBox: boxes.length > 0 })}
+          onClick={() => onDone({ regions: regions.length, hasBox: boxes.length > 0, cropImages: buildCrops() })}
         >
           {regions.length === 0 ? '표시할 부분을 칠하거나 드래그하세요' : `${regions.length}곳 분석하기`}
         </Button>
