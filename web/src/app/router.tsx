@@ -57,6 +57,8 @@ export const router = createBrowserRouter([
           { path: 'wrong-note', element: <WrongNotePage /> },
           { path: 'report', element: <ReportPage /> },
           { path: 'my', element: <MyPage /> },
+          // 직접 선택은 오답노트 스타일 화면 — 하단 네비를 유지하도록 App(탭) 레이아웃에 둔다
+          { path: 'study-pick', element: <StudyPickPage /> },
         ],
       },
       {
@@ -76,7 +78,6 @@ export const router = createBrowserRouter([
           { path: 'withdraw', element: <WithdrawPage /> },
           { path: 'export', element: <ExportPage /> },
           { path: 'export-done', element: <ExportDonePage /> },
-          { path: 'study-pick', element: <StudyPickPage /> },
           { path: 'card-done', element: <CardDonePage /> },
           { path: 'math-problem', element: <MathProblemPage /> },
           { path: 'capture', element: <CapturePage /> },
