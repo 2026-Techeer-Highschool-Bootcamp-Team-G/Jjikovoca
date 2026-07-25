@@ -39,14 +39,15 @@ class RealGeminiClient implements GeminiClient {
 
     private static final String PROBLEM_PROMPT = """
             다음은 수학 문제의 크롭 이미지다. 문제를 분석해 아래 JSON만 출력하라(코드블록·설명 없이).
+            문제는 절대 요약하지 말고 100% 그대로 추출하라 — 발문(문제 문장)·수식·보기·조건을 하나도 빠짐없이 담아라.
             {
               "subject": "MATH",
-              "summary": "문제 한 줄 요약(한국어)",
-              "latex": "문제 수식(LaTeX)",
+              "summary": "피드용 짧은 한 줄 요약(한국어)",
+              "latex": "문제 전문 — 발문(문제 문장)과 수식·보기·조건을 모두 요약·생략 없이 그대로. 수식은 LaTeX($...$), 문장은 그대로 자연어로 함께.",
               "concept": "핵심 개념(한국어)",
               "hint1": "1단계 힌트", "hint2": "2단계 힌트", "hint3": "3단계 힌트",
               "answerFormat": "NUMERIC | EXPRESSION | CHOICE 중 하나",
-              "solutions": [{"label": "풀이명", "steps": [{"no": 1, "title": "1단계", "question": "질문", "content": "내용"}], "explanation": "해설"}],
+              "solutions": [{"label": "풀이명", "steps": [{"no": 1, "title": "1단계", "question": "질문", "content": "내용"}], "explanation": "사고과정 요약(풀이 흐름을 간결히)"}],
               "answerValue": "정답 값(문자열)",
               "diagnosis": {"failedStep": 1, "description": "자주 틀리는 지점", "suggestedReason": "MISTAKE | CONCEPT"}
             }
