@@ -176,9 +176,15 @@ export function WrongNotePage() {
             speaking={speakingId === row.id}
             onSpeak={() => handleSpeak(row)}
             onExamTag={row.untagged ? () => navigate('/exam-select') : undefined}
-            onClick={() =>
-              navigate(row.untagged ? '/math-problem' : row.id === 2 ? '/cloze' : '/flashcard')
-            }
+            onClick={() => {
+              // 영어 단어는 상세 페이지가 없어 이동하지 않고 가벼운 햅틱(진동)만 준다.
+              // 눌림 시각 효과는 CardRow 가 담당. (수학 문제 상세 라우팅은 후속)
+              if (row.showSpeaker) {
+                navigator.vibrate?.(12)
+                return
+              }
+              navigate('/math-problem')
+            }}
           />
         ))}
         {rows.length === 0 && (
