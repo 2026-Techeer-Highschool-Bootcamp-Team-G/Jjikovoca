@@ -1,28 +1,38 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Button, IconCheck, IconChevronRight } from '@/shared/ui'
+import { fetchRecommendation } from '@/features/study'
+import { fetchExams } from '@/entities/exam'
 import type { ReviewType, StudyMethod } from '../model/types'
 
 interface Props {
   onStart: (method: StudyMethod, type: ReviewType) => void
 }
 
-// AI가 사용자 내역·리포트를 학습해 만든 추천 (백엔드 연결 전 데모 값)
-const AI_RECOMMEND = {
-  reason: '17회 중간고사가 3일 남았어요. 최근 헷갈려한 다의어 위주로 24개를 골랐어요.',
-  stats: [
-    { icon: '🎯', text: '기억률 62%' },
-    { icon: '🃏', text: '24개' },
-    { icon: '⏱', text: '약 8분' },
-  ],
-}
-
 const label = { fontSize: 11, fontWeight: 500, color: 'var(--color-text-tertiary)' } as const
 
-// 학습 설정 시트 (149:851…) — AI 추천 카드로 강조 강화(추천 이유·통계) + 직접 선택 + 학습 시작 (오답노트 QA)
+// 학습 설정 시트 — 실 추천(GET /api/study/recommendation) 통계 + 시험 D-day 조합 문구 + 직접 선택 + 학습 시작
 export function StudySetupSheet({ onStart }: Props) {
   const [method, setMethod] = useState<StudyMethod>('TODAY')
   const [type, setType] = useState<ReviewType>('FLASHCARD')
   const aiPicked = method === 'TODAY'
+
+  // 오늘의 추천 통계 + 가장 가까운 시험(문구 조합용)
+  const rec = useQuery({ queryKey: ['recommendation'], queryFn: fetchRecommendation })
+  const exams = useQuery({ queryKey: ['exams'], queryFn: fetchExams })
+  const r = rec.data
+  const nearest = exams.data?.[0]
+  const memPct = r?.memoryRate != null ? `${Math.round(r.memoryRate * 100)}%` : '—'
+  const AI_RECOMMEND = {
+    reason: nearest
+      ? `${nearest.title} D-${nearest.dday} — 복습 대기 ${r?.reviewCount ?? 0}개를 골랐어요.`
+      : `복습 대기 ${r?.reviewCount ?? 0}개를 골랐어요.`,
+    stats: [
+      { icon: '🎯', text: `기억률 ${memPct}` },
+      { icon: '🃏', text: `${r?.reviewCount ?? 0}개` },
+      { icon: '⏱', text: `약 ${r?.estimatedMinutes ?? 0}분` },
+    ],
+  }
 
   return (
     <>
