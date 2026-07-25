@@ -6,14 +6,26 @@ export type FeedSubject = 'ALL' | Subject
 interface FeedOptions {
   examId?: number // 특정 시험 범위 카드만 (F-29)
   untagged?: boolean // 시험 미지정 카드만 (F-29)
+  q?: string // 서버 텍스트 검색(word·문맥뜻·개념·요약 부분일치)
 }
 
-/** 통합 피드 조회 (F-04). 04 §3: GET /api/cards?subject=&examId=&untagged= */
+/** 통합 피드 조회 (F-04). 04 §3: GET /api/cards?subject=&examId=&untagged=&q= */
 export function fetchCards(subject: FeedSubject = 'ALL', opts: FeedOptions = {}): Promise<Card[]> {
   const params = new URLSearchParams({ subject })
   if (opts.examId != null) params.set('examId', String(opts.examId))
   if (opts.untagged) params.set('untagged', 'true')
+  if (opts.q) params.set('q', opts.q)
   return apiGet<{ cards: Card[] }>(`/api/cards?${params.toString()}`).then((r) => r.cards)
+}
+
+/** 카드 상태 카운트 (상태칩 배지) — GET /api/cards/counts */
+export interface CardCounts {
+  total: number
+  graduated: number
+  reviewDue: number
+}
+export function fetchCardCounts(): Promise<CardCounts> {
+  return apiGet<CardCounts>('/api/cards/counts')
 }
 
 /** 카드 시험 태깅(수동, 복수·멱등) — POST /api/cards/{id}/exams (F-29) */

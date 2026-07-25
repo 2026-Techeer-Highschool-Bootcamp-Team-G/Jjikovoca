@@ -26,7 +26,7 @@
 |---|---|---|---|
 | ~~`pronunciation`·`pos`·`tags[]`·`emoji`~~ | ~~`GET /api/cards`,`/study/flashcards`~~ | 발음·품사·유형태그·이모지 | ✅ **실연동 완료**(PR #240) |
 | 발음 오디오(미국/영국) | — | 카드 앞면 발음 듣기 | **클라 Web Speech TTS**(데이터 아닌 기능이라 유지) |
-| 상태 칩 카운트(전체/졸업완료/복습대기 수) | 피드 or 별도 집계 | 오답노트/직접선택 상태 필터 배지 숫자 | 직접선택은 숫자 제거, 오답노트는 하드코딩 잔존(후속) |
+| ~~상태 칩 카운트~~ | `GET /api/cards/counts` | 오답노트·직접선택·시험지정 배지 숫자 | ✅ **실연동 완료**(PR #248) |
 | `recallProb`(잊을 확률) | `GET /api/study/flashcards` | 플래시카드 "N일 뒤 잊을 확률" | **데모**(FlashcardView 기본값) |
 | AI 연상 이미지 | `GET /api/study/flashcards` | 플래시카드 상단 이미지 | **데모** |
 | ~~추천 요약(기억률·개수·예상시간)~~ | `GET /api/study/recommendation` | StudySetupSheet 통계 | ✅ **실연동 완료**(PR #244) |

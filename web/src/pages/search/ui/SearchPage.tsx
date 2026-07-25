@@ -7,7 +7,7 @@ import type { CardRowView } from '@/widgets/card-row'
 import { fetchCards } from '@/entities/card'
 import type { Card } from '@/entities/card'
 
-// 피드 Card → 행 뷰(검색 결과). 백엔드 q 파라미터 미제공 → 클라 부분일치 필터
+// 피드 Card → 행 뷰(검색 결과)
 function toRow(c: Card): CardRowView {
   const isWord = c.type === 'WORD'
   return {
@@ -19,23 +19,18 @@ function toRow(c: Card): CardRowView {
   }
 }
 
-// 카드가 검색어를 포함하는지(제목·뜻·요약·개념)
-function matches(c: Card, q: string): boolean {
-  const hay = [c.word, c.contextMeaning, c.dictMeaning, c.latex, c.summary, c.concept]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase()
-  return hay.includes(q)
-}
-
-/** 통합 검색 (07) — 백엔드 q 파라미터 미제공 → /api/cards 클라 필터 */
+/** 통합 검색 (07) — GET /api/cards?q= 서버 부분일치 검색 */
 export function SearchPage() {
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
 
-  const { data } = useQuery({ queryKey: ['cards', 'ALL'], queryFn: () => fetchCards('ALL') })
-  const q = query.trim().toLowerCase()
-  const rows = q === '' ? [] : (data ?? []).filter((c) => matches(c, q)).map(toRow)
+  const q = query.trim()
+  const { data } = useQuery({
+    queryKey: ['cards-search', q],
+    queryFn: () => fetchCards('ALL', { q }),
+    enabled: q !== '',
+  })
+  const rows = q === '' ? [] : (data ?? []).map(toRow)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>

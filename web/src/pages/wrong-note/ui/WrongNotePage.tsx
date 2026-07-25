@@ -5,8 +5,8 @@ import { Tabs, Chip, Button, SearchBar, BottomSheet } from '@/shared/ui'
 import { CardRow } from '@/widgets/card-row'
 import type { CardRowView } from '@/widgets/card-row'
 import { StudySetupSheet } from '@/features/study-setup'
-import { fetchCards } from '@/entities/card'
-import type { Card, FeedSubject } from '@/entities/card'
+import { fetchCards, fetchCardCounts } from '@/entities/card'
+import type { Card, CardCounts, FeedSubject } from '@/entities/card'
 
 const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
   { key: 'ALL', label: '전체' },
@@ -15,10 +15,10 @@ const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
 ]
 
 type Status = 'ALL' | 'GRADUATED' | 'WAITING' | 'WEAK' | 'UNTAGGED'
-const STATUS_CHIPS: { key: Status; label: string }[] = [
-  { key: 'ALL', label: '전체 128' },
-  { key: 'GRADUATED', label: '졸업완료 13' },
-  { key: 'WAITING', label: '복습대기 15' },
+const STATUS_CHIPS: { key: Status; label: string; countKey?: keyof CardCounts }[] = [
+  { key: 'ALL', label: '전체', countKey: 'total' },
+  { key: 'GRADUATED', label: '졸업완료', countKey: 'graduated' },
+  { key: 'WAITING', label: '복습대기', countKey: 'reviewDue' },
   { key: 'WEAK', label: '약점유형' },
   { key: 'UNTAGGED', label: '시험 미지정' },
 ]
@@ -47,6 +47,10 @@ export function WrongNotePage() {
   // 실 피드 조회 — 실패/빈 응답을 데모로 가리지 않고 실제 카드만 표시(캡처 카드도 서버 저장되어 여기 포함됨)
   const { data, isLoading, isError } = useQuery({ queryKey: ['cards', subject], queryFn: () => fetchCards(subject) })
   const rows = (data ?? []).map(toRow)
+  // 상태칩 배지 카운트
+  const counts = useQuery({ queryKey: ['card-counts'], queryFn: fetchCardCounts })
+  const chipLabel = (c: (typeof STATUS_CHIPS)[number]) =>
+    c.countKey && counts.data ? `${c.label} ${counts.data[c.countKey]}` : c.label
   const [status, setStatus] = useState<Status>('ALL')
   const [setupOpen, setSetupOpen] = useState(false)
   // 스피커로 발음 재생 중인 단어 — 듣기 끝날 때까지 그 행을 강조 (오답노트 QA)
@@ -129,7 +133,7 @@ export function WrongNotePage() {
         {STATUS_CHIPS.map((c) => (
           <div key={c.key} style={{ flexShrink: 0 }}>
             <Chip active={status === c.key} onClick={() => setStatus(c.key)}>
-              {c.label}
+              {chipLabel(c)}
             </Chip>
           </div>
         ))}
@@ -184,24 +188,7 @@ export function WrongNotePage() {
         )}
       </div>
 
-      <div style={{ padding: '12px var(--spacing-xl) 24px' }}>
-        <button
-          type="button"
-          style={{
-            width: '100%',
-            height: 44,
-            borderRadius: 'var(--radius-md)',
-            background: 'var(--color-bg-primary)',
-            border: '1px solid var(--color-border-default)',
-            color: 'var(--color-text-secondary)',
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}
-        >
-          더보기 124개 ▾
-        </button>
-      </div>
+      <div style={{ paddingBottom: 24 }} />
 
       <BottomSheet open={setupOpen} onClose={() => setSetupOpen(false)}>
         <StudySetupSheet
