@@ -9,7 +9,7 @@ import type { Grade } from '@/features/study-grade'
 import { fetchFlashcards, recordStudy } from '@/features/study'
 import type { FlashcardQueueCard } from '@/features/study'
 
-// 큐 카드(얇은 응답) → 카드 뷰 매핑. pronunciation·품사·tags 등은 큐 미제공(후속)
+// 큐 카드 → 카드 뷰 매핑. 발음·품사·이모지·유형태그는 백엔드 제공(기존 카드는 null)
 function toFlashcard(c: FlashcardQueueCard): FlashcardData {
   const w = c.word ?? ''
   const ex = c.example ?? ''
@@ -18,15 +18,16 @@ function toFlashcard(c: FlashcardQueueCard): FlashcardData {
     i >= 0
       ? { pre: ex.slice(0, i), highlight: ex.slice(i, i + w.length), post: ex.slice(i + w.length), translation: '' }
       : { pre: '', highlight: '', post: ex, translation: '' }
+  const badges = (c.tags ?? []).map((t, idx) => ({ label: t, tone: idx === 0 ? ('grey' as const) : ('blue' as const) }))
   return {
     word: w,
-    pronunciation: '',
-    conceptEmoji: '📘',
-    pos: '',
+    pronunciation: c.pronunciation ?? '',
+    conceptEmoji: c.emoji || '📘',
+    pos: c.pos ?? '',
     meaning: c.contextMeaning ?? '',
     dictNote: '',
-    frontTags: [],
-    backTags: [],
+    frontTags: badges,
+    backTags: badges.map((b) => ({ label: b.label, tone: b.tone === 'grey' ? ('blue' as const) : ('red' as const) })),
     example,
   }
 }

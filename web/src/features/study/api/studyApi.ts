@@ -12,6 +12,11 @@ export interface FlashcardQueueCard {
   contextMeaning?: string
   example?: string
   boxLevel: number
+  // 표기용 부가 필드(기존 카드는 null — 하위호환)
+  pronunciation?: string | null
+  pos?: string | null
+  tags?: string[] | null
+  emoji?: string | null
 }
 
 interface FlashcardQueue {

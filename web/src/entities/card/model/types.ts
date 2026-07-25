@@ -41,6 +41,11 @@ export interface Card {
   contextMeaning?: string
   dictMeaning?: string
   example?: string
+  // 표기용 부가 필드(기존 카드는 null — 하위호환). 발음 오디오는 클라 Web Speech 유지
+  pronunciation?: string | null
+  pos?: string | null
+  tags?: string[] | null
+  emoji?: string | null
 
   // PROBLEM
   summary?: string

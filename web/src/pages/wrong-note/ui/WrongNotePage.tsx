@@ -23,14 +23,17 @@ const STATUS_CHIPS: { key: Status; label: string }[] = [
   { key: 'UNTAGGED', label: '시험 미지정' },
 ]
 
-// 피드 Card → 행 뷰 매핑. pronunciation·품사 tags·유형 배지는 피드 미제공(후속 백엔드)
+// 피드 Card → 행 뷰 매핑. 발음·유형 태그는 백엔드 제공(기존 카드는 null)
 function toRow(c: Card): CardRowView {
   const isWord = c.type === 'WORD'
   const exams = c.exams ?? []
+  const tags = (c.tags ?? []).map((t, i) => ({ label: t, tone: i === 0 ? ('grey' as const) : ('blue' as const) }))
   return {
     id: c.id,
     title: isWord ? (c.word ?? '') : (c.latex ?? c.summary ?? '문제'),
     subtitle: isWord ? (c.contextMeaning ?? '') : (c.summary ?? ''),
+    pronunciation: isWord ? (c.pronunciation ?? undefined) : undefined,
+    tags: tags.length > 0 ? tags : undefined,
     exams: exams.map((e) => e.title),
     untagged: exams.length === 0,
     showSpeaker: isWord,
