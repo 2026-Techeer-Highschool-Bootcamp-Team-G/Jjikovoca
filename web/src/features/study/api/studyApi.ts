@@ -17,6 +17,7 @@ export interface FlashcardQueueCard {
   pos?: string | null
   tags?: string[] | null
   emoji?: string | null
+  mnemonicImagePath?: string | null // AI 연상 이미지(미생성 시 null → 온디맨드 생성)
 }
 
 interface FlashcardQueue {

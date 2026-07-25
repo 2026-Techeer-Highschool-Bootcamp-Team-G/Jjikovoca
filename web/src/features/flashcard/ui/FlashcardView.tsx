@@ -1,11 +1,15 @@
 import type { CSSProperties } from 'react'
 import { IconSpeaker } from '@/shared/ui'
+import { mediaUrl } from '@/shared/api'
 import type { FlashcardData } from '../model/types'
 
 interface Props {
   data: FlashcardData
   flipped: boolean
   onFlip: () => void
+  onGenerate: () => void // AI 연상 이미지 생성 요청
+  generating: boolean
+  genError: boolean
 }
 
 const CONCEPT_GRADIENT = 'linear-gradient(90deg, var(--color-brand-weak), var(--teal-50))'
@@ -21,7 +25,8 @@ const FACE: CSSProperties = {
 }
 
 // 플래시카드 (24:137 / 28:230) — 탭하면 앞↔뒤 3D 플립. 앞: 단어, 뒤: 뜻·예문
-export function FlashcardView({ data, flipped, onFlip }: Props) {
+export function FlashcardView({ data, flipped, onFlip, onGenerate, generating, genError }: Props) {
+  const img = { mnemonicPath: data.mnemonicPath, emoji: data.conceptEmoji, generating, genError, onGenerate }
   return (
     <div onClick={onFlip} style={{ perspective: 1200, height: 400, cursor: 'pointer' }}>
       <div
@@ -35,7 +40,7 @@ export function FlashcardView({ data, flipped, onFlip }: Props) {
         }}
       >
         <div style={{ ...FACE, border: '1px solid var(--color-border-default)' }}>
-          <FrontFace data={data} />
+          <FrontFace data={data} img={img} />
         </div>
         <div
           style={{
@@ -44,14 +49,23 @@ export function FlashcardView({ data, flipped, onFlip }: Props) {
             transform: 'rotateY(180deg)',
           }}
         >
-          <BackFace data={data} />
+          <BackFace data={data} img={img} />
         </div>
       </div>
     </div>
   )
 }
 
-function ConceptImage({ emoji, height }: { emoji: string; height: number }) {
+interface MnemonicImg {
+  mnemonicPath: string | null
+  emoji: string
+  generating: boolean
+  genError: boolean
+  onGenerate: () => void
+}
+
+function ConceptImage({ img, height }: { img: MnemonicImg; height: number }) {
+  const { mnemonicPath, emoji, generating, genError, onGenerate } = img
   return (
     <div
       style={{
@@ -64,6 +78,7 @@ function ConceptImage({ emoji, height }: { emoji: string; height: number }) {
         justifyContent: 'center',
         fontSize: 48,
         flexShrink: 0,
+        overflow: 'hidden',
       }}
     >
       <span
@@ -71,6 +86,7 @@ function ConceptImage({ emoji, height }: { emoji: string; height: number }) {
           position: 'absolute',
           top: 8,
           left: 8,
+          zIndex: 1,
           fontSize: 10,
           fontWeight: 500,
           padding: '3px 8px',
@@ -81,7 +97,43 @@ function ConceptImage({ emoji, height }: { emoji: string; height: number }) {
       >
         ✨ AI 연상 이미지
       </span>
-      <span aria-hidden>{emoji}</span>
+      {mnemonicPath ? (
+        // 생성 완료 — 실 이미지 표시
+        <img
+          src={mediaUrl(mnemonicPath)}
+          alt="AI 연상 이미지"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      ) : (
+        // 미생성 — 이모지 폴백 + 온디맨드 생성 버튼(쿼터 초과 시 폴백 유지)
+        <>
+          <span aria-hidden>{emoji}</span>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation() // 카드 플립 방지
+              if (!generating) onGenerate()
+            }}
+            disabled={generating}
+            style={{
+              position: 'absolute',
+              bottom: 8,
+              right: 8,
+              fontSize: 11,
+              fontWeight: 500,
+              padding: '4px 10px',
+              borderRadius: 'var(--radius-full)',
+              border: 'none',
+              background: 'var(--color-brand-primary)',
+              color: 'var(--color-text-inverse)',
+              cursor: generating ? 'default' : 'pointer',
+              opacity: generating ? 0.7 : 1,
+            }}
+          >
+            {generating ? '생성 중…' : genError ? '다시 생성' : '✨ 이미지 생성'}
+          </button>
+        </>
+      )}
     </div>
   )
 }
@@ -141,10 +193,10 @@ function Tag({ label, tone }: { label: string; tone: 'grey' | 'blue' | 'red' }) 
   )
 }
 
-function FrontFace({ data }: { data: FlashcardData }) {
+function FrontFace({ data, img }: { data: FlashcardData; img: MnemonicImg }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 15 }}>
-      <ConceptImage emoji={data.conceptEmoji} height={118} />
+      <ConceptImage img={img} height={118} />
       <div
         style={{
           flex: 1,
@@ -182,10 +234,10 @@ function FrontFace({ data }: { data: FlashcardData }) {
   )
 }
 
-function BackFace({ data }: { data: FlashcardData }) {
+function BackFace({ data, img }: { data: FlashcardData; img: MnemonicImg }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 15, gap: 8 }}>
-      <ConceptImage emoji={data.conceptEmoji} height={104} />
+      <ConceptImage img={img} height={104} />
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
           <span style={{ fontSize: 26, fontWeight: 700, color: 'var(--color-text-primary)' }}>
