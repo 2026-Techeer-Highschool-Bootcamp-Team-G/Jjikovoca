@@ -50,11 +50,13 @@ export function HomePage() {
   const nearest = exams.data?.[0]
   const todayDue = review.data?.dueCount ?? 0
 
-  // 일일 퀘스트 — 서버 quest(진행/목표). 없으면 복습대기 수로 폴백
+  // 일일 퀘스트 — 서버 quest(진행/목표). 목표가 0(미할당·미사용)이거나 quest 없으면
+  // "0/0 · 달성 시" 오표기 대신 첫 행동을 유도하는 문구를 보여준다.
   const quest = e?.quest
-  const questLabel = quest
-    ? `${quest.label} ${quest.progress}/${quest.target}${quest.completed ? ' · 달성 🎉' : ' · 달성 시 +40XP'}`
-    : `일일 퀘스트 — 복습 ${todayDue}개 · 달성 시 +40XP`
+  const questLabel =
+    quest && quest.target > 0
+      ? `${quest.label} ${quest.progress}/${quest.target}${quest.completed ? ' · 달성 🎉' : ' · 달성 시 +40XP'}`
+      : '오늘의 복습 — 단어 10개를 인식하면 +40XP'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
