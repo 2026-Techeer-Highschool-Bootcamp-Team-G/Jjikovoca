@@ -41,6 +41,11 @@ jwt:
 # 크롭 이미지 저장소 (API-10). 기본 local(파일) — 워커가 여기 저장, /images/{file}이 여기서 서빙.
 # storage=s3면 S3ImageStorageService가 뜬다(계약 불변, 토글만 전환). 자격은 env/IAM(15 §7), 이미지에 미탑재.
 app:
+  # CORS 허용 오리진 (배포 시 Vercel 프론트 ↔ EC2 백엔드, SecurityConfig). 기본은 커스텀 도메인만.
+  # 넓은 와일드카드(*.vercel.app)는 credentials와 함께 남의 배포까지 신뢰하므로 금지 — 프리뷰가 필요하면
+  # 프로젝트 스코프 패턴(https://jjikovoca-*.vercel.app)만 env로 추가한다.
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:https://jjikovoca.site,https://www.jjikovoca.site}
   image:
     storage: ${APP_IMAGE_STORAGE:local}   # local | s3
     dir: ${APP_IMAGE_DIR:./data/images}
