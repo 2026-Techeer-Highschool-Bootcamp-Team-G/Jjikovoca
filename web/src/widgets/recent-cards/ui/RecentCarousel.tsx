@@ -275,24 +275,31 @@ const examChip: CSSProperties = {
   color: 'var(--color-brand-primary)',
 }
 
-// 발음 재생 — 카드 플립과 겹치지 않게 stopPropagation
-function speak(text: string, lang: string) {
-  const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined
-  if (!synth || !text) return
-  synth.cancel()
-  const u = new SpeechSynthesisUtterance(text)
-  u.lang = lang
-  synth.speak(u)
-}
-
 // 미국/영국 발음 선택 재생 (카드 앞면)
+// 기본은 둘 다 회색(비활성). 클릭해 재생되는 동안에만 활성색, 재생이 끝나면 다시 회색.
 function AudioButtons({ text }: { text: string }) {
+  const [playing, setPlaying] = useState<'US' | 'GB' | null>(null)
+
+  // 발음 재생 — 카드 플립과 겹치지 않게 호출부에서 stopPropagation
+  const play = (locale: 'US' | 'GB', lang: string) => {
+    const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined
+    if (!synth || !text) return
+    synth.cancel()
+    const u = new SpeechSynthesisUtterance(text)
+    u.lang = lang
+    const done = () => setPlaying((p) => (p === locale ? null : p)) // 다른 발음이 이어 재생 중이면 유지
+    u.onend = done
+    u.onerror = done
+    setPlaying(locale)
+    synth.speak(u)
+  }
+
   return (
     <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-      <button type="button" onClick={(e) => { e.stopPropagation(); speak(text, 'en-US') }} style={audioBtn(true)}>
+      <button type="button" onClick={(e) => { e.stopPropagation(); play('US', 'en-US') }} style={audioBtn(playing === 'US')}>
         🇺🇸 미국 <IconSpeaker size={13} />
       </button>
-      <button type="button" onClick={(e) => { e.stopPropagation(); speak(text, 'en-GB') }} style={audioBtn(false)}>
+      <button type="button" onClick={(e) => { e.stopPropagation(); play('GB', 'en-GB') }} style={audioBtn(playing === 'GB')}>
         🇬🇧 영국 <IconSpeaker size={13} />
       </button>
     </div>
