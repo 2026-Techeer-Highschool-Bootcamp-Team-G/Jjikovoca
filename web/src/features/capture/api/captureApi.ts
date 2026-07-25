@@ -6,6 +6,7 @@ import type { Card } from '@/entities/card'
 interface AnalyzeInput {
   type: 'WORD' | 'PROBLEM'
   cropImages?: string[] // WORD 시 형광펜 크롭 base64(최대 10)
+  words?: string[] // WORD 크롭의 OCR 단어 힌트(cropImages 와 인덱스 정렬, 미상은 ""). 캐시용 순수 힌트 — 없어도 동작
   fullImage?: string // 지문 전체(문맥 뜻 판별)
   cropImage?: string // PROBLEM 시 문제 박스 크롭(단일)
   examId?: number
