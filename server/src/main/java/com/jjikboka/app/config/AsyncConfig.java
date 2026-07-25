@@ -27,4 +27,21 @@ public class AsyncConfig {
         executor.initialize();
         return executor;
     }
+
+    /**
+     * WORD 크롭별 Gemini 호출 병렬화 전용 풀 (analysisExecutor와 분리 — 워커가 자기 병렬 작업에 막히지 않게).
+     * 동시성 상한(max 4)은 Gemini rate-limit(429) 방어선이다 — 크롭이 많아도 한 번에 4개까지만 호출한다.
+     * 큐가 차면 CallerRuns로 호출 스레드(워커)가 직접 실행해 백프레셔를 건다.
+     */
+    @Bean(name = "geminiCallExecutor")
+    Executor geminiCallExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(4);
+        executor.setQueueCapacity(20);
+        executor.setThreadNamePrefix("gemini-");
+        executor.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy());
+        executor.initialize();
+        return executor;
+    }
 }
