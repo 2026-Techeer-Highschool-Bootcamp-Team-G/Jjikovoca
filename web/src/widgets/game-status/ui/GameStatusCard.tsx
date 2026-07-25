@@ -121,14 +121,7 @@ export function GameStatusCard({
             textAlign: 'left',
             fontSize: 13,
             fontWeight: 700,
-            backgroundImage:
-              'linear-gradient(90deg, #ff5a5a, #ffab4e, #ffe24e, #4fd88b, #4fb0ff, #a06bff, #ff5a5a)',
-            backgroundSize: '200% auto',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            color: 'transparent',
-            WebkitTextFillColor: 'transparent',
-            animation: 'jjik-rainbow 4s linear infinite',
+            color: 'var(--color-text-brand)', // 앱 전체 파란 톤과 통일(기존 무지개 → 브랜드 파랑)
           }}
         >
           {questLabel}
