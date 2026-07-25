@@ -1,0 +1,53 @@
+name: build-push
+
+# main에 server/ 변경이 머지되면: server 이미지를 빌드해 GHCR에 push하고,
+# 배포 레포(Jjikovoca-deploy)에 배포 신호(repository_dispatch)를 보낸다.
+# 실제 EC2 배포는 배포 레포의 deploy.yml이 이 신호를 받아 수행한다.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'server/**'
+      - '.github/workflows/build-push.yml'
+
+concurrency: build-push        # 연속 머지 시 빌드 겹침 방지
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write          # GHCR push는 GITHUB_TOKEN으로(별도 PAT 불필요)
+    steps:
+      - uses: actions/checkout@v4
+
+      # GHCR는 소유자명을 소문자만 허용 — org명(대문자 포함)을 소문자로 변환
+      - name: 소유자명 소문자화
+        id: vars
+        run: echo "owner=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+
+      - name: GHCR 로그인
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # server/Dockerfile(멀티스테이지)로 이미지 빌드 → 태그 2개(git sha·latest)로 push
+      - name: 이미지 빌드·push
+        uses: docker/build-push-action@v6
+        with:
+          context: server
+          push: true
+          tags: |
+            ghcr.io/${{ steps.vars.outputs.owner }}/jjikovoca-server:${{ github.sha }}
+            ghcr.io/${{ steps.vars.outputs.owner }}/jjikovoca-server:latest
+
+      # 배포 레포에 "이 sha로 배포해" 신호. 크로스 레포라 GITHUB_TOKEN이 아닌 PAT 필요.
+      - name: 배포 레포 트리거
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.DEPLOY_REPO_PAT }}
+          repository: 2026-Techeer-Highschool-Bootcamp-Team-G/Jjikovoca-deploy
+          event-type: deploy
+          client-payload: '{"sha": "${{ github.sha }}"}'
