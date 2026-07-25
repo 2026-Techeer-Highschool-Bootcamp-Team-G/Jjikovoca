@@ -8,6 +8,7 @@ import { GradeButtons } from '@/features/study-grade'
 import type { Grade } from '@/features/study-grade'
 import { fetchFlashcards, recordStudy } from '@/features/study'
 import type { FlashcardQueueCard } from '@/features/study'
+import { generateMnemonic } from '@/entities/card'
 
 // 큐 카드 → 카드 뷰 매핑. 발음·품사·이모지·유형태그는 백엔드 제공(기존 카드는 null)
 function toFlashcard(c: FlashcardQueueCard): FlashcardData {
@@ -20,9 +21,11 @@ function toFlashcard(c: FlashcardQueueCard): FlashcardData {
       : { pre: '', highlight: '', post: ex, translation: '' }
   const badges = (c.tags ?? []).map((t, idx) => ({ label: t, tone: idx === 0 ? ('grey' as const) : ('blue' as const) }))
   return {
+    cardId: c.id,
     word: w,
     pronunciation: c.pronunciation ?? '',
     conceptEmoji: c.emoji || '📘',
+    mnemonicPath: c.mnemonicImagePath ?? null,
     pos: c.pos ?? '',
     meaning: c.contextMeaning ?? '',
     dictNote: '',
@@ -53,6 +56,13 @@ export function FlashcardPage() {
 
   const record = useMutation({
     mutationFn: (grade: Grade) => recordStudy(cur.id, { activity: 'FLASHCARD', result: grade }),
+  })
+
+  // AI 연상 이미지 온디맨드 생성 — 생성된 경로는 카드별로 보관해 즉시 반영(쿼터 초과 시 이모지 폴백 유지)
+  const [genMap, setGenMap] = useState<Record<number, string>>({})
+  const mnemonic = useMutation({
+    mutationFn: (cardId: number) => generateMnemonic(cardId),
+    onSuccess: (r, cardId) => setGenMap((m) => ({ ...m, [cardId]: r.mnemonicImagePath })),
   })
 
   const handleGrade = (grade: Grade) => {
@@ -155,7 +165,14 @@ export function FlashcardPage() {
       </div>
 
       <div style={{ padding: '16px var(--spacing-xl) 0' }}>
-        <FlashcardView data={cur.data} flipped={flipped} onFlip={() => setFlipped((f) => !f)} />
+        <FlashcardView
+          data={{ ...cur.data, mnemonicPath: genMap[cur.id] ?? cur.data.mnemonicPath }}
+          flipped={flipped}
+          onFlip={() => setFlipped((f) => !f)}
+          onGenerate={() => cur?.id != null && mnemonic.mutate(cur.id)}
+          generating={mnemonic.isPending && mnemonic.variables === cur.id}
+          genError={mnemonic.isError && mnemonic.variables === cur.id}
+        />
       </div>
 
       <div style={{ marginTop: 'auto', padding: '0 var(--spacing-xl) 8px' }}>
