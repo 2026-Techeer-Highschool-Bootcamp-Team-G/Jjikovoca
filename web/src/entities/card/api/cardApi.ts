@@ -28,6 +28,12 @@ export function fetchCardCounts(): Promise<CardCounts> {
   return apiGet<CardCounts>('/api/cards/counts')
 }
 
+/** AI 연상 이미지 온디맨드 생성 — POST /api/cards/{id}/mnemonic (F-05 §6).
+ *  성공 시 파일명(mnemonicImagePath) 반환. 쿼터 초과(429/503)는 ApiError 로 throw → 이모지 폴백. */
+export function generateMnemonic(cardId: number): Promise<{ mnemonicImagePath: string }> {
+  return apiPost(`/api/cards/${cardId}/mnemonic`)
+}
+
 /** 카드 시험 태깅(수동, 복수·멱등) — POST /api/cards/{id}/exams (F-29) */
 export function tagCardExams(
   cardId: number,
