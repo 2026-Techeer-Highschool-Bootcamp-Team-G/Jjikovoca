@@ -64,11 +64,11 @@ class AnalysisWorker {
         try {
             analyzeJobService.markRunning(jobId);
             emitStages(jobId, event.type());
-            List<GeminiImage> images = loadImages(event);
-            AnalysisContent content = geminiClient.generate(event.type(), images);
-            cardCreationService.create(toCommand(event, content));
+            // WORD로 여러 단어를 칠하면 크롭마다 카드 하나 — 정보 누락 없이 단어별로 분석한다.
+            // PROBLEM(수학)이나 크롭 0~1개 WORD는 기존 단일 호출 경로.
+            String model = isMultiWord(event) ? analyzeWordsPerCrop(event) : analyzeSingle(event);
             analyzeJobService.markDone(jobId);
-            eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeCompleted(jobId, content.model()));
+            eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeCompleted(jobId, model));
             awardCaptureQuietly(event.userId());   // 오답 기록 보상(best-effort) — 실패해도 분석은 완료 유지
         } catch (Exception e) {
             log.error("분석 처리 실패 — jobId={}, quota 환불", jobId, e);
@@ -76,6 +76,62 @@ class AnalysisWorker {
             quotaConsumeService.refund(event.userId());
             eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeFailed(jobId, e.getMessage()));
         }
+    }
+
+    /** WORD + 크롭 2개 이상이면 크롭별 카드 생성 경로로 간다(단어 하나 = 카드 하나). */
+    private boolean isMultiWord(AnalyzeEvents.AnalyzeRequested event) {
+        return "WORD".equals(event.type())
+                && event.cropImageRefs() != null && event.cropImageRefs().size() >= 2;
+    }
+
+    /** 기존 단일 호출 경로(PROBLEM, 또는 크롭 0~1개 WORD) — 카드 1개 생성 후 model 반환. */
+    private String analyzeSingle(AnalyzeEvents.AnalyzeRequested event) {
+        List<GeminiImage> images = loadImages(event);
+        AnalysisContent content = geminiClient.generate(event.type(), images);
+        String imagePath = (event.cropImageRefs() == null || event.cropImageRefs().isEmpty())
+                ? null : event.cropImageRefs().get(0);
+        cardCreationService.create(toCommand(event, content, imagePath));
+        return content.model();
+    }
+
+    /**
+     * WORD 크롭별 순차 분석 — 크롭(단어)마다 [크롭 + 지문]으로 generate를 호출해 카드 1개씩 만든다.
+     * 한 크롭이 실패해도 나머지는 진행(격리) — 전부 실패했을 때만 예외로 job FAILED + 환불로 이어진다.
+     * 카드 image_path는 각자의 크롭이라 보관함·서빙이 단어별 이미지를 쓴다.
+     */
+    private String analyzeWordsPerCrop(AnalyzeEvents.AnalyzeRequested event) {
+        GeminiImage full = event.fullImageRef() == null ? null : loadOne(event.fullImageRef());
+        String model = null;
+        int failed = 0;
+        for (String cropRef : event.cropImageRefs()) {
+            try {
+                List<GeminiImage> images = new ArrayList<>();
+                GeminiImage crop = loadOne(cropRef);
+                if (crop != null) {
+                    images.add(crop);
+                }
+                if (full != null) {
+                    images.add(full);   // 지문은 문맥(contextMeaning)용으로 매 호출에 함께 넣는다
+                }
+                AnalysisContent content = geminiClient.generate("WORD", images);
+                cardCreationService.create(toCommand(event, content, cropRef));
+                model = content.model();
+            } catch (RuntimeException e) {
+                failed++;
+                log.warn("단어 크롭 분석 실패(건너뜀) — jobId={}, crop={}: {}", event.jobId(), cropRef, e.getMessage());
+            }
+        }
+        if (model == null) {   // 카드 0개 = 전부 실패 → 상위 catch로 FAILED·환불
+            throw new IllegalStateException("모든 단어 크롭 분석 실패(" + failed + "개)");
+        }
+        return model;
+    }
+
+    /** 참조 하나를 비전 입력으로 로드한다(읽기 실패면 null — 모의/부분 흐름 허용). */
+    private GeminiImage loadOne(String ref) {
+        return imageStorageService.readBytes(ref)
+                .map(bytes -> new GeminiImage(ImageStorageService.mimeOf(ref), bytes))
+                .orElse(null);
     }
 
     /** 캡처 exp 적립(F3) — 카드는 이미 저장·완료됐으므로 적립 실패가 분석을 되돌리지 않게 별도 try로 격리(로그만). */
@@ -120,10 +176,8 @@ class AnalysisWorker {
         return images;
     }
 
-    /** analysis 산출을 core.card 생성 커맨드로 옮긴다. image_path는 대표 크롭(첫 참조) — 보관함·서빙이 이를 쓴다. */
-    private CardCreateCommand toCommand(AnalyzeEvents.AnalyzeRequested event, AnalysisContent content) {
-        String imagePath = (event.cropImageRefs() == null || event.cropImageRefs().isEmpty())
-                ? null : event.cropImageRefs().get(0);
+    /** analysis 산출을 core.card 생성 커맨드로 옮긴다. image_path는 호출자가 넘긴 크롭(단어별) — 보관함·서빙이 이를 쓴다. */
+    private CardCreateCommand toCommand(AnalyzeEvents.AnalyzeRequested event, AnalysisContent content, String imagePath) {
         return new CardCreateCommand(
                 event.userId(), event.jobId(), event.type(), content.subject(), imagePath,
                 content.word(), content.contextMeaning(), content.dictMeaning(), content.example(),
