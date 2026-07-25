@@ -27,6 +27,11 @@ public record AnalyzeRequest(
         @Size(max = 10, message = "크롭 이미지는 최대 10개까지입니다.")
         List<String> cropImages,
 
+        // OCR 단어 힌트(프론트 Tesseract) — cropImages와 인덱스 정렬. 있으면 단어키 캐시 조회에 쓰고,
+        // 없거나 ""(저신뢰)면 무시하고 기존 경로(이미지 해시 캐시→Gemini). 순수 힌트라 하위호환.
+        @Size(max = 10, message = "단어 힌트는 최대 10개까지입니다.")
+        List<String> words,
+
         String fullImage,
 
         String cropImage,
