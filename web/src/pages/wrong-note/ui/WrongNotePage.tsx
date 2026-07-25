@@ -175,7 +175,7 @@ export function WrongNotePage() {
             row={row}
             speaking={speakingId === row.id}
             onSpeak={() => handleSpeak(row)}
-            onExamTag={row.untagged ? () => navigate('/exam-select') : undefined}
+            onExamTag={row.untagged ? () => navigate('/exam-select', { state: { cardId: row.id } }) : undefined}
             onClick={() => {
               // 영어 단어는 상세 페이지가 없어 이동하지 않고 가벼운 햅틱(진동)만 준다.
               // 눌림 시각 효과는 CardRow 가 담당. (수학 문제 상세 라우팅은 후속)
