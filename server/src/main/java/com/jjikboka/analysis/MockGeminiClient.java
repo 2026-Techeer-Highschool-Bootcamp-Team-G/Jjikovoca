@@ -34,7 +34,7 @@ class MockGeminiClient implements GeminiClient {
                     null, null, null, null,
                     null, null, null, null,   // WORD enrichment 미해당(PROBLEM)
                     "이차방정식의 근과 계수의 관계를 묻는 문제",
-                    "x^2 - 5x + 6 = 0",
+                    "다음 이차방정식의 두 근을 구하시오. $x^2 - 5x + 6 = 0$",   // latex=문제 전문(발문+수식)
                     "이차방정식",
                     "두 근의 합과 곱을 계수로 표현해 보세요.",
                     "근과 계수의 관계: 합 = -b/a, 곱 = c/a",

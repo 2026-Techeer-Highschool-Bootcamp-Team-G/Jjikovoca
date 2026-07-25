@@ -39,14 +39,15 @@ class RealGeminiClient implements GeminiClient {
 
     private static final String PROBLEM_PROMPT = """
             다음은 수학 문제의 크롭 이미지다. 문제를 분석해 아래 JSON만 출력하라(코드블록·설명 없이).
+            문제는 절대 요약하지 말고 100% 그대로 추출하라 — 발문(문제 문장)·수식·보기·조건을 하나도 빠짐없이 담아라.
             {
               "subject": "MATH",
-              "summary": "문제 한 줄 요약(한국어)",
-              "latex": "문제 수식(LaTeX)",
+              "summary": "피드용 짧은 한 줄 요약(한국어)",
+              "latex": "문제 전문 — 발문(문제 문장)과 수식·보기·조건을 모두 요약·생략 없이 그대로. 수식은 LaTeX($...$), 문장은 그대로 자연어로 함께.",
               "concept": "핵심 개념(한국어)",
               "hint1": "1단계 힌트", "hint2": "2단계 힌트", "hint3": "3단계 힌트",
-              "answerFormat": "NUMERIC | EXPRESSION | CHOICE 중 하나",
-              "solutions": [{"label": "풀이명", "steps": [{"no": 1, "title": "1단계", "question": "질문", "content": "내용"}], "explanation": "해설"}],
+              "answerFormat": "NUMERIC | CHOICE 중 하나 (반드시 이 둘 중 하나. 수식·복수해도 NUMERIC으로)",
+              "solutions": [{"label": "풀이명", "steps": [{"no": 1, "title": "1단계", "question": "질문", "content": "내용"}], "explanation": "사고과정 요약(풀이 흐름을 간결히)"}],
               "answerValue": "정답 값(문자열)",
               "diagnosis": {"failedStep": 1, "description": "자주 틀리는 지점", "suggestedReason": "MISTAKE | CONCEPT"}
             }
@@ -72,7 +73,7 @@ class RealGeminiClient implements GeminiClient {
                     null, null, null, null,   // WORD enrichment 미해당(PROBLEM)
                     str(node, "summary", null), str(node, "latex", null), str(node, "concept", null),
                     str(node, "hint1", null), str(node, "hint2", null), str(node, "hint3", null),
-                    str(node, "answerFormat", null),
+                    answerFormat(node),
                     jsonString(node, "solutions"), str(node, "answerValue", null), jsonString(node, "diagnosis"));
         }
         return new AnalysisContent(
@@ -125,6 +126,11 @@ class RealGeminiClient implements GeminiClient {
 
     private static String str(JsonNode node, String field, String fallback) {
         return node.hasNonNull(field) ? node.get(field).asText() : fallback;
+    }
+
+    /** answerFormat을 DB 허용값(NUMERIC·CHOICE)으로 정규화 — 모델이 벗어난 값(EXPRESSION 등)을 내도 카드 저장이 깨지지 않게. */
+    private static String answerFormat(JsonNode node) {
+        return "CHOICE".equals(str(node, "answerFormat", null)) ? "CHOICE" : "NUMERIC";
     }
 
     /** JSON 배열 필드를 문자열 리스트로 — 없거나 배열이 아니면 null(카드 tags 미설정). */
