@@ -61,3 +61,15 @@ export interface StudyRecordResult {
 export function recordStudy(cardId: number, body: StudyRecordBody): Promise<StudyRecordResult> {
   return apiPost<StudyRecordResult>(`/api/cards/${cardId}/study`, body)
 }
+
+/** 오늘의 학습 추천 통계 (F-28) — memoryRate 는 평균 회상확률 R(0~1, null 가능) */
+export interface Recommendation {
+  reviewCount: number
+  memoryRate: number | null
+  estimatedMinutes: number
+}
+
+/** 학습 추천 — GET /api/study/recommendation */
+export function fetchRecommendation(): Promise<Recommendation> {
+  return apiGet<Recommendation>('/api/study/recommendation')
+}
