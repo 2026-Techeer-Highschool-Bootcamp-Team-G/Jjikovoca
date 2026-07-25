@@ -50,6 +50,12 @@ export function HomePage() {
   const nearest = exams.data?.[0]
   const todayDue = review.data?.dueCount ?? 0
 
+  // 일일 퀘스트 — 서버 quest(진행/목표). 없으면 복습대기 수로 폴백
+  const quest = e?.quest
+  const questLabel = quest
+    ? `${quest.label} ${quest.progress}/${quest.target}${quest.completed ? ' · 달성 🎉' : ' · 달성 시 +40XP'}`
+    : `일일 퀘스트 — 복습 ${todayDue}개 · 달성 시 +40XP`
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <AppHeader onBell={() => navigate('/notifications')} />
@@ -68,7 +74,7 @@ export function HomePage() {
           exp={expVal}
           nextExp={nextExp}
           streakDays={streakDays}
-          questLabel={`일일 퀘스트 — 복습 ${todayDue}개 · 달성 시 +40XP`}
+          questLabel={questLabel}
         />
         {nearest ? (
           <DdayCard title={nearest.title} dday={nearest.dday} todayDue={todayDue} onClick={() => navigate('/exam')} />
