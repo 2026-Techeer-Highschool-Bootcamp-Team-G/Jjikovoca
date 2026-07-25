@@ -40,10 +40,12 @@ class AnalyzeService {
         quotaConsumeService.consume(userId);
         Long jobId = analyzeJobService.create(userId);
         List<String> cropImageRefs = saveCrops(request);
+        // WORD만 단어 힌트를 흘려보낸다(cropImages 순서=cropImageRefs 순서라 인덱스 정렬 유지). PROBLEM은 미해당.
+        List<String> words = "WORD".equals(request.type()) ? request.words() : null;
         String fullImageRef = (request.fullImage() == null || request.fullImage().isBlank())
                 ? null : imageStorageService.save(request.fullImage());
         eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeRequested(
-                jobId, userId, request.type(), cropImageRefs, fullImageRef));
+                jobId, userId, request.type(), cropImageRefs, words, fullImageRef));
         return AnalyzeAcceptedResponse.pending(jobId);
     }
 
