@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Tabs, Chip, Button, SearchBar, BottomSheet } from '@/shared/ui'
 import { CardRow } from '@/widgets/card-row'
@@ -40,6 +40,9 @@ function toRow(c: Card): CardRowView {
 /** 시험 선택 시트 (14-4, F-29) — 카드에 시험 지정/해제. 실 카드·시험 기반 */
 export function ExamSelectPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  // 오답노트 "+시험" 에서 넘어온 카드 — 그 카드의 시험 지정 시트를 자동으로 연다
+  const focusCardId = (location.state as { cardId?: number } | null)?.cardId ?? null
   const qc = useQueryClient()
   const [subject, setSubject] = useState<FeedSubject>('ALL')
   const [status, setStatus] = useState<Status>('ALL')
@@ -69,6 +72,7 @@ export function ExamSelectPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['cards'] })
       setOpen(false)
+      if (focusCardId != null) navigate(-1) // "+시험"에서 왔으면 오답노트로 복귀
     },
   })
 
@@ -79,6 +83,17 @@ export function ExamSelectPage() {
     setActiveCardId(card.id)
     setOpen(true)
   }
+
+  // "+시험"으로 특정 카드를 지정하고 왔으면 그 카드 시트를 1회 자동으로 연다(닫으면 다시 안 열림)
+  const autoOpenedRef = useRef(false)
+  useEffect(() => {
+    if (autoOpenedRef.current || focusCardId == null || cards.length === 0) return
+    const card = cards.find((c) => c.id === focusCardId)
+    if (card) {
+      autoOpenedRef.current = true
+      openSheet(card)
+    }
+  }, [focusCardId, cards])
 
   const toggle = (id: number) =>
     setChecked((prev) => {
@@ -92,7 +107,7 @@ export function ExamSelectPage() {
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', padding: '12px var(--spacing-xl) 0' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--color-text-primary)' }}>오답노트</h1>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--color-text-primary)' }}>시험 지정</h1>
           <span style={{ fontSize: 13, color: 'var(--color-text-tertiary)' }}>{cards.length}장</span>
         </div>
         <button type="button" style={{ background: 'none', border: 'none', fontSize: 13, fontWeight: 500, color: 'var(--color-text-brand)', cursor: 'pointer' }}>
@@ -140,7 +155,13 @@ export function ExamSelectPage() {
         )}
       </div>
 
-      <BottomSheet open={open} onClose={() => setOpen(false)}>
+      <BottomSheet
+        open={open}
+        onClose={() => {
+          setOpen(false)
+          if (focusCardId != null) navigate(-1) // "+시험" 왕복 — 시트를 닫으면 오답노트로 복귀
+        }}
+      >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)' }}>시험 지정</span>
           <span style={{ fontSize: 12, color: 'var(--color-text-tertiary)' }}>
