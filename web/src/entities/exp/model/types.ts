@@ -6,6 +6,8 @@ export interface ExpSummary {
   todayEarned: number
   dailyCap: number
   streakDays: number
+  /** 일일 퀘스트 — progress(오늘 학습 수)/target(학습수+복습대기), completed(복습대기 0) */
+  quest?: { label: string; progress: number; target: number; completed: boolean }
 }
 
 /** 출석 체크 결과 (일 1회 멱등) */
