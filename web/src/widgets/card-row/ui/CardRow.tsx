@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Badge, IconSpeaker } from '@/shared/ui'
 import type { BadgeColor } from '@/shared/ui'
 
@@ -31,9 +32,14 @@ export function CardRow({
   selected?: boolean
   speaking?: boolean // 스피커로 발음 재생 중 — 듣기 끝날 때까지 이 행/단어 강조 (오답노트 QA)
 }) {
+  // 탭 눌림(햅틱) 시각 효과 — 상세 이동이 없는 카드도 눌린 느낌을 준다
+  const [pressed, setPressed] = useState(false)
   return (
     <article
       onClick={onClick}
+      onPointerDown={onClick ? () => setPressed(true) : undefined}
+      onPointerUp={() => setPressed(false)}
+      onPointerLeave={() => setPressed(false)}
       style={{
         position: 'relative',
         background: speaking ? 'var(--color-brand-weak)' : 'var(--color-bg-primary)',
@@ -47,8 +53,9 @@ export function CardRow({
         flexDirection: 'column',
         gap: 8,
         cursor: onClick ? 'pointer' : 'default',
+        transform: pressed ? 'scale(0.98)' : undefined,
         animation: speaking ? 'jjik-speak-pulse 1.2s ease-in-out infinite' : undefined,
-        transition: 'background 160ms ease, border-color 160ms ease',
+        transition: 'background 160ms ease, border-color 160ms ease, transform 120ms ease',
       }}
     >
       {selectable && (
