@@ -31,6 +31,8 @@ export function CapturePage() {
   const [phase, setPhase] = useState<Phase>(params.get('phase') === 'analyzing' ? 'analyzing' : 'method')
   const [isMath, setIsMath] = useState(params.get('subject') === 'math')
   const [imageSrc, setImageSrc] = useState<string | null>(null)
+  // 형광펜 영역별 크롭(base64) — WORD 다중 단어 분석. CaptureEditor 에서 추출
+  const [cropImages, setCropImages] = useState<string[]>([])
   // 분석 결과 카드(폴링에서 수신) — 결과 화면에 실 카드로 전달
   const [resultCards, setResultCards] = useState<Card[] | null>(null)
   // 분석 오류 — 무음 폴백 대신 실패를 사용자에게 표시
@@ -55,11 +57,12 @@ export function CapturePage() {
           navigate('/limit') // 무료 한도 초과
           return
         }
-        // ⚠️ CaptureEditor가 크롭 base64를 아직 만들지 않음 → fullImage best-effort(크롭 추출은 후속)
+        // WORD: 형광펜 영역별 크롭 배열을 보낸다(단어마다 카드 생성). 크롭 실패 시 전체 이미지로 폴백.
+        const wordCrops = cropImages.length > 0 ? cropImages : imageSrc ? [imageSrc] : undefined
         const { jobId } = await analyzeCapture({
           type: isMath ? 'PROBLEM' : 'WORD',
           fullImage: imageSrc ?? undefined,
-          cropImages: imageSrc && !isMath ? [imageSrc] : undefined,
+          cropImages: !isMath ? wordCrops : undefined,
           cropImage: imageSrc && isMath ? imageSrc : undefined,
         })
         const poll = async () => {
@@ -106,6 +109,7 @@ export function CapturePage() {
 
   const onEditDone = (result: CaptureResult) => {
     setIsMath(result.hasBox)
+    setCropImages(result.hasBox ? [] : result.cropImages) // WORD 만 크롭 배열 사용
     setPhase('analyzing')
   }
 
