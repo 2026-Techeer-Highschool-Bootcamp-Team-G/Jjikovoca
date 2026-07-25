@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { fetchReportSummary } from '@/entities/report'
+import type { ReportSubject } from '@/entities/report'
 
 // 진입 시 0→목표 카운트업 (rAF, ease-out cubic)
 function useCountUp(target: number, durationMs = 900): number {
@@ -22,7 +23,7 @@ function useCountUp(target: number, durationMs = 900): number {
   return v
 }
 
-// "24장" / "78%" / "12개" 의 앞 숫자를 카운트업하고 접미사는 유지
+// "24장" / "78%" 의 앞 숫자를 카운트업하고 접미사는 유지
 function CountUp({ value }: { value: string }) {
   const match = /^(\d+)(.*)$/.exec(value)
   const target = match ? Number(match[1]) : 0
@@ -37,7 +38,7 @@ function CountUp({ value }: { value: string }) {
   )
 }
 
-// mount 기반 순차 등장 스타일(아래에서 떠오르며 페이드) — 전역 keyframe 불필요
+// mount 기반 순차 등장 스타일
 function entrance(mounted: boolean, delay: number): CSSProperties {
   return {
     opacity: mounted ? 1 : 0,
@@ -46,134 +47,81 @@ function entrance(mounted: boolean, delay: number): CSSProperties {
   }
 }
 
-// 백엔드 미제공 시각화 표식 — reports/summary 에 없는 데이터라 데모임을 명시(backend-requests §3)
-function DemoTag() {
-  return (
-    <span
-      style={{
-        fontSize: 10,
-        fontWeight: 600,
-        padding: '2px 6px',
-        borderRadius: 6,
-        background: 'var(--color-bg-secondary)',
-        color: 'var(--color-text-tertiary)',
-        whiteSpace: 'nowrap',
-      }}
-    >
-      데모
-    </span>
-  )
+// 학습 잔디 색 강도 — level 0~4 (백엔드 통일 임계)
+const GRASS_COLOR = ['var(--color-bg-secondary)', '#b8ecd4', '#7ee2b0', '#4fd89e', 'var(--color-success-primary)']
+
+const pad = (n: number) => String(n).padStart(2, '0')
+const ymd = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+const WEEKDAY = ['일', '월', '화', '수', '목', '금', '토']
+
+// 분 → "Xh Ym" / "N분"
+function fmtMin(m: number): string {
+  if (m <= 0) return '0분'
+  const h = Math.floor(m / 60)
+  const min = m % 60
+  return h > 0 ? `${h}h ${min}m` : `${min}분`
 }
 
-// 과목별 학습 비중 — 오늘 / 이번 달 (백엔드 연결 전 데모)
-const SUBJECT = {
-  TODAY: {
-    total: '1h 20m',
-    mathPct: 65,
-    math: { pct: '65%', detail: '52분 · 28문제' },
-    eng: { pct: '35%', detail: '28분 · 22단어' },
-    caption: '오늘은 수학 위주로 공부했어요',
-  },
-  MONTH: {
-    total: '4h 48m',
-    mathPct: 58,
-    math: { pct: '58%', detail: '168분 · 96문제' },
-    eng: { pct: '42%', detail: '120분 · 84단어' },
-    caption: '이번 달은 수학에 조금 더 집중했어요',
-  },
-} as const
-type Scope = keyof typeof SUBJECT
-
-// 학습 잔디 — 레벨(=학습 시간대)별 색·칸 크기. 시간이 많을수록 진하고 커진다
-const GRASS_COLOR = ['var(--color-bg-secondary)', '#b8ecd4', '#4fd89e', 'var(--color-success-primary)']
-const GRASS_HOURS = [0, 2, 4, 7] // 레벨 0~3 → 그날 학습 시간(h). 칸 안에 Nh 표기
-
-// 월별 학습 잔디 4주 × 7일 (25:163) — 백엔드 연결 전 데모
-const MONTHS = [
-  {
-    label: '6월',
-    days: 21,
-    streak: 3,
-    grass: [
-      [1, 0, 2, 1, 3, 0, 1],
-      [2, 1, 1, 0, 2, 3, 0],
-      [0, 2, 3, 1, 0, 1, 2],
-      [1, 3, 0, 2, 1, 0, 1],
-    ],
-  },
-  {
-    label: '7월',
-    days: 18,
-    streak: 5,
-    grass: [
-      [0, 1, 2, 0, 3, 1, 0],
-      [1, 2, 0, 1, 0, 2, 3],
-      [0, 3, 1, 2, 1, 0, 1],
-      [2, 0, 0, 3, 2, 1, 0],
-    ],
-  },
-]
-
-// 약한 개념 — 과목별 분리 (왼쪽 영어 / 오른쪽 수학)
-const WEAK_ENG = [
-  { concept: '가정법 과거완료', count: 3, to: '/flashcard' },
-  { concept: '다의어 (sound 등)', count: 2, to: '/flashcard' },
-]
-const WEAK_MATH = [
-  { concept: '이차방정식 인수분해', count: 5, to: '/math-review' },
-  { concept: '삼각함수 그래프', count: 3, to: '/math-review' },
-]
-
-// 일일 학습 시간 주간 막대 (F-10) — 과목별 분(분 단위): 수학(파랑)+영어(초록) 누적
-const WEEK = [
-  { day: '월', eng: 90, math: 70 },
-  { day: '화', eng: 130, math: 170 },
-  { day: '수', eng: 60, math: 60 },
-  { day: '목', eng: 150, math: 190 },
-  { day: '금', eng: 100, math: 80 },
-  { day: '토', eng: 40, math: 40 },
-  { day: '일', eng: 140, math: 150, today: true },
-]
-const WEEK_TOTALS = WEEK.map((d) => d.eng + d.math)
-// Y축 상한(짝수 시간) + 눈금·평균 (분 단위)
-const AXIS_HOUR = Math.max(2, Math.ceil(Math.max(...WEEK_TOTALS) / 120) * 2)
-const AXIS_MIN = AXIS_HOUR * 60
-const WEEK_AVG_MIN = WEEK_TOTALS.reduce((a, b) => a + b, 0) / WEEK_TOTALS.length
-
-/** 학습 리포트 (F-10) — 13 리포트 */
+/** 학습 리포트 (F-10) — 13 리포트. GET /api/reports/summary 실연동 */
 export function ReportPage() {
   const navigate = useNavigate()
-  const [scope, setScope] = useState<Scope>('MONTH')
-  const [monthIdx, setMonthIdx] = useState(MONTHS.length - 1)
-  const s = SUBJECT[scope]
-  const m = MONTHS[monthIdx]
-  const grassHours = m.grass.flat().reduce((a, l) => a + GRASS_HOURS[l], 0) // 이번 달 총 학습 시간(h)
 
-  // 실 API — 백엔드는 period=YYYY-MM 요구(WEEK/MONTH 는 400). 이번 달을 전달
-  const period = (() => {
-    const d = new Date()
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-  })()
-  // basic(새 카드·정답률)만 백엔드 제공 → 실값. null(데이터 없음)은 가짜 대신 '—'
-  // (도넛·잔디·약점·주간막대는 백엔드 필드 없음 → 클라 데모, Phase 5에서 문서화)
+  // 이번 달(YYYY-MM). period=YYYY-MM 만 허용(WEEK/MONTH 는 400)
+  const today = new Date()
+  const period = `${today.getFullYear()}-${pad(today.getMonth() + 1)}`
   const report = useQuery({ queryKey: ['report-summary', period], queryFn: () => fetchReportSummary(period) })
   const basic = report.data?.basic
-  const newCards = `${basic?.newCards ?? 0}장`
-  const accuracyWord = basic?.accuracy.word != null ? `${Math.round(basic.accuracy.word * 100)}%` : '—'
-  const accuracyMath = basic?.accuracy.problem != null ? `${Math.round(basic.accuracy.problem * 100)}%` : '—'
+  const full = report.data?.full ?? null
+  const grass = report.data?.grass ?? []
 
-  // 진입 시 카드/막대/잔디가 생성되듯 순차 등장
+  // 통계 카드
+  const newCards = `${basic?.newCards ?? 0}장`
+  const accWord = basic?.accuracy.word != null ? `${Math.round(basic.accuracy.word * 100)}%` : '—'
+  const accMath = basic?.accuracy.problem != null ? `${Math.round(basic.accuracy.problem * 100)}%` : '—'
+
+  // 과목별 학습 비중(도넛)
+  const breakdown = basic?.subjectBreakdown ?? []
+  const mathB = breakdown.find((b) => b.subject === 'MATH')
+  const engB = breakdown.find((b) => b.subject === 'ENGLISH')
+  const totalMin = breakdown.reduce((a, b) => a + b.minutes, 0)
+  const mathPct = Math.round((mathB?.ratio ?? 0) * 100)
+  const engPct = Math.round((engB?.ratio ?? 0) * 100)
+
+  // 잔디 — 이번 달 날짜별 level. 총 학습분
+  const grassByDate = new Map(grass.map((g) => [g.date, g]))
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
+  const monthLevels = Array.from({ length: daysInMonth }, (_, i) => {
+    const key = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(i + 1)}`
+    return grassByDate.get(key)?.level ?? 0
+  })
+  const totalStudyMin = grass.reduce((a, g) => a + g.minutes, 0)
+  const activeDays = grass.filter((g) => g.count > 0).length
+
+  // 일일 학습시간(최근 7일, 일별 총 분 — 과목별 분해는 백엔드 미제공)
+  const last7 = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today)
+    d.setDate(today.getDate() - (6 - i))
+    return { label: WEEKDAY[d.getDay()], minutes: grassByDate.get(ymd(d))?.minutes ?? 0, today: i === 6 }
+  })
+  const maxMin = Math.max(60, ...last7.map((x) => x.minutes))
+  const avgMin = Math.round(basic?.rhythm.avgSessionMinutes ?? 0)
+
+  // 약한 개념(프리미엄) — 과목별 분리
+  const weakEng = (full?.weakConcepts ?? []).filter((w) => w.subject === 'ENGLISH')
+  const weakMath = (full?.weakConcepts ?? []).filter((w) => w.subject === 'MATH')
+
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
     const id = requestAnimationFrame(() => setMounted(true))
     return () => cancelAnimationFrame(id)
   }, [])
+
+  const monthLabel = `${today.getMonth() + 1}월`
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <header style={{ background: 'var(--color-bg-primary)', padding: '24px var(--spacing-xl) 16px' }}>
-        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: 'var(--color-text-primary)' }}>
-          7월 리포트
-        </h1>
+        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: 'var(--color-text-primary)' }}>{monthLabel} 리포트</h1>
         <p style={{ margin: '4px 0 0', fontSize: 15, color: 'var(--color-text-secondary)' }}>
           이번 달 학습 요약 — 프리미엄 리포트
         </p>
@@ -182,77 +130,59 @@ export function ReportPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '16px var(--spacing-xl) 24px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 9, ...entrance(mounted, 0) }}>
           <StatCard label="새로 만든 카드" value={newCards} />
-          <StatCard label="영어 정답률" value={accuracyWord} accent />
-          <StatCard label="수학 정답률" value={accuracyMath} accent />
+          <StatCard label="영어 정답률" value={accWord} accent />
+          <StatCard label="수학 정답률" value={accMath} accent />
         </div>
 
+        {/* 과목별 학습 비중 도넛 */}
         <Card style={entrance(mounted, 0.12)}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: 'var(--color-text-primary)' }}>
-              {scope === 'TODAY' ? '오늘' : '이번 달'} 과목별 학습 비중 <DemoTag />
-            </span>
-            <Segmented
-              options={[
-                { key: 'TODAY', label: '오늘' },
-                { key: 'MONTH', label: '이번 달' },
-              ]}
-              value={scope}
-              onChange={(k) => setScope(k as Scope)}
-            />
-          </div>
-          <div style={{ display: 'flex', gap: 24, alignItems: 'center', justifyContent: 'center' }}>
-            <Donut total={s.total} mathPct={s.mathPct} />
-            <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <LegendRow color="var(--blue-500)" subject="수학" pct={s.math.pct} pctColor="var(--blue-500)" detail={s.math.detail} />
-              <LegendRow color="var(--teal-500)" subject="영어" pct={s.eng.pct} pctColor="var(--teal-500)" detail={s.eng.detail} />
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-primary)' }}>이번 달 과목별 학습 비중</span>
+          {totalMin > 0 ? (
+            <div style={{ display: 'flex', gap: 24, alignItems: 'center', justifyContent: 'center' }}>
+              <Donut total={fmtMin(totalMin)} mathPct={mathPct} />
+              <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <LegendRow color="var(--blue-500)" subject="수학" pct={`${mathPct}%`} pctColor="var(--blue-500)" detail={`${mathB?.minutes ?? 0}분 · ${mathB?.count ?? 0}문제`} />
+                <LegendRow color="var(--teal-500)" subject="영어" pct={`${engPct}%`} pctColor="var(--teal-500)" detail={`${engB?.minutes ?? 0}분 · ${engB?.count ?? 0}단어`} />
+              </div>
             </div>
-          </div>
-          <span style={{ fontSize: 11, color: 'var(--grey-500)' }}>{s.caption}</span>
+          ) : (
+            <EmptyRow text="이번 달 학습 기록이 아직 없어요" />
+          )}
         </Card>
 
+        {/* 학습 잔디 */}
         <Card style={entrance(mounted, 0.18)}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>학습 잔디 <DemoTag /></span>
-              <MonthNav
-                label={m.label}
-                canPrev={monthIdx > 0}
-                canNext={monthIdx < MONTHS.length - 1}
-                onPrev={() => setMonthIdx((i) => Math.max(0, i - 1))}
-                onNext={() => setMonthIdx((i) => Math.min(MONTHS.length - 1, i + 1))}
-              />
-            </div>
+            <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>학습 잔디 · {monthLabel}</span>
             <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>
-              총 {grassHours}시간 · 연속 {m.streak}일 🔥
+              총 {fmtMin(totalStudyMin)} · {activeDays}일 학습 🔥
             </span>
           </div>
-          {/* 잔디 그리드 — 균일 칸, 칸 안에 학습 시간(Nh) 표기. 가운데 정렬 */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 34px)', gap: 6 }}>
-              {m.grass.flat().map((lvl, i) => (
+              {monthLevels.map((lvl, i) => (
                 <span
                   key={i}
+                  title={`${i + 1}일`}
                   style={{
                     width: 34,
                     height: 34,
                     borderRadius: 8,
-                    background: GRASS_COLOR[lvl],
+                    background: GRASS_COLOR[Math.min(lvl, 4)],
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: 10,
-                    fontWeight: 700,
-                    color: lvl >= 2 ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)',
+                    color: 'var(--color-text-tertiary)',
                     opacity: mounted ? 1 : 0,
                     transform: mounted ? 'scale(1)' : 'scale(0.3)',
                     transition: `opacity 0.3s ease-out ${0.28 + i * 0.012}s, transform 0.3s ease-out ${0.28 + i * 0.012}s`,
                   }}
                 >
-                  {lvl > 0 ? `${GRASS_HOURS[lvl]}h` : ''}
+                  {i + 1}
                 </span>
               ))}
             </div>
-            {/* 범례 — 색이 진할수록 오래 공부한 날 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)' }}>적게</span>
               {GRASS_COLOR.map((c, i) => (
@@ -263,129 +193,69 @@ export function ReportPage() {
           </div>
         </Card>
 
+        {/* 일일 학습 시간(최근 7일 · 일별 총 분) */}
         <Card style={entrance(mounted, 0.24)}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>일일 학습 시간 <DemoTag /></span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                <SubjectDot color="var(--blue-500)" label="수학" />
-                <SubjectDot color="var(--teal-500)" label="영어" />
-              </span>
-            </div>
-            <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>
-              하루 평균 {(WEEK_AVG_MIN / 60).toFixed(1)}시간
-            </span>
+            <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>일일 학습 시간</span>
+            <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>평균 세션 {avgMin}분</span>
           </div>
-          {/* Y축 시간 눈금 + 평균 점선 + 막대 */}
           <div style={{ position: 'relative', height: 120 }}>
-            {/* 시간 눈금(상한·절반) */}
-            {[AXIS_HOUR, AXIS_HOUR / 2].map((h) => (
-              <div
-                key={h}
-                style={{
-                  position: 'absolute',
-                  left: 0,
-                  right: 30,
-                  bottom: `${(h / AXIS_HOUR) * 100}%`,
-                  borderTop: '1px dashed var(--color-border-default)',
-                }}
-              >
-                <span
-                  style={{
-                    position: 'absolute',
-                    left: 'calc(100% + 4px)',
-                    top: 0,
-                    transform: 'translateY(-50%)',
-                    fontSize: 10,
-                    color: 'var(--color-text-tertiary)',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {h}시간
-                </span>
-              </div>
-            ))}
-            {/* 평균 점선 */}
-            <div
-              style={{
-                position: 'absolute',
-                left: 0,
-                right: 30,
-                bottom: `${(WEEK_AVG_MIN / AXIS_MIN) * 100}%`,
-                borderTop: '1.5px dashed #0a8a55',
-                opacity: mounted ? 1 : 0,
-                transition: 'opacity 0.5s ease-out 0.6s',
-              }}
-            >
-              <span
-                style={{
-                  position: 'absolute',
-                  left: 'calc(100% + 4px)',
-                  top: 0,
-                  transform: 'translateY(-50%)',
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: '#0a8a55',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                평균
-              </span>
-            </div>
-            {/* 막대 */}
             <div style={{ position: 'absolute', left: 0, right: 30, top: 0, bottom: 0, display: 'flex', alignItems: 'flex-end', gap: 10 }}>
-              {WEEK.map((d, di) => {
-                const total = d.eng + d.math
-                const hPct = (total / AXIS_MIN) * 100
+              {last7.map((d, di) => {
+                const hPct = (d.minutes / maxMin) * 100
                 return (
-                  <div key={d.day} style={{ flex: 1, height: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+                  <div key={di} style={{ flex: 1, height: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
                     <div
                       style={{
                         width: '100%',
                         maxWidth: 22,
                         height: mounted ? `${hPct}%` : '0%',
-                        minHeight: mounted ? 4 : 0,
+                        minHeight: mounted && d.minutes > 0 ? 4 : 0,
                         borderRadius: 4,
-                        overflow: 'hidden',
-                        display: 'flex',
-                        flexDirection: 'column',
+                        background: d.today ? 'var(--color-brand-primary)' : 'var(--blue-500)',
                         transition: `height 0.6s cubic-bezier(0.2, 0.8, 0.3, 1) ${0.28 + di * 0.05}s`,
                       }}
-                    >
-                      <div style={{ height: `${(d.math / total) * 100}%`, background: 'var(--blue-500)' }} />
-                      <div style={{ height: `${(d.eng / total) * 100}%`, background: 'var(--teal-500)' }} />
-                    </div>
+                    />
                   </div>
                 )
               })}
             </div>
           </div>
-          {/* 요일 라벨 */}
           <div style={{ display: 'flex', gap: 10, marginRight: 30 }}>
-            {WEEK.map((d) => (
+            {last7.map((d, i) => (
               <span
-                key={d.day}
+                key={i}
                 style={{ flex: 1, textAlign: 'center', fontSize: 10, color: d.today ? 'var(--color-text-brand)' : 'var(--color-text-tertiary)' }}
               >
-                {d.day}
+                {d.label}
               </span>
             ))}
           </div>
         </Card>
 
+        {/* 나의 약한 개념 (프리미엄) */}
         <Card style={entrance(mounted, 0.3)}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>
-            나의 약한 개념 <DemoTag />
-          </span>
-          {/* 왼쪽 영어 / 오른쪽 수학 */}
-          <div style={{ display: 'flex', gap: 14 }}>
-            <WeakColumn title="영어" color="var(--teal-500)" items={WEAK_ENG} onPick={navigate} />
-            <div style={{ width: 1, background: 'var(--color-border-default)', alignSelf: 'stretch' }} aria-hidden />
-            <WeakColumn title="수학" color="var(--blue-500)" items={WEAK_MATH} onPick={navigate} />
-          </div>
+          <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>나의 약한 개념</span>
+          {full == null ? (
+            <EmptyRow text="🔒 프리미엄에서 약한 개념 분석을 볼 수 있어요" />
+          ) : weakEng.length === 0 && weakMath.length === 0 ? (
+            <EmptyRow text="아직 약한 개념이 없어요 — 잘하고 있어요!" />
+          ) : (
+            <div style={{ display: 'flex', gap: 14 }}>
+              <WeakColumn title="영어" color="var(--teal-500)" items={weakEng} onPick={() => navigate('/flashcard')} />
+              <div style={{ width: 1, background: 'var(--color-border-default)', alignSelf: 'stretch' }} aria-hidden />
+              <WeakColumn title="수학" color="var(--blue-500)" items={weakMath} onPick={() => navigate('/math-review')} />
+            </div>
+          )}
         </Card>
       </div>
     </div>
+  )
+}
+
+function EmptyRow({ text }: { text: string }) {
+  return (
+    <p style={{ margin: '12px 0', textAlign: 'center', fontSize: 13, color: 'var(--color-text-tertiary)' }}>{text}</p>
   )
 }
 
@@ -429,7 +299,6 @@ function StatCard({ label, value, accent = false }: { label: string; value: stri
 }
 
 function Donut({ total, mathPct }: { total: string; mathPct: number }) {
-  // 진입 시 0→100% 시계방향으로 채워지며 원그래프 생성 (sweep 이 도달한 각도까지만 색, 나머지는 배경)
   const sweep = useCountUp(100, 900)
   const blueEnd = Math.min(sweep, mathPct)
   return (
@@ -464,95 +333,6 @@ function Donut({ total, mathPct }: { total: string; mathPct: number }) {
   )
 }
 
-// 오늘 / 이번 달 세그먼트 토글
-function Segmented({
-  options,
-  value,
-  onChange,
-}: {
-  options: { key: string; label: string }[]
-  value: string
-  onChange: (key: string) => void
-}) {
-  return (
-    <div style={{ display: 'inline-flex', gap: 2, padding: 2, borderRadius: 999, background: 'var(--color-bg-secondary)' }}>
-      {options.map((o) => {
-        const active = o.key === value
-        return (
-          <button
-            key={o.key}
-            type="button"
-            onClick={() => onChange(o.key)}
-            style={{
-              padding: '4px 10px',
-              borderRadius: 999,
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: 11,
-              fontWeight: 700,
-              background: active ? 'var(--color-brand-primary)' : 'transparent',
-              color: active ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)',
-              transition: 'background 140ms ease, color 140ms ease',
-            }}
-          >
-            {o.label}
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
-// 월 선택 ‹ 7월 › — 월별 학습 잔디 전환
-function MonthNav({
-  label,
-  canPrev,
-  canNext,
-  onPrev,
-  onNext,
-}: {
-  label: string
-  canPrev: boolean
-  canNext: boolean
-  onPrev: () => void
-  onNext: () => void
-}) {
-  const arrow = (glyph: string, enabled: boolean, onClick: () => void, aria: string) => (
-    <button
-      type="button"
-      disabled={!enabled}
-      onClick={onClick}
-      aria-label={aria}
-      style={{
-        width: 20,
-        height: 20,
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 0,
-        border: 'none',
-        background: 'none',
-        fontSize: 15,
-        fontWeight: 700,
-        cursor: enabled ? 'pointer' : 'default',
-        color: enabled ? 'var(--color-text-brand)' : 'var(--color-text-tertiary)',
-        opacity: enabled ? 1 : 0.4,
-      }}
-    >
-      {glyph}
-    </button>
-  )
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
-      {arrow('‹', canPrev, onPrev, '이전 달')}
-      <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-text-secondary)', minWidth: 26, textAlign: 'center' }}>
-        {label}
-      </span>
-      {arrow('›', canNext, onNext, '다음 달')}
-    </span>
-  )
-}
-
 function LegendRow({
   color,
   subject,
@@ -582,16 +362,6 @@ function LegendRow({
   )
 }
 
-// 일일 학습 시간 범례 점 (수학/영어)
-function SubjectDot({ color, label }: { color: string; label: string }) {
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10, color: 'var(--color-text-tertiary)' }}>
-      <span style={{ width: 8, height: 8, borderRadius: '50%', background: color }} aria-hidden />
-      {label}
-    </span>
-  )
-}
-
 // 약한 개념 과목 열 (영어/수학)
 function WeakColumn({
   title,
@@ -601,17 +371,18 @@ function WeakColumn({
 }: {
   title: string
   color: string
-  items: { concept: string; count: number; to: string }[]
-  onPick: (to: string) => void
+  items: { concept: string; subject: ReportSubject; wrongCount: number }[]
+  onPick: () => void
 }) {
   return (
     <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
       <span style={{ fontSize: 12, fontWeight: 700, color }}>{title}</span>
+      {items.length === 0 && <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)' }}>없음</span>}
       {items.map((w, i) => (
         <button
-          key={w.concept}
+          key={w.concept + i}
           type="button"
-          onClick={() => onPick(w.to)}
+          onClick={onPick}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -638,7 +409,7 @@ function WeakColumn({
           >
             {w.concept}
           </span>
-          <span style={{ fontSize: 11, color: 'var(--color-text-secondary)', flexShrink: 0 }}>{w.count}회</span>
+          <span style={{ fontSize: 11, color: 'var(--color-text-secondary)', flexShrink: 0 }}>{w.wrongCount}회</span>
         </button>
       ))}
     </div>
