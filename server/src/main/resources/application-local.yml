@@ -13,3 +13,10 @@ spring:
 # 로컬은 모의 Gemini 프로파일 허용 (키 없는 팀원 — 기존 "모의 AI 모드" 승계, 13 §8-4)
 gemini:
   mock: ${GEMINI_MOCK:true}
+
+# 로컬 CORS — 브라우저 프론트(Vite dev)는 항상 Origin을 붙이므로 localhost를 허용해야 개발이 된다.
+# 공통 기본값(application.yml)은 배포 도메인만이라, 로컬 프로파일에서 localhost를 더해 override한다.
+# (prod는 실제 프론트 도메인만 유지 — 여기 값은 local 프로파일에만 적용)
+app:
+  cors:
+    allowed-origins: http://localhost:5173,http://localhost:5174,http://localhost:5200,https://jjikovoca.site,https://www.jjikovoca.site
