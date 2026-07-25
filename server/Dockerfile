@@ -10,10 +10,11 @@ RUN gradle bootJar --no-daemon -x test
 # 2) runtime: JRE만 — 이미지 축소·공격면 감소
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
-# 비루트 실행 (08 §7 보안 베이스라인)
-RUN useradd -r -u 1001 spring
+# 비루트 실행 (08 §7 보안 베이스라인) + 로컬 저장 디렉토리(app.image.dir·export.dir = ./data/*) 쓰기 권한.
+# 명명 볼륨(server-data)이 /app/data에 처음 마운트될 때 이 소유권(spring)을 승계한다.
+RUN useradd -r -u 1001 spring && mkdir -p /app/data && chown -R spring:spring /app
 USER spring
-COPY --from=build /workspace/build/libs/app.jar app.jar
-EXPOSE 8080
+COPY --from=build --chown=spring:spring /workspace/build/libs/app.jar app.jar
+EXPOSE 8000
 # 컨테이너 메모리 인지 힙 (t3.small 등 소형 인스턴스)
 ENTRYPOINT ["java","-XX:MaxRAMPercentage=75.0","-jar","app.jar"]
