@@ -13,7 +13,7 @@ import java.util.List;
  *
  * <p>타입별 필수 필드가 갈린다:
  * <ul>
- *   <li>WORD — {@code cropImages}(형광펜 크롭 1~10개, AI 호출·차감은 1회) + {@code fullImage}(문맥 뜻 판별)</li>
+ *   <li>WORD — {@code cropImages}(형광펜 크롭 1~10개, 크롭마다 AI 1회·카드 1개; 차감은 접수 시 1회) + {@code fullImage}(문맥 뜻 판별)</li>
  *   <li>PROBLEM — {@code cropImage}(문제 박스 단일), {@code examId}로 활성 시험 자동 태깅(선택)</li>
  * </ul>
  * 교차 필드 규칙은 @AssertTrue로 표현한다(한쪽 타입 필드만 채워졌는지).
