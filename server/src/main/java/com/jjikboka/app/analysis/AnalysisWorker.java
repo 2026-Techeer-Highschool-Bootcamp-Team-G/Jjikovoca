@@ -2,7 +2,7 @@ package com.jjikboka.app.analysis;
 
 import com.jjikboka.analysis.AnalysisContent;
 import com.jjikboka.analysis.AnalyzeJobService;
-import com.jjikboka.analysis.GeminiClient;
+import com.jjikboka.analysis.GeminiAnalysisCache;
 import com.jjikboka.analysis.GeminiImage;
 import com.jjikboka.app.image.ImageStorageService;
 import com.jjikboka.core.card.CardCreateCommand;
@@ -37,7 +37,7 @@ class AnalysisWorker {
 
     private static final Logger log = LoggerFactory.getLogger(AnalysisWorker.class);
 
-    private final GeminiClient geminiClient;
+    private final GeminiAnalysisCache geminiAnalysisCache;
     private final AnalyzeJobService analyzeJobService;
     private final CardCreationService cardCreationService;
     private final QuotaConsumeService quotaConsumeService;
@@ -46,7 +46,7 @@ class AnalysisWorker {
     private final ExpService expService;
     private final Executor geminiCallExecutor;   // WORD 크롭별 Gemini 호출 병렬화 전용 풀(상한 4)
 
-    AnalysisWorker(GeminiClient geminiClient,
+    AnalysisWorker(GeminiAnalysisCache geminiAnalysisCache,
                    AnalyzeJobService analyzeJobService,
                    CardCreationService cardCreationService,
                    QuotaConsumeService quotaConsumeService,
@@ -54,7 +54,7 @@ class AnalysisWorker {
                    ApplicationEventPublisher eventPublisher,
                    ExpService expService,
                    @Qualifier("geminiCallExecutor") Executor geminiCallExecutor) {
-        this.geminiClient = geminiClient;
+        this.geminiAnalysisCache = geminiAnalysisCache;
         this.analyzeJobService = analyzeJobService;
         this.cardCreationService = cardCreationService;
         this.quotaConsumeService = quotaConsumeService;
@@ -94,7 +94,7 @@ class AnalysisWorker {
     /** 기존 단일 호출 경로(PROBLEM, 또는 크롭 0~1개 WORD) — 카드 1개 생성 후 model 반환. */
     private String analyzeSingle(AnalyzeEvents.AnalyzeRequested event) {
         List<GeminiImage> images = loadImages(event);
-        AnalysisContent content = geminiClient.generate(event.type(), images);
+        AnalysisContent content = geminiAnalysisCache.generate(event.type(), GeminiAnalysisCache.hash(images), images);
         String imagePath = (event.cropImageRefs() == null || event.cropImageRefs().isEmpty())
                 ? null : event.cropImageRefs().get(0);
         cardCreationService.create(toCommand(event, content, imagePath));
@@ -143,7 +143,7 @@ class AnalysisWorker {
             if (full != null) {
                 images.add(full);   // 지문은 문맥(contextMeaning)용으로 매 호출에 함께 넣는다
             }
-            AnalysisContent content = geminiClient.generate("WORD", images);
+            AnalysisContent content = geminiAnalysisCache.generate("WORD", GeminiAnalysisCache.hash(images), images);
             cardCreationService.create(toCommand(event, content, cropRef));
             return content.model();
         } catch (RuntimeException e) {
