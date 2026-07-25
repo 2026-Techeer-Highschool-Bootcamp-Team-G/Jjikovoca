@@ -17,7 +17,7 @@
 |---|---|---|---|
 | 단어·문제 텍스트 검색 | `pages/search` | `/api/cards` `q` 파라미터, 또는 검색 엔드포인트 | `/api/cards` 전체 조회 후 **클라 부분일치 필터** |
 | 알림 피드 | `pages/notifications` | 알림 목록 조회(아이콘·제목·시각) | **빈 상태** |
-| 일일 퀘스트 | 홈 `GameStatusCard.questLabel` | exp 응답에 오늘 퀘스트/진행도 | 복습 대기수(`review-queue.dueCount`)로 문구 구성 |
+| ~~일일 퀘스트~~ | 홈 `GameStatusCard` | exp `quest{label,progress,target,completed}` | ✅ **실연동 완료**(PR #244) |
 | 기억률(memoryRate) | 홈 D-day·학습 설정 | 시험 범위 집계 기억률 | 홈 D-day에서 **제거**(카드별 recallProb는 v2) |
 
 ## 2. 응답에 필드 추가가 필요한 곳
@@ -29,7 +29,7 @@
 | 상태 칩 카운트(전체/졸업완료/복습대기 수) | 피드 or 별도 집계 | 오답노트/직접선택 상태 필터 배지 숫자 | 직접선택은 숫자 제거, 오답노트는 하드코딩 잔존(후속) |
 | `recallProb`(잊을 확률) | `GET /api/study/flashcards` | 플래시카드 "N일 뒤 잊을 확률" | **데모**(FlashcardView 기본값) |
 | AI 연상 이미지 | `GET /api/study/flashcards` | 플래시카드 상단 이미지 | **데모** |
-| 추천 요약(기억률·개수·예상시간) | 학습 설정 AI 추천 | StudySetupSheet 통계 | **데모** |
+| ~~추천 요약(기억률·개수·예상시간)~~ | `GET /api/study/recommendation` | StudySetupSheet 통계 | ✅ **실연동 완료**(PR #244) |
 | 프리미엄 다음 결제일·금액 | `GET /api/me` | 마이/결제완료 결제 정보 | **데모**(하드코딩) |
 | `level`·`exp` | `GET /api/me` (v2) | exp 별도 호출 없이 표기 | 현재 `GET /api/exp/summary` 별도 호출 |
 | exp 확장 `{earned,total,levelUp}` | `POST /api/cards/{id}/study` (v2) | 학습 직후 XP·레벨업 피드백 | 미사용 |
