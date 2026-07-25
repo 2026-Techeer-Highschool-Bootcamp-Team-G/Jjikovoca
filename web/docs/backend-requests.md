@@ -30,7 +30,7 @@
 | `recallProb`(잊을 확률) | `GET /api/study/flashcards` | 플래시카드 "N일 뒤 잊을 확률" | **데모**(FlashcardView 기본값) |
 | AI 연상 이미지 | `GET /api/study/flashcards` | 플래시카드 상단 이미지 | **데모** |
 | ~~추천 요약(기억률·개수·예상시간)~~ | `GET /api/study/recommendation` | StudySetupSheet 통계 | ✅ **실연동 완료**(PR #244) |
-| 프리미엄 다음 결제일·금액 | `GET /api/me` | 마이/결제완료 결제 정보 | **데모**(하드코딩) |
+| ~~프리미엄 결제일·금액~~ | `GET /api/me` `premiumPlan·premiumExpiresAt·premiumAmount` | 결제 정보 | ✅ **실연동 완료**(PR #253) |
 | `level`·`exp` | `GET /api/me` (v2) | exp 별도 호출 없이 표기 | 현재 `GET /api/exp/summary` 별도 호출 |
 | exp 확장 `{earned,total,levelUp}` | `POST /api/cards/{id}/study` (v2) | 학습 직후 XP·레벨업 피드백 | 미사용 |
 
@@ -61,8 +61,8 @@
 ## 6. 기타 매핑·후속
 
 - **내보내기 범위→cardIds**: "몰라요만/헷갈려요만/전체" 필터를 실제 카드 선택으로 매핑(현재 전체=미지정으로 요청)
-- **프리미엄 해지**: `DELETE /api/premium` 연동 + 해지 UI(현재 해지 화면 없음)
-- **탈퇴**: 계정 삭제 엔드포인트 + `withdraw` 실연동(현재 `/login` 이동만)
+- ~~**프리미엄 해지**~~: `DELETE /api/premium` + 마이 해지 UI → ✅ **완료**(PR #253, 만료까지 유지)
+- ~~**탈퇴**~~: `DELETE /api/account`(soft delete+토큰폐기) → ✅ **완료**(PR #253)
 
 ## 6-1. 배포 — 별도 오리진(VITE_API_BASE_URL) 시 백엔드 CORS 필요
 
