@@ -4,8 +4,8 @@ import { useQuery } from '@tanstack/react-query'
 import { Tabs, Chip, Button, SearchBar } from '@/shared/ui'
 import { CardRow } from '@/widgets/card-row'
 import type { CardRowView } from '@/widgets/card-row'
-import { fetchCards } from '@/entities/card'
-import type { Card, FeedSubject } from '@/entities/card'
+import { fetchCards, fetchCardCounts } from '@/entities/card'
+import type { Card, CardCounts, FeedSubject } from '@/entities/card'
 
 const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
   { key: 'ALL', label: '전체' },
@@ -14,10 +14,10 @@ const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
 ]
 
 type Status = 'ALL' | 'GRADUATED' | 'WAITING' | 'WEAK'
-const STATUS_CHIPS: { key: Status; label: string }[] = [
-  { key: 'ALL', label: '전체' },
-  { key: 'GRADUATED', label: '졸업완료' },
-  { key: 'WAITING', label: '복습대기' },
+const STATUS_CHIPS: { key: Status; label: string; countKey?: keyof CardCounts }[] = [
+  { key: 'ALL', label: '전체', countKey: 'total' },
+  { key: 'GRADUATED', label: '졸업완료', countKey: 'graduated' },
+  { key: 'WAITING', label: '복습대기', countKey: 'reviewDue' },
   { key: 'WEAK', label: '약점유형' },
 ]
 
@@ -44,6 +44,9 @@ export function StudyPickPage() {
   // 실 카드 목록 — 여기서 고른 cardIds 로 PICK 학습 큐를 만든다
   const { data, isLoading } = useQuery({ queryKey: ['cards', subject], queryFn: () => fetchCards(subject) })
   const rows = (data ?? []).map(toRow)
+  const counts = useQuery({ queryKey: ['card-counts'], queryFn: fetchCardCounts })
+  const chipLabel = (c: (typeof STATUS_CHIPS)[number]) =>
+    c.countKey && counts.data ? `${c.label} ${counts.data[c.countKey]}` : c.label
 
   const toggle = (id: number) =>
     setPicked((prev) => {
@@ -101,7 +104,7 @@ export function StudyPickPage() {
         {STATUS_CHIPS.map((c) => (
           <div key={c.key} style={{ flexShrink: 0 }}>
             <Chip active={status === c.key} onClick={() => setStatus(c.key)}>
-              {c.label}
+              {chipLabel(c)}
             </Chip>
           </div>
         ))}
