@@ -34,16 +34,14 @@
 | `level`·`exp` | `GET /api/me` (v2) | exp 별도 호출 없이 표기 | 현재 `GET /api/exp/summary` 별도 호출 |
 | exp 확장 `{earned,total,levelUp}` | `POST /api/cards/{id}/study` (v2) | 학습 직후 XP·레벨업 피드백 | 미사용 |
 
-## 3. 리포트 — `reports/summary`에 없는 시각화 (UI에 `데모` 표기)
+## 3. 리포트 시각화 — ✅ 실연동 완료 (PR #246)
 
-`GET /api/reports/summary`는 `basic/full/grass`만 제공. `basic`(새 카드·정답률)만 실데이터, 아래는 대응 필드가 없어 **클라 데모**(리포트 화면에 `데모` 배지):
-
-- 과목별 학습 비중(수학/영어 도넛) — 과목별 시간·문항 분해 필요
-- 오늘 / 이번 달 토글 — 일 단위 집계
-- 일일 학습 시간 과목별 누적 막대(요일별 eng/math 분)
-- 월 prev/next 선택 — 월별 비교 데이터
-- 약한 개념 과목별 분리 + 오답 횟수 — 현재 `weakConcepts`는 평평한 `string[]`
-- `grass`는 `[{date,count}]` → 4×7 그리드 매핑 규칙(레벨 임계) 합의 필요(현재 그리드는 데모)
+`GET /api/reports/summary`가 `subjectBreakdown·rhythm·todayDue·grass{level,minutes}·full.weakConcepts` 전부 제공하여 실연동됨. DemoTag·데모 상수 제거:
+- 과목별 학습 비중 도넛 ← `basic.subjectBreakdown[{subject,minutes,count,ratio}]`
+- 학습 잔디 ← `grass[{date,count,minutes,level(0~4)}]` (level로 색)
+- 약한 개념(과목 분리·오답 횟수) ← `full.weakConcepts[{concept,subject,wrongCount}]` (프리미엄)
+- 일일 학습시간 막대 ← `grass[].minutes` (일별 총 분) + `rhythm.avgSessionMinutes`
+- 제거: 오늘/이번달 토글·월 prev/next (과목별×요일별·월별 비교는 백엔드 미제공 → 일일막대는 단색 총 분)
 
 ## 4. 카드 모델(Card)이 thin — 카드 앞/뒷면 표현 한계
 
