@@ -192,5 +192,5 @@ export function CapturePage() {
     return <AnalyzingView subject={isMath ? 'MATH' : 'ENGLISH'} />
   }
 
-  return <AnalysisResult isMath={isMath} card={resultCards?.[0] ?? null} onBack={() => navigate(-1)} />
+  return <AnalysisResult isMath={isMath} cards={resultCards} onBack={() => navigate(-1)} />
 }
