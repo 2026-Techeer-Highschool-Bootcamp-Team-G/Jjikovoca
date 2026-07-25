@@ -6,4 +6,10 @@ export interface Me {
   dailyUsed: number
   dailyLimit: number
   aiMockMode: boolean
+  level?: number
+  exp?: number
+  // 프리미엄 구독 정보(무료는 null). 해지해도 만료일까지 premium 유지
+  premiumPlan?: string | null
+  premiumExpiresAt?: string | null // ISO
+  premiumAmount?: number | null // 원
 }

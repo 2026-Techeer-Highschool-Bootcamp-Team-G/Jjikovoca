@@ -1,4 +1,4 @@
-import { apiPost, setTokens, clearTokens, getRefreshToken } from '@/shared/api'
+import { apiPost, apiFetch, setTokens, clearTokens, getRefreshToken } from '@/shared/api'
 
 // 인증 API (F-01) — 명세 §인증/계정. 로그인/회원가입 성공 시 access+refresh 저장
 export interface AuthUser {
@@ -32,6 +32,15 @@ export async function logout(): Promise<void> {
   const refreshToken = getRefreshToken()
   try {
     if (refreshToken) await apiPost('/api/auth/logout', { refreshToken })
+  } finally {
+    clearTokens()
+  }
+}
+
+/** 회원 탈퇴 — DELETE /api/account (soft delete + refresh 토큰 폐기). 항상 로컬 토큰 제거 */
+export async function deleteAccount(): Promise<void> {
+  try {
+    await apiFetch('/api/account', { method: 'DELETE' })
   } finally {
     clearTokens()
   }

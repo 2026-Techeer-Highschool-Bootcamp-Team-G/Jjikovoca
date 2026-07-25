@@ -1,14 +1,14 @@
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { Dialog } from '@/shared/ui'
-import { logout } from '@/features/auth'
+import { deleteAccount } from '@/features/auth'
 
 /** 탈퇴 확인 (21) — 파괴적 액션 확인 다이얼로그 */
 export function WithdrawPage() {
   const navigate = useNavigate()
-  // 계정 삭제 엔드포인트는 백엔드 미제공 → 최소한 세션을 정리(logout: POST /auth/logout + 토큰 제거)하고 로그인으로
+  // 회원 탈퇴 — DELETE /api/account (soft delete + refresh 토큰 폐기) 후 로그인으로
   const exit = useMutation({
-    mutationFn: logout,
+    mutationFn: deleteAccount,
     onSettled: () => navigate('/login', { replace: true }),
   })
   return (
