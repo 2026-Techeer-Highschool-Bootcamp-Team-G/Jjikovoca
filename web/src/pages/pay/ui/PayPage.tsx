@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { NavigationBar, Button } from '@/shared/ui'
-import { activatePremium } from '@/entities/user'
+import { activatePremium, fetchMe } from '@/entities/user'
 
 type Method = 'TOSS' | 'CARD'
 
@@ -11,6 +11,11 @@ export function PayPage() {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const [method, setMethod] = useState<Method>('TOSS')
+
+  // 구독 금액 — me.premiumAmount(미구독 시 null → 플랜 기본가)
+  const me = useQuery({ queryKey: ['me'], queryFn: fetchMe })
+  const amount = me.data?.premiumAmount ?? 4900
+  const won = `₩${amount.toLocaleString()}`
 
   // 모의 결제 활성화 — 성공 시 프리미엄 상태(me) 갱신 후 완료. 실패는 성공으로 가리지 않음
   const pay = useMutation({
@@ -41,10 +46,10 @@ export function PayPage() {
             ⭐ 찍어보카 프리미엄 (월 구독)
           </span>
           <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
-            오늘 결제 후 매월 20일 자동 결제
+            오늘 결제 후 매월 자동 결제
           </span>
           <span style={{ position: 'absolute', right: 16, bottom: 16, fontSize: 18, fontWeight: 700, color: 'var(--color-text-brand)' }}>
-            ₩4,900
+            {won}
           </span>
         </div>
 
@@ -83,7 +88,7 @@ export function PayPage() {
           </p>
         )}
         <Button block size="lg" onClick={() => pay.mutate()} disabled={pay.isPending}>
-          {pay.isPending ? '결제 중…' : '₩4,900 결제하기'}
+          {pay.isPending ? '결제 중…' : `${won} 결제하기`}
         </Button>
       </div>
     </div>

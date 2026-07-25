@@ -1,11 +1,23 @@
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { Button, SuccessGraphic } from '@/shared/ui'
+import { fetchMe } from '@/entities/user'
 
 const GRADIENT = 'linear-gradient(180deg, var(--color-success-weak) 0%, var(--color-bg-primary) 55%)'
+
+// ISO → "M월 D일"
+function mmdd(iso?: string | null): string {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? '—' : `${d.getMonth() + 1}월 ${d.getDate()}일`
+}
 
 /** 결제 완료 (19) — 모의 결제 성공 */
 export function PayDonePage() {
   const navigate = useNavigate()
+  const me = useQuery({ queryKey: ['me'], queryFn: fetchMe })
+  const amount = me.data?.premiumAmount ?? 4900
+  const nextDate = mmdd(me.data?.premiumExpiresAt)
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: GRADIENT }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, padding: '0 24px' }}>
@@ -44,7 +56,7 @@ export function PayDonePage() {
             animation: 'jjik-rise-in 0.5s ease-out 0.45s both',
           }}
         >
-          결제 금액 ₩4,900 · 다음 결제 8월 20일 · 마이페이지에서 관리
+          결제 금액 ₩{amount.toLocaleString()} · 다음 결제 {nextDate} · 마이페이지에서 관리
         </p>
       </div>
 
