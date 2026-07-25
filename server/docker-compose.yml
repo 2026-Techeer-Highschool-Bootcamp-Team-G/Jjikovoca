@@ -42,7 +42,8 @@ services:
       DB_USER: ${DB_USER:-jjik}
       DB_PASSWORD: ${DB_PASSWORD:-jjik}
       REDIS_HOST: redis
-      GEMINI_MOCK: ${GEMINI_MOCK:-true}
+      GEMINI_MOCK: ${GEMINI_MOCK:-true}       # .env에서 false로 두면 실 Gemini(RealGeminiClient)
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}     # 시크릿은 gitignore된 .env에서 주입 — compose엔 참조만(미기재)
       APP_IMAGE_STORAGE: local   # 컨테이너엔 AWS 자격 없음 → 로컬 파일 저장(/app/data/images)
     expose: ["8000"]             # 호스트 미공개 — nginx가 전면(프론트 proxy 8000 → nginx → server)
     volumes: ["server-data:/app/data"]   # 로컬 이미지·내보내기 영속
