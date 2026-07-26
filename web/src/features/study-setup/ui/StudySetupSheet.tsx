@@ -63,13 +63,13 @@ export function StudySetupSheet({ onStart }: Props) {
           padding: '16px 16px 14px',
           borderRadius: 16,
           textAlign: 'left',
-          background: aiPicked ? 'var(--color-danger-weak)' : 'var(--color-bg-elevated)',
+          background: aiPicked ? 'var(--color-brand-weak)' : 'var(--color-bg-elevated)',
           border: aiPicked ? '1.5px solid transparent' : '1px solid var(--color-border-default)',
-          // 오늘 복습 추천 강조(QA) — 주변이 빨갛게 빛나는 글로우 + 주기적으로 살짝 흔들림.
-          // box-shadow 는 jjik-red-glow 애니메이션이 관리하므로 선택 시엔 인라인 지정을 비운다.
+          // 오늘 복습 추천 강조(QA) — 주변이 브랜드 메인(파랑)으로 빛나는 글로우 + 주기적으로 살짝 흔들림.
+          // box-shadow 는 jjik-brand-glow 애니메이션이 관리하므로 선택 시엔 인라인 지정을 비운다.
           boxShadow: aiPicked ? undefined : 'none',
           animation: aiPicked
-            ? 'jjik-red-glow 1.6s ease-in-out infinite, jjik-shake 2.8s ease-in-out infinite'
+            ? 'jjik-brand-glow 1.6s ease-in-out infinite, jjik-shake 2.8s ease-in-out infinite'
             : undefined,
           cursor: 'pointer',
           transition: 'background 160ms ease, border-color 160ms ease, box-shadow 160ms ease',
@@ -84,7 +84,7 @@ export function StudySetupSheet({ onStart }: Props) {
               width: 24,
               height: 24,
               borderRadius: '50%',
-              background: 'var(--color-danger-primary)',
+              background: 'var(--color-brand-primary)',
               color: 'var(--color-text-inverse)',
               display: 'flex',
               alignItems: 'center',
@@ -101,7 +101,7 @@ export function StudySetupSheet({ onStart }: Props) {
             style={{
               fontSize: 18,
               fontWeight: 700,
-              color: aiPicked ? 'var(--color-danger-primary)' : 'var(--color-text-primary)',
+              color: aiPicked ? 'var(--color-brand-primary)' : 'var(--color-text-primary)',
             }}
           >
             오늘은 이렇게 복습해보세요
@@ -121,7 +121,7 @@ export function StudySetupSheet({ onStart }: Props) {
                 gap: 4,
                 fontSize: 12,
                 fontWeight: 600,
-                color: aiPicked ? 'var(--color-danger-primary)' : 'var(--color-text-secondary)',
+                color: aiPicked ? 'var(--color-brand-primary)' : 'var(--color-text-secondary)',
               }}
             >
               <span aria-hidden>{s.icon}</span>
