@@ -37,6 +37,9 @@ class AnalysisWorker {
 
     private static final Logger log = LoggerFactory.getLogger(AnalysisWorker.class);
 
+    /** WORD 지문(문맥) 이미지 다운스케일 상한(px). 지문은 정밀할 필요가 없고 크롭마다 반복 전송되므로 줄여 지연·비용을 낮춘다. */
+    private static final int PASSAGE_MAX_DIM = 640;
+
     private final GeminiAnalysisCache geminiAnalysisCache;
     private final AnalyzeJobService analyzeJobService;
     private final CardCreationService cardCreationService;
@@ -109,7 +112,9 @@ class AnalysisWorker {
      * 카드 image_path는 각자의 크롭이라 보관함·서빙이 단어별 이미지를 쓴다.
      */
     private String analyzeWordsPerCrop(AnalyzeEvents.AnalyzeRequested event) {
-        GeminiImage full = event.fullImageRef() == null ? null : loadOne(event.fullImageRef());
+        // 지문은 크롭별 호출마다 함께 전송되므로(N×) 다운스케일해 입력 토큰·지연을 낮춘다(실패 시 원본).
+        GeminiImage full = event.fullImageRef() == null ? null
+                : VisionImageScaler.downscale(loadOne(event.fullImageRef()), PASSAGE_MAX_DIM);
 
         // 크롭(단어)마다 Gemini 호출을 전용 풀에 동시에 던진다(팬아웃) — 지연이 N배 대신 ≈1콜.
         // 동시성은 geminiCallExecutor의 상한(4)이 제어한다(429 방어). 크롭별 OCR 힌트(wordAt)를 함께 넘긴다.

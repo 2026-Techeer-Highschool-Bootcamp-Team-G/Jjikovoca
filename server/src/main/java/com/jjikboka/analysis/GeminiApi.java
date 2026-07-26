@@ -43,9 +43,18 @@ class GeminiApi {
      * 모델이 순수 JSON만 내도록 한다. 모델 폴백을 모두 소진하면 마지막 오류를 담아 예외를 던진다.
      */
     String generate(String prompt, List<GeminiImage> images, boolean jsonOutput) {
+        return generate(prompt, images, jsonOutput, false);
+    }
+
+    /**
+     * fast=true면 WORD 전용 체인(wordModels — flash-lite 우선)으로 빠르게, 아니면 기본 체인(models — flash 우선)으로 정확히.
+     * 단어 분석은 단순해 lite로도 충분하므로 지연을 줄이고, 실패 시 flash로 폴백한다.
+     */
+    String generate(String prompt, List<GeminiImage> images, boolean jsonOutput, boolean fast) {
+        List<String> models = fast ? properties.getWordModels() : properties.getModels();
         Map<String, Object> body = buildBody(prompt, images, jsonOutput);
         RuntimeException last = null;
-        for (String model : properties.getModels()) {
+        for (String model : models) {
             try {
                 String raw = call(model, body);
                 return extractText(raw);

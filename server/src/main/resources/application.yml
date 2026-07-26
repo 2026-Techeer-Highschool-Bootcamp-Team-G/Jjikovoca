@@ -69,6 +69,9 @@ gemini:
   models:                    # 폐기 안 되는 -latest 별칭(구 gemini-2.5-flash 등은 신규 사용자 폐기 → 404)
     - gemini-flash-latest
     - gemini-flash-lite-latest
+  word-models:               # WORD 전용 — lite 우선(지연 단축), flash 폴백(정확도). PROBLEM은 위 models 사용.
+    - gemini-flash-lite-latest
+    - gemini-flash-latest
   timeout-ms: 30000
 
 # 로그 JSON 구조화는 배포 프로파일에서 (07 규약) — traceId 주입 자리

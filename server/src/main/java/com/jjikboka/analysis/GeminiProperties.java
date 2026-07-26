@@ -28,6 +28,12 @@ public class GeminiProperties {
      */
     private List<String> models = List.of("gemini-flash-latest", "gemini-flash-lite-latest");
 
+    /**
+     * WORD 분석 전용 폴백 체인 — 단어 뜻·발음은 단순하므로 더 빠른 lite를 우선, flash를 정확도 폴백으로 둔다.
+     * PROBLEM(수학)은 {@link #models}(flash 우선)를 그대로 쓴다. 지연 단축용(정확도 리스크 낮음).
+     */
+    private List<String> wordModels = List.of("gemini-flash-lite-latest", "gemini-flash-latest");
+
     /** 단일 호출 타임아웃(ms). 워커 전용 풀에서 블로킹 호출하므로 상한을 둔다. */
     private long timeoutMs = 30000;
 
@@ -64,6 +70,14 @@ public class GeminiProperties {
 
     public void setModels(List<String> models) {
         this.models = models;
+    }
+
+    public List<String> getWordModels() {
+        return wordModels;
+    }
+
+    public void setWordModels(List<String> wordModels) {
+        this.wordModels = wordModels;
     }
 
     public long getTimeoutMs() {
