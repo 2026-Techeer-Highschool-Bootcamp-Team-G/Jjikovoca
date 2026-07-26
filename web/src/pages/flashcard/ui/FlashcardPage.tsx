@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { NavigationBar, StudyLoading } from '@/shared/ui'
@@ -54,8 +54,15 @@ export function FlashcardPage() {
   const pos = Math.min(idx, Math.max(0, total - 1))
   const cur = list[pos]
 
+  // 카드 표시~채점 소요시간(durationMs) 측정 — 리포트 학습 시간 집계 원천(study_log). 새 카드마다 리셋
+  const shownAt = useRef(performance.now())
+  useEffect(() => {
+    shownAt.current = performance.now()
+  }, [cur?.id])
+
   const record = useMutation({
-    mutationFn: (grade: Grade) => recordStudy(cur.id, { activity: 'FLASHCARD', result: grade }),
+    mutationFn: ({ grade, durationMs }: { grade: Grade; durationMs: number }) =>
+      recordStudy(cur.id, { activity: 'FLASHCARD', result: grade, durationMs }),
   })
 
   // AI 연상 이미지 온디맨드 생성 — 생성된 경로는 카드별로 보관해 즉시 반영(쿼터 초과 시 이모지 폴백 유지)
@@ -66,7 +73,8 @@ export function FlashcardPage() {
   })
 
   const handleGrade = (grade: Grade) => {
-    if (cur?.id != null) record.mutate(grade) // 실 학습 기록
+    const durationMs = Math.round(performance.now() - shownAt.current)
+    if (cur?.id != null) record.mutate({ grade, durationMs }) // 실 학습 기록(+소요시간)
     if (pos + 1 >= total) {
       navigate('/card-done')
       return
