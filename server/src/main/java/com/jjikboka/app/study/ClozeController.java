@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * 빈칸 퀴즈 API (Notion API-ID 14·15·16). 인증 필요 — JwtAuthenticationFilter가 실은 userId를 넣는다.
  * 문항 생성은 정답을 숨기고, 답 제출은 서버가 판정해 전이·기록까지 처리하며, 예문 재생성은 AI(analysis)와 core.card를
@@ -34,8 +36,9 @@ class ClozeController {
     @GetMapping("/api/study/cloze")
     ResponseEntity<ApiResponse<ClozeGenerateResponse>> generate(
             @AuthenticationPrincipal Long userId,
-            @RequestParam(defaultValue = "10") int limit) {
-        ClozeGenerateResponse response = new ClozeGenerateResponse(clozeService.getItems(userId, limit));
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(required = false) List<Long> cardIds) {
+        ClozeGenerateResponse response = new ClozeGenerateResponse(clozeService.getItems(userId, limit, cardIds));
         return ResponseEntity.ok(ApiResponse.ok(response, "빈칸 퀴즈 문항 생성이 완료되었습니다."));
     }
 
