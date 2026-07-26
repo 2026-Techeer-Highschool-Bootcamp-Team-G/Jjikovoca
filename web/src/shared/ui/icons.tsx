@@ -51,6 +51,20 @@ export const IconClock = (p: IconProps) => (
   </Svg>
 )
 
+export const IconCalendar = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="3" y="4.5" width="18" height="16.5" rx="2" />
+    <path d="M3 9.5h18" />
+    <path d="M8 2.5v4M16 2.5v4" />
+  </Svg>
+)
+
+export const IconFire = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 2c1 3 4 4.6 4 8.5A4 4 0 0 1 8 11c0-1.3.5-2.2 1.2-3C9.9 9.4 11 8 12 2z" />
+  </Svg>
+)
+
 export const IconCheck = (p: IconProps) => (
   <Svg {...p}>
     <polyline points="5 12 10 17 19 7" />
