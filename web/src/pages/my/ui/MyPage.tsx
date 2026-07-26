@@ -128,26 +128,9 @@ function ProfileCard({
         borderRadius: 16,
         padding: 16,
         display: 'flex',
-        gap: 14,
         alignItems: 'center',
       }}
     >
-      <span
-        style={{
-          width: 56,
-          height: 56,
-          flexShrink: 0,
-          borderRadius: 28,
-          background: 'var(--color-brand-weak)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 28,
-        }}
-        aria-hidden
-      >
-        🦉
-      </span>
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)' }}>{nickname}</span>

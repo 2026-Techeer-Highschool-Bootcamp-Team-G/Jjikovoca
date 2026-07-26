@@ -31,23 +31,7 @@ export function GameStatusCard({
         padding: '12px 14px',
       }}
     >
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-        <div
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 22,
-            background: 'var(--color-bg-primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 22,
-            flexShrink: 0,
-          }}
-          aria-hidden
-        >
-          🦉
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--color-text-primary)' }}>
