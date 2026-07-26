@@ -47,8 +47,8 @@ function entrance(mounted: boolean, delay: number): CSSProperties {
   }
 }
 
-// 학습 잔디 색 강도 — level 0~4 (백엔드 통일 임계). 서비스 메인 색에 맞춘 파랑 톤(QA)
-const GRASS_COLOR = ['var(--color-bg-secondary)', '#cfe4fd', '#93c1fa', '#5a9bf6', 'var(--color-brand-primary)']
+// 학습 잔디 색 강도 — level 0~4. GitHub식 초록 스케일(적게→많이)
+const GRASS_COLOR = ['var(--color-bg-secondary)', '#9be9a8', '#40c463', '#30a14e', '#216e39']
 
 const pad = (n: number) => String(n).padStart(2, '0')
 const ymd = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
@@ -75,7 +75,7 @@ export function ReportPage() {
   const grass = report.data?.grass ?? []
 
   // 통계 카드
-  const newCards = `${basic?.newCards ?? 0}장`
+  const newCards = `${basic?.newCards ?? 0}개`
   const accWord = basic?.accuracy.word != null ? `${Math.round(basic.accuracy.word * 100)}%` : '—'
 
   // 잔디 — 이번 달 날짜별 level. 총 학습분
@@ -119,8 +119,8 @@ export function ReportPage() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '16px var(--spacing-xl) 24px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9, ...entrance(mounted, 0) }}>
-          <StatCard label="새로 만든 카드" value={newCards} />
-          <StatCard label="영어 정답률" value={accWord} accent />
+          <StatCard label="새로 추가한 단어" value={newCards} />
+          <StatCard label="단어 정답률" value={accWord} accent />
         </div>
 
         {/* 학습 잔디 */}
