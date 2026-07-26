@@ -27,7 +27,10 @@ dependencies {
     // 이미지 저장소 S3(API-10) — app.image.storage=s3일 때만 사용, 기본 local. 자격은 env/IAM(15 §7)
     implementation(platform("software.amazon.awssdk:bom:2.28.29"))
     implementation("software.amazon.awssdk:s3")
-    // 내보내기 실 렌더(API-25) — headless Chromium(Playwright). app.export.renderer=chromium일 때만 사용, 기본 stub.
+    // 내보내기 경량 PDF 렌더(API-25) — 브라우저 없이 서버가 직접 PDF 생성. app.export.renderer=pdfbox(기본).
+    // 한글은 번들 폰트(NanumGothic, OFL)를 임베드. JPG_CARD는 PDF 페이지를 래스터화해 PNG.
+    implementation("org.apache.pdfbox:pdfbox:3.0.3")
+    // 내보내기 실 렌더(API-25) — headless Chromium(Playwright). app.export.renderer=chromium일 때만 사용.
     // 브라우저 바이너리는 첫 렌더에 자동 다운로드되거나 `playwright install chromium`으로 준비.
     implementation("com.microsoft.playwright:playwright:1.47.0")
     // API 문서 — SpringDoc OpenAPI(Swagger UI). 04 명세와 실제 구현을 상호 대조(04 §자동 문서)
