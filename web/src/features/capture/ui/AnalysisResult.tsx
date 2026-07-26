@@ -60,7 +60,7 @@ export function AnalysisResult({ isMath, cards, onBack }: Props) {
           >
             {recents.map((c) => (
               <div key={c.id} style={{ flex: '0 0 84%', scrollSnapAlign: 'center' }}>
-                <FlipCard card={c} height={380} />
+                <FlipCard card={c} height={500} />
               </div>
             ))}
           </div>
