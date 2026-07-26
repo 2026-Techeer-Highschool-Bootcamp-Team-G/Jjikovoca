@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Button, IconCheck, IconChevronRight } from '@/shared/ui'
-import { fetchRecommendation, fetchFlashcards } from '@/features/study'
+import { fetchRecommendation } from '@/features/study'
 import { fetchExams } from '@/entities/exam'
 import type { ReviewType, StudyMethod } from '../model/types'
 
@@ -17,19 +17,14 @@ export function StudySetupSheet({ onStart }: Props) {
   const [type, setType] = useState<ReviewType>('FLASHCARD')
   const aiPicked = method === 'TODAY'
 
-  // 오늘의 추천 통계 + 가장 가까운 시험(문구 조합용)
+  // 오늘의 추천 통계 + 가장 가까운 시험(문구 조합용).
+  // 개수는 recommendation.reviewCount 를 그대로 쓴다 — 백엔드에서 flashcards TODAY total 과 기준을 통일(PR #303).
   const rec = useQuery({ queryKey: ['recommendation'], queryFn: fetchRecommendation })
   const exams = useQuery({ queryKey: ['exams'], queryFn: fetchExams })
-  // 실제 학습 큐(TODAY) — 시트에 보여주는 개수를 학습 시작 후 플래시카드 큐와 일치시킨다.
-  // (백엔드 recommendation.reviewCount 와 flashcards TODAY total 이 불일치하는 문제를 프론트에서 보정 — backend-requests §학습추천 참조)
-  const todayQueue = useQuery({ queryKey: ['flashcards', 'TODAY', []], queryFn: () => fetchFlashcards({ mode: 'TODAY' }) })
-  const count = todayQueue.data?.total ?? 0
   const r = rec.data
+  const count = r?.reviewCount ?? 0
   const nearest = exams.data?.[0]
   const memPct = r?.memoryRate != null ? `${Math.round(r.memoryRate * 100)}%` : '—'
-  // 예상 시간: recommendation 값이 유효하면 그대로, 아니면(개수 불일치) 큐 개수로 대략 추정
-  const estMin =
-    r?.estimatedMinutes && r.estimatedMinutes > 0 ? r.estimatedMinutes : count > 0 ? Math.max(1, Math.round(count * 0.4)) : 0
   const AI_RECOMMEND = {
     reason: nearest
       ? `${nearest.title} D-${nearest.dday} — 복습 대기 ${count}개를 골랐어요.`
@@ -37,7 +32,7 @@ export function StudySetupSheet({ onStart }: Props) {
     stats: [
       { icon: '🎯', text: `기억률 ${memPct}` },
       { icon: '🃏', text: `${count}개` },
-      { icon: '⏱', text: `약 ${estMin}분` },
+      { icon: '⏱', text: `약 ${r?.estimatedMinutes ?? 0}분` },
     ],
   }
 
