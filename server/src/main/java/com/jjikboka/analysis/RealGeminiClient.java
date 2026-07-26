@@ -64,7 +64,8 @@ class RealGeminiClient implements GeminiClient {
     @Override
     public AnalysisContent generate(String type, List<GeminiImage> images) {
         boolean problem = "PROBLEM".equals(type);
-        String raw = geminiApi.generate(problem ? PROBLEM_PROMPT : WORD_PROMPT, images, true);
+        // WORD는 빠른 모델 우선(fast=true) — 단어 분석은 단순해 lite로 지연을 줄인다. PROBLEM은 정확도 위해 기본 체인.
+        String raw = geminiApi.generate(problem ? PROBLEM_PROMPT : WORD_PROMPT, images, true, !problem);
         JsonNode node = readJson(raw);
         if (problem) {
             return new AnalysisContent(
