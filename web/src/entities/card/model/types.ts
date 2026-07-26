@@ -41,6 +41,7 @@ export interface Card {
   contextMeaning?: string
   dictMeaning?: string
   example?: string
+  exampleMeaning?: string | null // 예문 한글 번역(백엔드 피드 확장 시 제공, 기존 null)
   // 표기용 부가 필드(기존 카드는 null — 하위호환). 발음 오디오는 클라 Web Speech 유지
   pronunciation?: string | null
   pos?: string | null
