@@ -19,6 +19,10 @@ interface CardRepository extends JpaRepository<Card, Long> {
 
     List<Card> findByUserIdAndSubjectAndDeletedAtIsNullOrderByCreatedAtDesc(Long userId, String subject);
 
+    /** 소유·미삭제 카드 by ids — 시험범위 기억률 등 특정 카드 집합의 회상확률(R) 계산용. */
+    @Query("SELECT c FROM Card c WHERE c.userId = :userId AND c.deletedAt IS NULL AND c.id IN :cardIds")
+    List<Card> findOwnedByIds(@Param("userId") Long userId, @Param("cardIds") java.util.Collection<Long> cardIds);
+
     /** 상세 조회 — 삭제된 카드는 없는 것으로 본다(404). 소유자 검증은 조회 후 서비스에서(403). */
     Optional<Card> findByIdAndDeletedAtIsNull(Long id);
 
