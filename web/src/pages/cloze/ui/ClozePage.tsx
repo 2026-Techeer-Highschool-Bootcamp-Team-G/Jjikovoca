@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { NavigationBar, Button, TextField } from '@/shared/ui'
+import { NavigationBar, Button, TextField, StudyLoading } from '@/shared/ui'
 import { fetchClozeQueue, submitClozeAnswer, regenerateCloze } from '@/features/cloze'
 import type { ClozeJudge } from '@/features/cloze'
 
@@ -52,11 +52,15 @@ export function ClozePage() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
         <NavigationBar title="빈칸 퀴즈" onBack={() => navigate(-1)} />
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 24px' }}>
-          <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--color-text-tertiary)' }}>
-            {queue.isLoading ? '문항을 불러오는 중…' : '풀 빈칸 문항이 없어요 — 단어 카드를 먼저 만들어보세요'}
-          </p>
-        </div>
+        {queue.isLoading ? (
+          <StudyLoading />
+        ) : (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 24px' }}>
+            <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--color-text-tertiary)' }}>
+              풀 빈칸 문항이 없어요 — 단어 카드를 먼저 만들어보세요
+            </p>
+          </div>
+        )}
       </div>
     )
   }
