@@ -1,6 +1,6 @@
 import { NavLink, Link } from 'react-router-dom'
 import type { ComponentType } from 'react'
-import { IconBook, IconCamera, IconChart, IconHome, IconUser } from '@/shared/ui'
+import { IconBook, IconChart, IconHome, IconUser, AppLogo } from '@/shared/ui'
 
 interface Item {
   to: string
@@ -43,7 +43,7 @@ function NavItem({ item }: { item: Item }) {
   )
 }
 
-// 하단 내비게이션 (21:22) — 5탭 + 중앙 카메라 FAB(돌출, 라벨 없음)
+// 하단 내비게이션 (21:22) — 5탭 + 중앙 앱 로고 FAB(촬영 진입, 돌출, 라벨 없음)
 export function BottomNav() {
   return (
     <nav
@@ -79,20 +79,17 @@ export function BottomNav() {
         style={{
           position: 'absolute',
           left: '50%',
-          top: -15,
+          top: -16,
           transform: 'translateX(-50%)',
-          width: 54,
-          height: 54,
-          borderRadius: 27,
-          background: 'var(--color-brand-primary)',
-          color: 'var(--color-text-inverse)',
+          width: 56,
+          height: 56,
+          // 로고 자체가 라운드 스퀘어 배경(rx 22.5%)을 가지므로 래퍼 반경을 맞춰 그림자가 로고 형태를 따르게 한다
+          borderRadius: 13,
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
           boxShadow: 'var(--shadow-fab)',
         }}
       >
-        <IconCamera size={24} />
+        <AppLogo size={56} />
       </Link>
     </nav>
   )
