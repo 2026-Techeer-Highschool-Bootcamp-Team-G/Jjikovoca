@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { IconSpeaker } from '@/shared/ui'
 
-/** 홈·게임 공용 플래시카드 모델 (정규화). 앞면=예문+해석, 뒷면=+뜻(형광펜) */
+/** 홈·게임 공용 플래시카드 모델 (정규화). 앞면=예문+해석, 뒷면=단어 아래 뜻(형광펜) */
 export interface FlashCardModel {
   word: string
   pronunciation?: string
@@ -11,7 +11,7 @@ export interface FlashCardModel {
   tags?: { label: string; tone: 'grey' | 'blue' }[]
   example?: string // 영어 예문
   exampleTranslation?: string // 예문 해석(한글) — 없으면 숨김
-  meaning?: string // 뜻(뒷면 형광펜 강조)
+  meaning?: string // 뜻(뒷면, 단어 아래 형광펜 강조)
   pos?: string
 }
 
@@ -24,16 +24,6 @@ interface Props {
   onGenerate?: () => void
   generating?: boolean
   genError?: boolean
-}
-
-function speak(text: string, lang: 'en-US' | 'en-GB') {
-  const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined
-  if (!synth || !text) return
-  synth.cancel()
-  const u = new SpeechSynthesisUtterance(text)
-  u.lang = lang
-  u.rate = 0.9
-  synth.speak(u)
 }
 
 const FACE: CSSProperties = {
@@ -52,8 +42,8 @@ const FACE: CSSProperties = {
   overflow: 'hidden',
 }
 
-/** 공용 플래시카드 — 탭하면 3D 플립. 앞: 단어+예문+해석 / 뒤: + 뜻(형광펜) */
-export function FlashCard({ card, height = 440, flipped, onFlip, onGenerate, generating, genError }: Props) {
+/** 공용 플래시카드 — 탭하면 3D 플립. 앞: 단어+예문+해석 / 뒤: 단어 아래 뜻(형광펜) */
+export function FlashCard({ card, height = 500, flipped, onFlip, onGenerate, generating, genError }: Props) {
   const [inner, setInner] = useState(false)
   const isFlipped = flipped ?? inner
   const toggle = onFlip ?? (() => setInner((f) => !f))
@@ -87,34 +77,35 @@ interface ImgProps {
   genError?: boolean
 }
 
-// 앞/뒤 공통 본문 — showMeaning 이면 뒷면(뜻 형광펜 추가)
+// 앞/뒤 공통 본문 — showMeaning 이면 단어 바로 아래에 뜻(형광펜) 추가
 function FaceContent({ card, showMeaning, img }: { card: FlashCardModel; showMeaning: boolean; img: ImgProps }) {
   return (
     <>
       <ImageArea card={card} img={img} />
 
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+      {/* 단어 → (뒷면) 뜻 형광펜 → 발음 */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
         <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--color-text-primary)' }}>{card.word}</span>
+        {showMeaning && card.meaning && (
+          <span style={{ fontSize: 17, fontWeight: 700, lineHeight: 1.5, color: 'var(--color-text-primary)' }}>
+            <mark
+              style={{
+                background: 'linear-gradient(transparent 55%, var(--color-accent) 55%)',
+                color: 'inherit',
+                padding: '0 3px',
+                borderRadius: 3,
+              }}
+            >
+              {card.meaning}
+            </mark>
+          </span>
+        )}
         {card.pronunciation && (
           <span style={{ fontSize: 13, color: 'var(--color-text-tertiary)' }}>{card.pronunciation}</span>
         )}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-        <VoicePill label="🇺🇸 미국" primary onClick={() => speak(card.word, 'en-US')} />
-        <VoicePill label="🇬🇧 영국" onClick={() => speak(card.word, 'en-GB')} />
-        <button
-          type="button"
-          aria-label="발음 듣기"
-          onClick={(e) => {
-            e.stopPropagation()
-            speak(card.word, 'en-US')
-          }}
-          style={{ background: 'none', border: 'none', padding: 0, color: 'var(--color-text-brand)', cursor: 'pointer', display: 'inline-flex' }}
-        >
-          <IconSpeaker size={20} />
-        </button>
-      </div>
+      <VoiceRow word={card.word} />
 
       {card.tags && card.tags.length > 0 && (
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -137,25 +128,6 @@ function FaceContent({ card, showMeaning, img }: { card: FlashCardModel; showMea
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '10px 0' }}>
           <span style={{ fontSize: 13, color: 'var(--color-text-tertiary)' }}>이 단어와 관련된 예문</span>
           <span style={{ fontSize: 12, color: 'var(--color-text-tertiary)' }}>그 예문의 뜻</span>
-        </div>
-      )}
-
-      {/* 뒷면: 뜻(형광펜 강조) */}
-      {showMeaning && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text-tertiary)' }}>뜻</span>
-          <span style={{ fontSize: 17, fontWeight: 700, lineHeight: 1.5, color: 'var(--color-text-primary)', alignSelf: 'flex-start' }}>
-            <mark
-              style={{
-                background: 'linear-gradient(transparent 55%, var(--color-accent) 55%)',
-                color: 'inherit',
-                padding: '0 3px',
-                borderRadius: 3,
-              }}
-            >
-              {card.meaning ?? '뜻 정보 없음'}
-            </mark>
-          </span>
         </div>
       )}
 
@@ -183,22 +155,6 @@ function ImageArea({ card, img }: { card: FlashCardModel; img: ImgProps }) {
         overflow: 'hidden',
       }}
     >
-      <span
-        style={{
-          position: 'absolute',
-          top: 8,
-          left: 8,
-          zIndex: 1,
-          fontSize: 10,
-          fontWeight: 500,
-          padding: '3px 8px',
-          borderRadius: 999,
-          background: 'rgba(255,255,255,0.85)',
-          color: 'var(--color-text-secondary)',
-        }}
-      >
-        ✨ AI 연상 이미지
-      </span>
       {card.imageUrl ? (
         <img src={card.imageUrl} alt="AI 연상 이미지" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
       ) : (
@@ -238,7 +194,44 @@ function ImageArea({ card, img }: { card: FlashCardModel; img: ImgProps }) {
   )
 }
 
-function VoicePill({ label, primary = false, onClick }: { label: string; primary?: boolean; onClick: () => void }) {
+// 발음 재생 — 미국/영국 모두 기본 비활성. 클릭한 국가만 재생 동안 파랑 활성(끝나면 회색). 스피커는 미국 기본
+function VoiceRow({ word }: { word: string }) {
+  const [playing, setPlaying] = useState<'US' | 'GB' | null>(null)
+
+  const play = (loc: 'US' | 'GB', lang: string) => {
+    const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined
+    if (!synth || !word) return
+    synth.cancel()
+    const u = new SpeechSynthesisUtterance(word)
+    u.lang = lang
+    u.rate = 0.9
+    const clear = () => setPlaying((p) => (p === loc ? null : p))
+    u.onend = clear
+    u.onerror = clear
+    setPlaying(loc)
+    synth.speak(u)
+  }
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+      <VoicePill label="🇺🇸 미국" active={playing === 'US'} onClick={() => play('US', 'en-US')} />
+      <VoicePill label="🇬🇧 영국" active={playing === 'GB'} onClick={() => play('GB', 'en-GB')} />
+      <button
+        type="button"
+        aria-label="발음 듣기"
+        onClick={(e) => {
+          e.stopPropagation()
+          play('US', 'en-US')
+        }}
+        style={{ background: 'none', border: 'none', padding: 0, color: 'var(--color-text-brand)', cursor: 'pointer', display: 'inline-flex' }}
+      >
+        <IconSpeaker size={20} />
+      </button>
+    </div>
+  )
+}
+
+function VoicePill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
     <button
       type="button"
@@ -254,9 +247,9 @@ function VoicePill({ label, primary = false, onClick }: { label: string; primary
         fontSize: 12,
         fontWeight: 500,
         cursor: 'pointer',
-        background: primary ? 'var(--color-brand-weak)' : 'var(--color-bg-primary)',
-        color: primary ? 'var(--color-text-brand)' : 'var(--color-text-secondary)',
-        border: primary ? '1px solid transparent' : '1px solid var(--color-border-default)',
+        background: active ? 'var(--color-brand-weak)' : 'var(--color-bg-primary)',
+        color: active ? 'var(--color-text-brand)' : 'var(--color-text-secondary)',
+        border: active ? '1px solid transparent' : '1px solid var(--color-border-default)',
       }}
     >
       {label}
