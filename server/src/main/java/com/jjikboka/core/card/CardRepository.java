@@ -54,12 +54,13 @@ interface CardRepository extends JpaRepository<Card, Long> {
                                   Pageable pageable);
 
     /**
-     * 오늘의 복습 큐(API-13) — 미졸업 중 next_review_at 도래(<= now)한 카드. 이른 순, limit은 Pageable로.
-     * 미학습(null)은 아직 '복습' 대상이 아니라 제외한다(플래시카드 큐와 구분).
+     * 오늘의 복습 큐(API-13) — 미졸업 WORD 중 오늘 복습 대상. 이른 순, limit은 Pageable로.
+     * "오늘 복습 대상" 정의를 플래시카드 큐(findFlashcardQueue)와 통일한다: WORD만 + 미학습(null) 포함
+     * (방금 만든 오답을 오늘 복습하는 흐름). 수학(PROBLEM)은 별도 큐(findProblemReviewQueue)로 분리.
      */
-    @Query("SELECT c FROM Card c WHERE c.userId = :userId "
+    @Query("SELECT c FROM Card c WHERE c.userId = :userId AND c.type = 'WORD' "
             + "AND c.graduatedAt IS NULL AND c.deletedAt IS NULL "
-            + "AND c.nextReviewAt IS NOT NULL AND c.nextReviewAt <= :now "
+            + "AND (c.nextReviewAt IS NULL OR c.nextReviewAt <= :now) "
             + "ORDER BY c.nextReviewAt ASC")
     List<Card> findReviewQueue(@Param("userId") Long userId,
                                @Param("now") LocalDateTime now,
@@ -148,9 +149,12 @@ interface CardRepository extends JpaRepository<Card, Long> {
     @Query("SELECT COUNT(c) FROM Card c WHERE c.userId = :userId AND c.deletedAt IS NULL AND c.graduatedAt IS NOT NULL")
     long countGraduatedTotal(@Param("userId") Long userId);
 
-    /** 상태칩(API-7) — 오늘 복습 대기 수(next_review 도래·미졸업·soft-delete 제외). */
-    @Query("SELECT COUNT(c) FROM Card c WHERE c.userId = :userId AND c.deletedAt IS NULL "
-            + "AND c.graduatedAt IS NULL AND c.nextReviewAt IS NOT NULL AND c.nextReviewAt <= :now")
+    /**
+     * 상태칩(API-7)·추천 복습 수 — 오늘 복습 대기 WORD 수. "오늘 복습 대상" 정의를 flashcards TODAY와 통일:
+     * WORD만 + 미학습(null) 포함(미졸업·soft-delete 제외). → recommendation.reviewCount == flashcards TODAY total.
+     */
+    @Query("SELECT COUNT(c) FROM Card c WHERE c.userId = :userId AND c.type = 'WORD' AND c.deletedAt IS NULL "
+            + "AND c.graduatedAt IS NULL AND (c.nextReviewAt IS NULL OR c.nextReviewAt <= :now)")
     long countReviewDue(@Param("userId") Long userId, @Param("now") LocalDateTime now);
 
     /** 추천(API-6b) — 회상확률 계산 가능한 활성 FSRS 카드(미졸업·soft-delete 제외·stability·last_reviewed 有). 평균 R은 서비스에서. */
