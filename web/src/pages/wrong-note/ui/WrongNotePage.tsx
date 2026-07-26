@@ -185,7 +185,8 @@ export function WrongNotePage() {
         <StudySetupSheet
           onStart={(method, type) => {
             setSetupOpen(false)
-            if (method === 'PICK') navigate('/study-pick')
+            // PICK 시 복습 유형(type)을 함께 넘겨야 study-pick 이 올바른 학습 화면으로 라우팅한다
+            if (method === 'PICK') navigate('/study-pick', { state: { type } })
             else navigate(type === 'FLASHCARD' ? '/flashcard' : '/cloze')
           }}
         />
