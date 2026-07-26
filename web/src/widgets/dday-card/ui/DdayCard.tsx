@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { IconChevronRight } from '@/shared/ui'
+import { IconChevronRight, IconCalendar } from '@/shared/ui'
 
 // 홈 QA #2 — D-day 경각심 색: 초록(여유) → 연두 → 주황 → 빨강(임박, 보기 좋은 빨강)
 function ddayColor(dday: number): { bg: string; fg: string } {
@@ -44,8 +44,8 @@ export function DdayCard({ title, dday, memoryRate, todayDue, subtitle, onClick 
 
   const inner: ReactNode = (
     <>
-      <span style={{ fontSize: 20 }} aria-hidden>
-        📅
+      <span style={{ display: 'inline-flex', color: 'var(--color-brand-primary)' }} aria-hidden>
+        <IconCalendar size={20} />
       </span>
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
