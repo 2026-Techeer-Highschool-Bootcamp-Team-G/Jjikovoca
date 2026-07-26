@@ -2,36 +2,27 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { NavigationBar, StudyLoading } from '@/shared/ui'
-import { FlashcardView } from '@/features/flashcard'
-import type { FlashcardData } from '@/features/flashcard'
+import { mediaUrl } from '@/shared/api'
 import { GradeButtons } from '@/features/study-grade'
 import type { Grade } from '@/features/study-grade'
 import { fetchFlashcards, recordStudy } from '@/features/study'
 import type { FlashcardQueueCard } from '@/features/study'
-import { generateMnemonic } from '@/entities/card'
+import { FlashCard, generateMnemonic } from '@/entities/card'
+import type { FlashCardModel } from '@/entities/card'
 
-// 큐 카드 → 카드 뷰 매핑. 발음·품사·이모지·유형태그는 백엔드 제공(기존 카드는 null)
-function toFlashcard(c: FlashcardQueueCard): FlashcardData {
-  const w = c.word ?? ''
-  const ex = c.example ?? ''
-  const i = w ? ex.toLowerCase().indexOf(w.toLowerCase()) : -1
-  const example =
-    i >= 0
-      ? { pre: ex.slice(0, i), highlight: ex.slice(i, i + w.length), post: ex.slice(i + w.length), translation: '' }
-      : { pre: '', highlight: '', post: ex, translation: '' }
-  const badges = (c.tags ?? []).map((t, idx) => ({ label: t, tone: idx === 0 ? ('grey' as const) : ('blue' as const) }))
+// 큐 카드 → 공용 플래시카드 모델(앞: 예문+해석 / 뒤: 뜻). 부가 필드는 백엔드 제공(기존 카드는 null)
+function toModel(c: FlashcardQueueCard): FlashCardModel {
+  const tags = (c.tags ?? []).map((t, idx) => ({ label: t, tone: idx === 0 ? ('grey' as const) : ('blue' as const) }))
   return {
-    cardId: c.id,
-    word: w,
-    pronunciation: c.pronunciation ?? '',
-    conceptEmoji: c.emoji || '📘',
-    mnemonicPath: c.mnemonicImagePath ?? null,
-    pos: c.pos ?? '',
-    meaning: c.contextMeaning ?? '',
-    dictNote: '',
-    frontTags: badges,
-    backTags: badges.map((b) => ({ label: b.label, tone: b.tone === 'grey' ? ('blue' as const) : ('red' as const) })),
-    example,
+    word: c.word ?? '',
+    pronunciation: c.pronunciation ?? undefined,
+    imageUrl: c.mnemonicImagePath ? mediaUrl(c.mnemonicImagePath) : null,
+    emoji: c.emoji ?? undefined,
+    tags,
+    example: c.example ?? undefined,
+    exampleTranslation: c.exampleMeaning ?? undefined,
+    meaning: c.contextMeaning ?? undefined,
+    pos: c.pos ?? undefined,
   }
 }
 
@@ -49,7 +40,7 @@ export function FlashcardPage() {
     queryKey: ['flashcards', mode, cardIds ?? []],
     queryFn: () => fetchFlashcards({ mode, cardIds }),
   })
-  const list = (queue.data?.cards ?? []).map((c) => ({ id: c.id as number, data: toFlashcard(c) }))
+  const list = (queue.data?.cards ?? []).map((c) => ({ id: c.id as number, data: toModel(c) }))
   const total = list.length
   const pos = Math.min(idx, Math.max(0, total - 1))
   const cur = list[pos]
@@ -177,8 +168,8 @@ export function FlashcardPage() {
       </div>
 
       <div style={{ padding: '16px var(--spacing-xl) 0' }}>
-        <FlashcardView
-          data={{ ...cur.data, mnemonicPath: genMap[cur.id] ?? cur.data.mnemonicPath }}
+        <FlashCard
+          card={genMap[cur.id] ? { ...cur.data, imageUrl: mediaUrl(genMap[cur.id]) } : cur.data}
           flipped={flipped}
           onFlip={() => setFlipped((f) => !f)}
           onGenerate={() => cur?.id != null && mnemonic.mutate(cur.id)}
