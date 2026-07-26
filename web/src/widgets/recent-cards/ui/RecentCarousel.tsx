@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { IconSpeaker } from '@/shared/ui'
-import { fetchCards, cardToRecent } from '@/entities/card'
-import type { FeedSubject, RecentCard } from '@/entities/card'
+import { fetchCards, cardToRecent, FlashCard } from '@/entities/card'
+import type { FeedSubject, RecentCard, FlashCardModel } from '@/entities/card'
 
-const CARD_H = 300
+const CARD_H = 440
 
-/** 홈 최근 카드 — 좌우 스와이프 캐러셀 + 탭 플립(영어=뜻 / 수학=풀이). 실 카드(/api/cards) */
+/** 홈 최근 카드 — 좌우 스와이프 캐러셀 + 탭 플립(공용 FlashCard). 실 카드(/api/cards) */
 export function RecentCarousel({ subject = 'ALL' }: { subject?: FeedSubject }) {
   const { data, isLoading } = useQuery({
     queryKey: ['cards', subject],
@@ -30,29 +29,48 @@ export function RecentCarousel({ subject = 'ALL' }: { subject?: FeedSubject }) {
         gap: 12,
         overflowX: 'auto',
         scrollSnapType: 'x mandatory',
-        // 좌우 padding 대신 양끝 spacer 로 여백을 준다. (padding 을 쓰면 카드 flex-basis 84% 가
-        // content box 기준이라 실제 카드가 작아져 중심이 왼쪽으로 밀린다 — 양끝 spacer 로 정확히 중앙 정렬)
+        // 좌우 padding 대신 양끝 spacer 로 여백을 준다(flex-basis 84% content-box 왜곡 방지 — 정확히 중앙 정렬).
         padding: '4px 0 8px',
         scrollbarWidth: 'none',
         WebkitOverflowScrolling: 'touch',
       }}
     >
-      {/* 좌 spacer — 첫 카드도 화면 중앙에 스냅되도록 (100%-84%)/2 = 8% */}
       <div style={{ flex: '0 0 8%' }} aria-hidden />
       {cards.map((c) => (
         <div key={c.id} style={{ flex: '0 0 84%', scrollSnapAlign: 'center' }}>
           <FlipCard card={c} />
         </div>
       ))}
-      {/* 우 spacer — 마지막 카드도 중앙 스냅 */}
       <div style={{ flex: '0 0 8%' }} aria-hidden />
     </div>
   )
 }
 
+// RecentCard → 공용 플래시카드 모델(WORD)
+function recentToModel(c: RecentCard): FlashCardModel {
+  return {
+    word: c.word ?? '',
+    pronunciation: c.pronunciation,
+    emoji: c.emoji,
+    tags: c.tags,
+    example: c.example,
+    exampleTranslation: c.exampleTranslation,
+    meaning: c.meaning,
+    pos: c.pos,
+  }
+}
+
+/** 최근 카드 플립 — WORD 는 홈·게임 공용 FlashCard, PROBLEM(수학, 현재 미노출)은 기존 문제 플립 */
 export function FlipCard({ card, height = CARD_H }: { card: RecentCard; height?: number }) {
+  if (card.type === 'WORD') {
+    return <FlashCard card={recentToModel(card)} height={height} />
+  }
+  return <ProblemFlipCard card={card} height={height} />
+}
+
+// 수학 문제 카드 플립(비노출 계약 — 앞: 문제 / 뒤: 개념·요약)
+function ProblemFlipCard({ card, height }: { card: RecentCard; height: number }) {
   const [flipped, setFlipped] = useState(false)
-  const isWord = card.type === 'WORD'
   return (
     <div style={{ perspective: 1000, height }}>
       <div
@@ -67,8 +85,12 @@ export function FlipCard({ card, height = CARD_H }: { card: RecentCard; height?:
           cursor: 'pointer',
         }}
       >
-        <Face>{isWord ? <WordFront card={card} /> : <ProblemFront card={card} />}</Face>
-        <Face back>{isWord ? <WordBack card={card} /> : <ProblemBack card={card} />}</Face>
+        <Face>
+          <ProblemFront card={card} />
+        </Face>
+        <Face back>
+          <ProblemBack card={card} />
+        </Face>
       </div>
     </div>
   )
@@ -105,58 +127,6 @@ const chip = (color: string, bg: string): CSSProperties => ({
 })
 
 const tapHint: CSSProperties = { marginTop: 'auto', textAlign: 'center', fontSize: 12, color: 'var(--color-text-tertiary)' }
-
-function WordFront({ card }: { card: RecentCard }) {
-  return (
-    <>
-      <CardTags card={card} />
-      {card.emoji && (
-        <div
-          style={{
-            marginTop: 10,
-            width: '100%',
-            height: 78,
-            borderRadius: 12,
-            background: 'linear-gradient(90deg, #e8f3ff 0%, #e7f8f8 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <span style={{ fontSize: 40, lineHeight: 1 }} aria-hidden>
-            {card.emoji}
-          </span>
-        </div>
-      )}
-      <div style={{ margin: 'auto 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-        <span style={{ fontSize: 26, fontWeight: 700, color: 'var(--color-text-primary)' }}>{card.word}</span>
-        {card.pronunciation && (
-          <span style={{ fontSize: 13, color: 'var(--color-text-tertiary)' }}>{card.pronunciation}</span>
-        )}
-      </div>
-      <div style={{ marginTop: 10 }}>
-        <AudioButtons text={card.word ?? ''} />
-      </div>
-      <span style={tapHint}>탭하면 뜻이 보여요</span>
-    </>
-  )
-}
-
-function WordBack({ card }: { card: RecentCard }) {
-  return (
-    <>
-      <span style={chip('var(--color-text-brand)', 'var(--color-brand-weak)')}>뜻</span>
-      <div style={{ margin: 'auto 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, textAlign: 'center' }}>
-        {card.pos && <span style={{ fontSize: 13, color: 'var(--color-text-tertiary)' }}>{card.pos}</span>}
-        <span style={{ fontSize: 24, fontWeight: 700, color: 'var(--color-text-primary)' }}>{card.meaning ?? '뜻 정보 없음'}</span>
-        {card.example && (
-          <span style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--color-text-secondary)' }}>“{card.example}”</span>
-        )}
-      </div>
-      <span style={tapHint}>탭하면 단어로 돌아가요</span>
-    </>
-  )
-}
 
 function ProblemFront({ card }: { card: RecentCard }) {
   return (
@@ -239,7 +209,7 @@ function ProblemBack({ card }: { card: RecentCard }) {
   )
 }
 
-// 유형·특성 태그 + 시험 정보 태그 — 홈/오답노트 앞면 공용
+// 유형·특성 태그 + 시험 정보 태그 — 문제 카드 앞면
 function CardTags({ card }: { card: RecentCard }) {
   const tags = card.tags ?? []
   const exams = card.exams ?? []
@@ -279,48 +249,3 @@ const examChip: CSSProperties = {
   background: 'var(--color-brand-weak)',
   color: 'var(--color-brand-primary)',
 }
-
-// 미국/영국 발음 선택 재생 (카드 앞면)
-// 기본은 둘 다 회색(비활성). 클릭해 재생되는 동안에만 활성색, 재생이 끝나면 다시 회색.
-function AudioButtons({ text }: { text: string }) {
-  const [playing, setPlaying] = useState<'US' | 'GB' | null>(null)
-
-  // 발음 재생 — 카드 플립과 겹치지 않게 호출부에서 stopPropagation
-  const play = (locale: 'US' | 'GB', lang: string) => {
-    const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined
-    if (!synth || !text) return
-    synth.cancel()
-    const u = new SpeechSynthesisUtterance(text)
-    u.lang = lang
-    const done = () => setPlaying((p) => (p === locale ? null : p)) // 다른 발음이 이어 재생 중이면 유지
-    u.onend = done
-    u.onerror = done
-    setPlaying(locale)
-    synth.speak(u)
-  }
-
-  return (
-    <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-      <button type="button" onClick={(e) => { e.stopPropagation(); play('US', 'en-US') }} style={audioBtn(playing === 'US')}>
-        🇺🇸 미국 <IconSpeaker size={13} />
-      </button>
-      <button type="button" onClick={(e) => { e.stopPropagation(); play('GB', 'en-GB') }} style={audioBtn(playing === 'GB')}>
-        🇬🇧 영국 <IconSpeaker size={13} />
-      </button>
-    </div>
-  )
-}
-
-const audioBtn = (primary: boolean): CSSProperties => ({
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 5,
-  padding: '6px 12px',
-  borderRadius: 999,
-  fontSize: 12,
-  fontWeight: 500,
-  cursor: 'pointer',
-  background: primary ? 'var(--color-brand-weak)' : 'var(--color-bg-primary)',
-  color: primary ? 'var(--color-text-brand)' : 'var(--color-text-secondary)',
-  border: primary ? '1px solid transparent' : '1px solid var(--color-border-default)',
-})
