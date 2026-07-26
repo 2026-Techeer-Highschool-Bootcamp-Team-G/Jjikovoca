@@ -1,5 +1,6 @@
 package com.jjikboka.core.review;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -63,4 +64,12 @@ interface StudyLogRepository extends JpaRepository<StudyLog, Long> {
     List<Object[]> sessionLogs(@Param("userId") Long userId,
                                @Param("start") LocalDateTime start,
                                @Param("end") LocalDateTime end);
+
+    /**
+     * 콤보 파생용(빈칸 퀴즈) — 최근 CLOZE 학습 로그를 [result, createdAt] 최신순으로. 세션(30분 간격) 경계와
+     * 연속 KNOW 판정은 서비스에서 한다. Pageable로 소량만 가져온다(콤보는 세션 단위라 최근 몇 건이면 충분).
+     */
+    @Query("SELECT s.result, s.createdAt FROM StudyLog s WHERE s.userId = :userId AND s.activity = 'CLOZE' "
+            + "ORDER BY s.createdAt DESC")
+    List<Object[]> recentClozeResults(@Param("userId") Long userId, Pageable pageable);
 }

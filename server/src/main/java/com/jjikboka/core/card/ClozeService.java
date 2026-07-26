@@ -49,7 +49,8 @@ public class ClozeService {
         }
         boolean correct = ClozeMaker.judge(card.getWord(), guess);
         card.review(correct ? "KNOW" : "DONT_KNOW", LocalDateTime.now());
-        return new ClozeAnswerResult(correct, card.getWord(), CardReviewState.from(card));
+        return new ClozeAnswerResult(correct, card.getWord(),
+                card.getContextMeaning(), card.getExampleMeaning(), CardReviewState.from(card));
     }
 
     /**

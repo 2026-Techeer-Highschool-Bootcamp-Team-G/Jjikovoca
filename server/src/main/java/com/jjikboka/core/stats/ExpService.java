@@ -23,6 +23,8 @@ public class ExpService {
     private static final int ATTEND_EXP = 10;
     private static final int STUDY_EXP = 5;
     private static final int CAPTURE_EXP = 3;
+    private static final int CLOZE_EXP = 10;         // 빈칸 퀴즈 정답 기본(화면 +10)
+    private static final int CLOZE_COMBO_BONUS = 5;  // 연속 정답(combo≥2) 보너스(화면 +15 = 10+5)
     private static final int DAILY_CAP = 100;
 
     private final UserStatRepository userStatRepository;
@@ -91,6 +93,19 @@ public class ExpService {
     @Transactional
     public ExpDelta awardCapture(Long userId) {
         return grant(userId, SOURCE_CAPTURE, CAPTURE_EXP);
+    }
+
+    /**
+     * 빈칸 퀴즈 정답 적립(API-15) — 정답이면 base(CLOZE_EXP=10), 연속 정답이면 보너스(CLOZE_COMBO_BONUS=5)를 더해
+     * source=CORRECT로 적립한다(학습 적립과 한도 공유). 오답이면 0. 화면의 두 배지(+10/+15)를 그리도록 분해해 돌려준다 —
+     * base·comboBonus는 명목값, earned는 일일 한도로 잘린 실제 적립분이다.
+     */
+    @Transactional
+    public ClozeExp awardCloze(Long userId, boolean correct, boolean comboBonus) {
+        int base = correct ? CLOZE_EXP : 0;
+        int bonus = (correct && comboBonus) ? CLOZE_COMBO_BONUS : 0;
+        ExpDelta delta = grant(userId, SOURCE_CORRECT, base + bonus);
+        return new ClozeExp(base, bonus, delta.earned(), delta.total(), delta.levelUp());
     }
 
     /** 공통 적립 — 일일 한도(DAILY_CAP) 내에서 amount만큼(초과 시 0), exp_log 기록 + 레벨 재계산. 레벨업 시 알림 이벤트(AFTER_COMMIT). */

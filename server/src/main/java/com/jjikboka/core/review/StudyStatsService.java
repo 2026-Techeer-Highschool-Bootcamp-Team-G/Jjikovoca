@@ -1,5 +1,6 @@
 package com.jjikboka.core.review;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +43,34 @@ public class StudyStatsService {
     @Transactional(readOnly = true)
     public long studyCount(Long userId, LocalDateTime start, LocalDateTime end) {
         return studyLogRepository.countInPeriod(userId, start, end);
+    }
+
+    /**
+     * 빈칸 퀴즈 콤보(API-15) — <b>현재 세션</b>의 연속 정답 수를 study_log에서 파생한다. 최신 CLOZE 로그부터 거슬러
+     * 올라가며 {@code result=KNOW}이고 직전 로그와의 간격이 {@link #SESSION_GAP_MINUTES}분 이내인 동안 센다.
+     * 오답(KNOW 아님)이나 세션 단절을 만나면 멈춘다 — DB 콤보 컬럼 없이 세션 스코프를 만족한다(서버 authoritative).
+     *
+     * <p>기준 시각 {@code now}는 직전 로그가 아직 세션 안인지 판단하는 앵커다. 이 값은 <b>이번 정답을 기록하기 전에</b>
+     * 호출해 "직전까지의 연속 정답 수"를 얻는 용도다(호출부가 정답이면 +1). 최근 소량만 훑는다.
+     */
+    @Transactional(readOnly = true)
+    public int consecutiveClozeCorrect(Long userId, LocalDateTime now) {
+        List<Object[]> rows = studyLogRepository.recentClozeResults(userId, PageRequest.of(0, 50));
+        int combo = 0;
+        LocalDateTime anchor = now;
+        for (Object[] row : rows) {
+            String result = (String) row[0];
+            LocalDateTime at = (LocalDateTime) row[1];
+            if (Duration.between(at, anchor).toMinutes() > SESSION_GAP_MINUTES) {
+                break;   // 세션 단절 — 여기부터는 다른 세션
+            }
+            if (!"KNOW".equals(result)) {
+                break;   // 오답/헷갈림에서 연속 종료
+            }
+            combo++;
+            anchor = at;
+        }
+        return combo;
     }
 
     /** 과목별 학습 집계(API-17 도넛) — [subject, duration_ms 합, 학습 수] → 분·개수. 비율은 core.stats가 조합 시 붙인다. */
