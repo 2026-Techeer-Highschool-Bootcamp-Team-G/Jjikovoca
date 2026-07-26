@@ -7,4 +7,5 @@ export interface Exam {
   subject: Subject | null // null = 전과목
   examDate: string // YYYY-MM-DD
   dday: number
+  memoryRate?: number | null // 시험범위 기억률 = 태깅 단어들의 FSRS 회상확률 평균(0~1). null=태깅 없음/미복습
 }
