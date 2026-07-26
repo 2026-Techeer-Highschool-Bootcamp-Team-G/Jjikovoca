@@ -4,7 +4,6 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { NavigationBar, Button, TextField, StudyLoading } from '@/shared/ui'
 import { fetchClozeQueue, submitClozeAnswer, regenerateCloze } from '@/features/cloze'
 import type { ClozeJudge } from '@/features/cloze'
-import { recordStudy } from '@/features/study'
 
 /** 빈칸 퀴즈 (F-06) — 주관식 입력 + 서버 판정(정답은 서버만 보유, 클라 미내장) */
 export function ClozePage() {
@@ -30,16 +29,10 @@ export function ClozePage() {
   }, [cur?.cardId])
 
   const submit = useMutation({
-    mutationFn: async (): Promise<ClozeJudge> => {
+    // /cloze/answer 가 study_log(CLOZE)+durationMs+exp 단일 주체(BE 확정) — durationMs 를 여기로 보낸다(별도 /study 호출 없음)
+    mutationFn: (): Promise<ClozeJudge> => {
       const durationMs = Math.round(performance.now() - shownAt.current)
-      const judge = await submitClozeAnswer(cur.cardId, guess.trim())
-      // /cloze/answer 는 study_log 를 남기지 않으므로(BE 협의), 학습 시간 집계용으로 /study 에도 기록. fire-and-forget
-      recordStudy(cur.cardId, {
-        activity: 'CLOZE',
-        result: judge.correct ? 'KNOW' : 'DONT_KNOW',
-        durationMs,
-      }).catch(() => {})
-      return judge
+      return submitClozeAnswer(cur.cardId, guess.trim(), durationMs)
     },
     onSuccess: (r) => setResult(r),
   })
