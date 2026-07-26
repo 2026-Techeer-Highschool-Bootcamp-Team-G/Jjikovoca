@@ -52,17 +52,19 @@ export function AnalysisResult({ isMath, cards, onBack }: Props) {
               gap: 12,
               overflowX: 'auto',
               scrollSnapType: 'x mandatory',
-              // 카드를 화면 중앙에 정렬 — 좌우 균등 peek(홈 최근 카드와 동일)
-              padding: '4px calc((100% - 84%) / 2) 8px',
+              // 좌우 padding 대신 양끝 spacer 로 정확히 중앙 정렬(padding+flex-basis 84% content-box 왜곡 방지, 홈 캐러셀과 동일)
+              padding: '4px 0 8px',
               scrollbarWidth: 'none',
               WebkitOverflowScrolling: 'touch',
             }}
           >
+            <div style={{ flex: '0 0 8%' }} aria-hidden />
             {recents.map((c) => (
               <div key={c.id} style={{ flex: '0 0 84%', scrollSnapAlign: 'center' }}>
                 <FlipCard card={c} height={500} />
               </div>
             ))}
+            <div style={{ flex: '0 0 8%' }} aria-hidden />
           </div>
         ) : (
           <p style={{ margin: '40px 0', textAlign: 'center', fontSize: 13, color: 'var(--color-text-tertiary)', padding: '0 var(--spacing-xl)' }}>
