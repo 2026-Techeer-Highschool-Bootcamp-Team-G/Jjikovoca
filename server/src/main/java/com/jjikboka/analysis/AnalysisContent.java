@@ -15,6 +15,7 @@ public record AnalysisContent(
         String contextMeaning,
         String dictMeaning,
         String example,
+        String exampleMeaning,   // 예문의 한글 뜻(플래시카드 앞면: 예문 + 예문뜻)
         // WORD enrichment (Phase 5) — 발음(IPA)·품사·유형태그·이모지
         String pronunciation,
         String pos,

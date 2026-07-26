@@ -230,7 +230,7 @@ class AnalysisWorker {
     private CardCreateCommand toCommand(AnalyzeEvents.AnalyzeRequested event, AnalysisContent content, String imagePath) {
         return new CardCreateCommand(
                 event.userId(), event.jobId(), event.type(), content.subject(), imagePath,
-                content.word(), content.contextMeaning(), content.dictMeaning(), content.example(),
+                content.word(), content.contextMeaning(), content.dictMeaning(), content.example(), content.exampleMeaning(),
                 content.pronunciation(), content.pos(), content.tags(), content.emoji(),
                 content.summary(), content.latex(), content.concept(),
                 content.hint1(), content.hint2(), content.hint3(), content.answerFormat(),

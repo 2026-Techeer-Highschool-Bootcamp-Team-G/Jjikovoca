@@ -30,6 +30,7 @@ class RealGeminiClient implements GeminiClient {
               "contextMeaning": "이 지문 문맥에서의 뜻(한국어)",
               "dictMeaning": "사전적 여러 뜻(한국어, ①②③ 번호)",
               "example": "이 단어를 자연스럽게 포함한 새 영어 예문 한 문장",
+              "exampleMeaning": "위 example 문장의 자연스러운 한국어 번역",
               "pronunciation": "IPA 발음기호 (예: /saʊnd/)",
               "pos": "품사(한국어, 예: 명사/동사/형용사/부사)",
               "tags": ["유형 태그 2~4개(예: 수능, 빈출, 동사)"],
@@ -70,7 +71,7 @@ class RealGeminiClient implements GeminiClient {
         if (problem) {
             return new AnalysisContent(
                     MODEL, str(node, "subject", "MATH"),
-                    null, null, null, null,
+                    null, null, null, null, null,   // WORD·예문뜻 미해당(PROBLEM)
                     null, null, null, null,   // WORD enrichment 미해당(PROBLEM)
                     str(node, "summary", null), str(node, "latex", null), str(node, "concept", null),
                     str(node, "hint1", null), str(node, "hint2", null), str(node, "hint3", null),
@@ -80,7 +81,7 @@ class RealGeminiClient implements GeminiClient {
         return new AnalysisContent(
                 MODEL, str(node, "subject", "ENGLISH"),
                 str(node, "word", null), str(node, "contextMeaning", null),
-                str(node, "dictMeaning", null), str(node, "example", null),
+                str(node, "dictMeaning", null), str(node, "example", null), str(node, "exampleMeaning", null),
                 str(node, "pronunciation", null), str(node, "pos", null), strList(node, "tags"), str(node, "emoji", null),
                 null, null, null, null, null, null, null, null, null, null);
     }
