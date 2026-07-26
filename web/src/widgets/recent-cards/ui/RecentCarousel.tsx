@@ -30,17 +30,22 @@ export function RecentCarousel({ subject = 'ALL' }: { subject?: FeedSubject }) {
         gap: 12,
         overflowX: 'auto',
         scrollSnapType: 'x mandatory',
-        // 카드를 화면 중앙에 정렬 — 좌우 균등 peek. (100% - 84%)/2 만큼 좌우 여백
-        padding: '4px calc((100% - 84%) / 2) 8px',
+        // 좌우 padding 대신 양끝 spacer 로 여백을 준다. (padding 을 쓰면 카드 flex-basis 84% 가
+        // content box 기준이라 실제 카드가 작아져 중심이 왼쪽으로 밀린다 — 양끝 spacer 로 정확히 중앙 정렬)
+        padding: '4px 0 8px',
         scrollbarWidth: 'none',
         WebkitOverflowScrolling: 'touch',
       }}
     >
+      {/* 좌 spacer — 첫 카드도 화면 중앙에 스냅되도록 (100%-84%)/2 = 8% */}
+      <div style={{ flex: '0 0 8%' }} aria-hidden />
       {cards.map((c) => (
         <div key={c.id} style={{ flex: '0 0 84%', scrollSnapAlign: 'center' }}>
           <FlipCard card={c} />
         </div>
       ))}
+      {/* 우 spacer — 마지막 카드도 중앙 스냅 */}
+      <div style={{ flex: '0 0 8%' }} aria-hidden />
     </div>
   )
 }
