@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { NavigationBar, Button, StudyLoading } from '@/shared/ui'
 import { fetchClozeQueue, submitClozeAnswer, regenerateCloze } from '@/features/cloze'
@@ -8,6 +8,9 @@ import type { ClozeJudge } from '@/features/cloze'
 /** 빈칸 퀴즈 (F-06) — 인라인 빈칸 입력 + 서버 판정. 콤보·XP·해설은 백엔드 응답(optional) */
 export function ClozePage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  // 직접 선택(study-pick)에서 넘어온 cardIds — PICK 학습(백엔드 cardIds 미지원 시 일반 큐)
+  const cardIds = (location.state as { cardIds?: number[] } | null)?.cardIds
   const [idx, setIdx] = useState(0)
   const [guess, setGuess] = useState('')
   const [revealed, setRevealed] = useState<Set<number>>(new Set())
@@ -17,7 +20,10 @@ export function ClozePage() {
   const [overrides, setOverrides] = useState<Record<number, { clozeText: string; hints: string[] }>>({})
 
   // 실 큐 조회 — 정답 미포함(치팅 방지). 판정은 항상 서버
-  const queue = useQuery({ queryKey: ['cloze'], queryFn: () => fetchClozeQueue() })
+  const queue = useQuery({
+    queryKey: ['cloze', cardIds ?? []],
+    queryFn: () => fetchClozeQueue(cardIds && cardIds.length > 0 ? { cardIds } : {}),
+  })
   const list = queue.data ?? []
   const total = list.length
   const pos = Math.min(idx, Math.max(0, total - 1))

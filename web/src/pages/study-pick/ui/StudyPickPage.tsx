@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Chip, Button, SearchBar } from '@/shared/ui'
 import { CardRow } from '@/widgets/card-row'
@@ -31,6 +31,9 @@ function toRow(c: Card): CardRowView {
 /** 직접 선택 모드 (09-2, F-28) — 카드를 체크로 골라 학습 세트 구성 */
 export function StudyPickPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  // 학습 설정에서 고른 복습 유형(없으면 플래시카드) — 이 값으로 학습 화면을 라우팅
+  const type = (location.state as { type?: 'FLASHCARD' | 'CLOZE' } | null)?.type ?? 'FLASHCARD'
   const [status, setStatus] = useState<Status>('ALL')
   const [picked, setPicked] = useState<Set<number>>(new Set())
 
@@ -50,7 +53,8 @@ export function StudyPickPage() {
     })
 
   const count = picked.size
-  const start = () => navigate('/flashcard', { state: { cardIds: [...picked] } })
+  const start = () =>
+    navigate(type === 'CLOZE' ? '/cloze' : '/flashcard', { state: { cardIds: [...picked] } })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
