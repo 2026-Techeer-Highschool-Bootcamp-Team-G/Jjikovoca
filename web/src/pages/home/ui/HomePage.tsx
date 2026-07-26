@@ -2,14 +2,13 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { AppHeader } from '@/widgets/app-header'
-import { GameStatusCard } from '@/widgets/game-status'
 import { DdayCard } from '@/widgets/dday-card'
 import { RecentCarousel } from '@/widgets/recent-cards'
 import { Tabs, ListHeader, IconCalendar } from '@/shared/ui'
 import type { FeedSubject } from '@/entities/card'
-import { fetchExpSummary, attend } from '@/entities/exp'
+import { attend } from '@/entities/exp'
 import { fetchExams } from '@/entities/exam'
-import { fetchReviewQueue } from '@/features/study'
+import { fetchReviewQueue, fetchRecommendation } from '@/features/study'
 
 const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
   { key: 'ALL', label: '전체' },
@@ -17,46 +16,29 @@ const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
   { key: 'MATH', label: '수학' },
 ]
 
-// 홈 QA #4 — 동기부여 문구 풀(매 진입 랜덤)
-const HOME_QUOTES = [
-  '어제의 나보다 딱 한 걸음만 더 나아가자',
-  '오늘 한 문제가 내일의 자신감이 된다',
-  '꾸준함이 결국 실력을 만든다',
-]
-
-/** 게임형 홈 (F-16) — 03 홈 */
+/**
+ * 게임형 홈 (F-16) — 03 홈. 상단은 시험 D-day·시험범위 기억률·오늘 복습 중심.
+ * 게임 상태(Lv/XP/연속/퀘스트)는 마이페이지로, 동기부여 명언은 학습 시작 로딩으로 이동했다.
+ */
 export function HomePage() {
   const navigate = useNavigate()
   const [subject, setSubject] = useState<FeedSubject>('ALL')
-  const [quote] = useState(() => HOME_QUOTES[Math.floor(Math.random() * HOME_QUOTES.length)])
 
-  // 실 API 조회 — 실패/빈 응답은 가짜값으로 가리지 않고 0/빈 상태로 정직하게 표시
-  const exp = useQuery({ queryKey: ['exp-summary'], queryFn: fetchExpSummary })
+  // 실 API 조회 — 실패/빈 응답은 가짜값으로 가리지 않고 빈 상태로 정직하게 표시
   const exams = useQuery({ queryKey: ['exams'], queryFn: fetchExams })
   const review = useQuery({ queryKey: ['review-queue'], queryFn: () => fetchReviewQueue() })
+  const rec = useQuery({ queryKey: ['recommendation'], queryFn: fetchRecommendation })
 
   // 출석 체크 — 진입 시 1회(서버 멱등)
   useEffect(() => {
     attend().catch(() => {})
   }, [])
 
-  const e = exp.data
-  const level = e?.level ?? 0
-  const expVal = e?.exp ?? 0
-  const nextExp = e?.nextLevelExp ?? 0
-  const streakDays = e?.streakDays ?? 0
-
   // 가장 가까운 시험 — 없으면 가짜 D-day 대신 등록 유도
   const nearest = exams.data?.[0]
   const todayDue = review.data?.dueCount ?? 0
-
-  // 일일 퀘스트 — 서버 quest(진행/목표). 목표가 0(미할당·미사용)이거나 quest 없으면
-  // "0/0 · 달성 시" 오표기 대신 첫 행동을 유도하는 문구를 보여준다.
-  const quest = e?.quest
-  const questLabel =
-    quest && quest.target > 0
-      ? `${quest.label} ${quest.progress}/${quest.target}${quest.completed ? ' · 달성 🎉' : ' · 달성 시 +40XP'}`
-      : '오늘의 복습 — 단어 10개를 인식하면 +40XP'
+  // 시험범위 기억률 ← 추천 통계의 평균 회상확률 R(0~1). 없으면 미표시
+  const memoryRate = rec.data?.memoryRate != null ? Math.round(rec.data.memoryRate * 100) : undefined
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -70,16 +52,14 @@ export function HomePage() {
           padding: '6px var(--spacing-xl) 0',
         }}
       >
-        <GameStatusCard
-          level={level}
-          heroTitle="단어 헌터"
-          exp={expVal}
-          nextExp={nextExp}
-          streakDays={streakDays}
-          questLabel={questLabel}
-        />
         {nearest ? (
-          <DdayCard title={nearest.title} dday={nearest.dday} todayDue={todayDue} onClick={() => navigate('/exam')} />
+          <DdayCard
+            title={nearest.title}
+            dday={nearest.dday}
+            memoryRate={memoryRate}
+            todayDue={todayDue}
+            onClick={() => navigate('/exam')}
+          />
         ) : (
           <button
             type="button"
@@ -106,19 +86,6 @@ export function HomePage() {
             <span aria-hidden>›</span>
           </button>
         )}
-
-        {/* 홈 QA #4 — 동기부여 문구를 인용구로 표시 (좌측 세로선 + 이탤릭) */}
-        <blockquote
-          style={{
-            margin: 0,
-            padding: '2px 0 2px 12px',
-            borderLeft: '3px solid var(--color-brand-primary)',
-          }}
-        >
-          <span style={{ fontSize: 13, fontWeight: 500, fontStyle: 'italic', color: 'var(--color-text-secondary)' }}>
-            “{quote}”
-          </span>
-        </blockquote>
       </div>
 
       <div style={{ marginTop: 10, background: 'var(--color-bg-primary)' }}>
