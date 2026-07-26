@@ -66,8 +66,8 @@ export function HomePage() {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 8,
-          padding: '16px var(--spacing-xl) 0',
+          gap: 6,
+          padding: '6px var(--spacing-xl) 0',
         }}
       >
         <GameStatusCard
@@ -121,7 +121,7 @@ export function HomePage() {
         </blockquote>
       </div>
 
-      <div style={{ marginTop: 16, background: 'var(--color-bg-primary)' }}>
+      <div style={{ marginTop: 10, background: 'var(--color-bg-primary)' }}>
         <Tabs tabs={SUBJECT_TABS} value={subject} onChange={setSubject} />
         <ListHeader title="최근 카드" link="전체 보기" onLink={() => navigate('/wrong-note')} />
       </div>
