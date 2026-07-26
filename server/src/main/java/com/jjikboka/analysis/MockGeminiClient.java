@@ -31,7 +31,7 @@ class MockGeminiClient implements GeminiClient {
         if ("PROBLEM".equals(type)) {
             return new AnalysisContent(
                     MODEL, "MATH",
-                    null, null, null, null,
+                    null, null, null, null, null,   // WORD·예문뜻 미해당(PROBLEM)
                     null, null, null, null,   // WORD enrichment 미해당(PROBLEM)
                     "이차방정식의 근과 계수의 관계를 묻는 문제",
                     "다음 이차방정식의 두 근을 구하시오. $x^2 - 5x + 6 = 0$",   // latex=문제 전문(발문+수식)
@@ -48,6 +48,7 @@ class MockGeminiClient implements GeminiClient {
                 "타당한, 믿을 만한",
                 "① 소리 ② 건전한, 타당한 ③ (잠이) 깊은",
                 "That's a sound argument.",
+                "그건 타당한 주장이야.",   // 예문 한글뜻
                 "/saʊnd/", "형용사", java.util.List.of("수능", "빈출", "형용사"), "🔊",   // WORD enrichment
                 null, null, null, null, null, null, null,
                 null, null, null);
