@@ -29,11 +29,28 @@ public class ClozeService {
         this.quotaConsumeService = quotaConsumeService;
     }
 
-    /** 문항 생성(API-14) — 예문 보유 미졸업 WORD 카드로 빈칸 문항을 만든다. 정답은 담지 않는다. */
+    /**
+     * 문항 생성(API-14). cardIds가 있으면 <b>직접 선택(PICK, F-28)</b> — 고른 카드만 빈칸 문항으로(due·복습 스케줄·졸업 무관,
+     * 플래시카드 PICK과 동일 소유 쿼리 재사용). 없으면 예문 보유 미졸업 WORD due 후보에서 limit개. 정답은 담지 않는다.
+     *
+     * <p>PICK에서 예문 없거나 WORD 아닌 카드는 빈칸을 만들 수 없어 <b>조용히 제외</b>한다(에러 아님). 최신순 + limit은 공통.
+     */
     @Transactional(readOnly = true)
-    public List<ClozeItem> getItems(Long userId, int limit) {
+    public List<ClozeItem> getItems(Long userId, int limit, List<Long> cardIds) {
+        if (cardIds != null && !cardIds.isEmpty()) {
+            return cardRepository.findByUserIdAndIdInAndDeletedAtIsNullOrderByCreatedAtDesc(userId, cardIds).stream()
+                    .filter(ClozeService::clozeEligible)
+                    .limit(limit)
+                    .map(ClozeItem::from)
+                    .toList();
+        }
         return cardRepository.findClozeCandidates(userId, PageRequest.of(0, limit))
                 .stream().map(ClozeItem::from).toList();
+    }
+
+    /** PICK 적격 — 빈칸을 만들려면 WORD 타입이고 예문이 있어야 한다(부적격은 조용히 제외). */
+    private static boolean clozeEligible(Card card) {
+        return "WORD".equals(card.getType()) && card.getExample() != null && !card.getExample().isBlank();
     }
 
     /**
