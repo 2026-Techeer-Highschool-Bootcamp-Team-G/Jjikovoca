@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { NavigationBar } from '@/shared/ui'
+import { NavigationBar, StudyLoading } from '@/shared/ui'
 import { FlashcardView } from '@/features/flashcard'
 import type { FlashcardData } from '@/features/flashcard'
 import { GradeButtons } from '@/features/study-grade'
@@ -80,11 +80,15 @@ export function FlashcardPage() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
         <NavigationBar title="플래시카드" onBack={() => navigate(-1)} />
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 24px' }}>
-          <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--color-text-tertiary)' }}>
-            {queue.isLoading ? '카드를 불러오는 중…' : '복습할 카드가 없어요 — 시험지를 촬영해 카드를 만들어보세요'}
-          </p>
-        </div>
+        {queue.isLoading ? (
+          <StudyLoading />
+        ) : (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 24px' }}>
+            <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--color-text-tertiary)' }}>
+              복습할 카드가 없어요 — 시험지를 촬영해 카드를 만들어보세요
+            </p>
+          </div>
+        )}
       </div>
     )
   }

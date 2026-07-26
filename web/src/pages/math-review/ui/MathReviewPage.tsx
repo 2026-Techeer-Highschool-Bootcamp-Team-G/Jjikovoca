@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { NavigationBar, Button } from '@/shared/ui'
+import { NavigationBar, Button, StudyLoading } from '@/shared/ui'
 import {
   MathProblemCard,
   DiagnosisBanner,
@@ -85,11 +85,15 @@ export function MathReviewPage() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
         <NavigationBar title="수학" onBack={() => navigate(-1)} />
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 24px' }}>
-          <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--color-text-tertiary)' }}>
-            {queue.isLoading ? '문제를 불러오는 중…' : '복습할 수학 문제가 없어요 — 문제를 먼저 촬영해보세요'}
-          </p>
-        </div>
+        {queue.isLoading ? (
+          <StudyLoading />
+        ) : (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 24px' }}>
+            <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--color-text-tertiary)' }}>
+              복습할 수학 문제가 없어요 — 문제를 먼저 촬영해보세요
+            </p>
+          </div>
+        )}
       </div>
     )
   }

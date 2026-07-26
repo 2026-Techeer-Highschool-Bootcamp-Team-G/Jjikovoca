@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ListRow } from '@/shared/ui'
+import { GameStatusCard } from '@/widgets/game-status'
 import { fetchMe, deactivatePremium } from '@/entities/user'
 import { fetchExpSummary } from '@/entities/exp'
 import { fetchExams } from '@/entities/exam'
@@ -29,6 +30,13 @@ export function MyPage() {
   const level = exp.data?.level ?? 0
   const expVal = exp.data?.exp ?? 0
   const nextExp = exp.data?.nextLevelExp ?? 0
+  const streakDays = exp.data?.streakDays ?? 0
+  // 일일 퀘스트 라벨 — 목표 미할당(0)이거나 quest 없으면 첫 행동 유도 문구(홈과 동일 규칙)
+  const quest = exp.data?.quest
+  const questLabel =
+    quest && quest.target > 0
+      ? `${quest.label} ${quest.progress}/${quest.target}${quest.completed ? ' · 달성 🎉' : ' · 달성 시 +40XP'}`
+      : '오늘의 복습 — 단어 10개를 인식하면 +40XP'
   const nearest = exams.data?.[0]
   const examLabel = nearest ? `${nearest.title} D-${nearest.dday}` : '시험 미등록'
 
@@ -47,7 +55,15 @@ export function MyPage() {
       </header>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '16px var(--spacing-xl) 0' }}>
-        <ProfileCard nickname={nickname} email={email} level={level} exp={expVal} nextExp={nextExp} />
+        <ProfileCard nickname={nickname} email={email} level={level} />
+        <GameStatusCard
+          level={level}
+          heroTitle="단어 헌터"
+          exp={expVal}
+          nextExp={nextExp}
+          streakDays={streakDays}
+          questLabel={questLabel}
+        />
         <PremiumCard
           premium={premium}
           amount={premiumAmount}
@@ -110,16 +126,12 @@ function ProfileCard({
   nickname,
   email,
   level,
-  exp,
-  nextExp,
 }: {
   nickname: string
   email: string
   level: number
-  exp: number
-  nextExp: number
 }) {
-  const ratio = nextExp > 0 ? Math.min(1, exp / nextExp) : 0
+  // 신원(닉네임·이메일·Lv뱃지·편집)만 — XP·연속·퀘스트는 아래 GameStatusCard가 담당(중복 제거)
   return (
     <div
       style={{
@@ -148,12 +160,6 @@ function ProfileCard({
           </span>
         </div>
         <span style={{ fontSize: 12, color: 'var(--color-text-tertiary)' }}>{email}</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
-          <div style={{ flex: 1, height: 6, borderRadius: 3, background: 'var(--color-bg-secondary)', overflow: 'hidden' }}>
-            <div style={{ width: `${ratio * 100}%`, height: '100%', background: 'var(--color-brand-primary)', borderRadius: 3 }} />
-          </div>
-          <span style={{ fontSize: 10, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>{exp}/{nextExp}</span>
-        </div>
       </div>
       <button
         type="button"
