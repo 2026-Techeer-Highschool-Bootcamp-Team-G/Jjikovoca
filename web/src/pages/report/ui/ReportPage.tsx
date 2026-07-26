@@ -47,8 +47,8 @@ function entrance(mounted: boolean, delay: number): CSSProperties {
   }
 }
 
-// 학습 잔디 색 강도 — level 0~4 (백엔드 통일 임계)
-const GRASS_COLOR = ['var(--color-bg-secondary)', '#b8ecd4', '#7ee2b0', '#4fd89e', 'var(--color-success-primary)']
+// 학습 잔디 색 강도 — level 0~4 (백엔드 통일 임계). 서비스 메인 색에 맞춘 파랑 톤(QA)
+const GRASS_COLOR = ['var(--color-bg-secondary)', '#cfe4fd', '#93c1fa', '#5a9bf6', 'var(--color-brand-primary)']
 
 const pad = (n: number) => String(n).padStart(2, '0')
 const ymd = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
