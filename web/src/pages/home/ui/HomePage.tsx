@@ -8,7 +8,7 @@ import { Tabs, ListHeader, IconCalendar } from '@/shared/ui'
 import type { FeedSubject } from '@/entities/card'
 import { attend } from '@/entities/exp'
 import { fetchExams } from '@/entities/exam'
-import { fetchReviewQueue, fetchRecommendation } from '@/features/study'
+import { fetchRecommendation } from '@/features/study'
 
 const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
   { key: 'ALL', label: '전체' },
@@ -26,7 +26,6 @@ export function HomePage() {
 
   // 실 API 조회 — 실패/빈 응답은 가짜값으로 가리지 않고 빈 상태로 정직하게 표시
   const exams = useQuery({ queryKey: ['exams'], queryFn: fetchExams })
-  const review = useQuery({ queryKey: ['review-queue'], queryFn: () => fetchReviewQueue() })
   const rec = useQuery({ queryKey: ['recommendation'], queryFn: fetchRecommendation })
 
   // 출석 체크 — 진입 시 1회(서버 멱등)
@@ -34,11 +33,12 @@ export function HomePage() {
     attend().catch(() => {})
   }, [])
 
-  // 가장 가까운 시험 — 없으면 가짜 D-day 대신 등록 유도
+  // 가장 가까운 시험(다가오는 순 정렬 → exams[0]) — 없으면 가짜 D-day 대신 등록 유도
   const nearest = exams.data?.[0]
-  const todayDue = review.data?.dueCount ?? 0
-  // 시험범위 기억률 ← 추천 통계의 평균 회상확률 R(0~1). 없으면 미표시
-  const memoryRate = rec.data?.memoryRate != null ? Math.round(rec.data.memoryRate * 100) : undefined
+  // 오늘 복습 수 ← 추천 통계 reviewCount(FSRS 복습주기 도래, flashcards TODAY와 정합 #302)
+  const todayDue = rec.data?.reviewCount ?? 0
+  // 시험범위 기억률 ← 해당 시험 태깅 단어들의 FSRS 회상확률 평균(0~1). null(태깅 없음/미복습) → 미표시
+  const memoryRate = nearest?.memoryRate != null ? Math.round(nearest.memoryRate * 100) : undefined
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
