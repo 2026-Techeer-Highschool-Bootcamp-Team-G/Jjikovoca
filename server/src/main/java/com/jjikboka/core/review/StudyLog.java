@@ -18,6 +18,9 @@ import java.time.LocalDateTime;
 @Table(name = "study_log")
 class StudyLog {
 
+    /** 문항당 학습 시간 상한(ms) — 문항을 켜둔 채 방치해 durationMs가 비정상적으로 커지는 이상치를 5분으로 캡한다(리포트 minutes 방어). */
+    private static final int MAX_DURATION_MS = 300_000;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -57,8 +60,16 @@ class StudyLog {
         log.activity = command.activity();
         log.result = command.result();
         log.reasonTag = command.reasonTag();
-        log.durationMs = command.durationMs();
+        log.durationMs = cap(command.durationMs());
         log.detail = command.detail();
         return log;
+    }
+
+    /** durationMs를 [0, 5분]으로 클램프 — 음수·방치 이상치를 정리한다(null은 그대로 둬 미측정과 구분). */
+    private static Integer cap(Integer durationMs) {
+        if (durationMs == null) {
+            return null;
+        }
+        return Math.max(0, Math.min(durationMs, MAX_DURATION_MS));
     }
 }
