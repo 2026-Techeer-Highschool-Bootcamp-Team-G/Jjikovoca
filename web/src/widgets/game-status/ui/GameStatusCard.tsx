@@ -1,4 +1,4 @@
-import { IconChevronRight, IconClock } from '@/shared/ui'
+import { IconChevronRight, IconClock, IconFire } from '@/shared/ui'
 
 interface Props {
   level: number
@@ -21,8 +21,6 @@ export function GameStatusCard({
   onQuestClick,
 }: Props) {
   const ratio = nextExp > 0 ? Math.min(1, exp / nextExp) : 0
-  // 홈 QA #1 — 연속일이 많을수록 불꽃이 커진다(상한 30px)
-  const flameSize = Math.min(14 + streakDays, 30)
   return (
     <section
       style={{
@@ -44,12 +42,12 @@ export function GameStatusCard({
                 aria-hidden
                 title={`연속 ${streakDays}일`}
                 style={{
-                  fontSize: flameSize,
-                  lineHeight: 1,
+                  display: 'inline-flex',
+                  color: 'var(--color-warning-primary, #ff8a3d)',
                   filter: streakDays >= 14 ? 'drop-shadow(0 0 5px rgba(255,120,40,0.65))' : undefined,
                 }}
               >
-                🔥
+                <IconFire size={16} />
               </span>
               연속 {streakDays}일
             </span>
