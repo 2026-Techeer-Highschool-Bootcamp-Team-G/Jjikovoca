@@ -30,6 +30,7 @@
 | `recallProb`(잊을 확률) | `GET /api/study/flashcards` | 플래시카드 "N일 뒤 잊을 확률" | **데모**(FlashcardView 기본값) |
 | ~~AI 연상 이미지~~ | `GET /api/study/flashcards` `mnemonicImagePath` + `POST /api/cards/{id}/mnemonic` | 플래시카드 상단 이미지(미생성 시 온디맨드 생성) | ✅ **실연동 완료**(PR #255) |
 | ~~추천 요약(기억률·개수·예상시간)~~ | `GET /api/study/recommendation` | StudySetupSheet 통계 | ✅ **실연동 완료**(PR #244) |
+| ⚠️ `recommendation.reviewCount` ↔ `flashcards?mode=TODAY` **개수 불일치** | `GET /api/study/recommendation` vs `GET /api/study/flashcards?mode=TODAY` | 학습 설정 "복습 N개" = 실제 학습 큐 개수 | **백엔드 요청**: 두 API의 "오늘 복습" 기준을 일치(같은 카드집합) — 현재 reviewCount(복습 due)=0인데 TODAY total=4로 어긋남. 프론트는 임시로 flashcards TODAY total을 표시(PR #298) |
 | ~~프리미엄 결제일·금액~~ | `GET /api/me` `premiumPlan·premiumExpiresAt·premiumAmount` | 결제 정보 | ✅ **실연동 완료**(PR #253) |
 | `level`·`exp` | `GET /api/me` (v2) | exp 별도 호출 없이 표기 | 현재 `GET /api/exp/summary` 별도 호출 |
 | exp 확장 `{earned,total,levelUp}` | `POST /api/cards/{id}/study` (v2) | 학습 직후 XP·레벨업 피드백 | 미사용 |
