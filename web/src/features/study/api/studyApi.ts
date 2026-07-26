@@ -11,6 +11,7 @@ export interface FlashcardQueueCard {
   word?: string
   contextMeaning?: string
   example?: string
+  exampleMeaning?: string | null // 예문 한글 번역(플래시카드 앞면: 예문 + 예문뜻)
   boxLevel: number
   // 표기용 부가 필드(기존 카드는 null — 하위호환)
   pronunciation?: string | null

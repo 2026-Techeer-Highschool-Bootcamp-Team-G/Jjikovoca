@@ -14,6 +14,7 @@ export interface RecentCard {
   pos?: string
   meaning?: string
   example?: string
+  exampleTranslation?: string // 예문 해석(한글) — 피드가 exampleMeaning 제공 시 채워짐
   // PROBLEM
   problem?: string
   answer?: string
@@ -50,6 +51,7 @@ export function cardToRecent(c: Card): RecentCard {
       emoji: c.emoji ?? undefined,
       meaning: c.contextMeaning ?? c.dictMeaning,
       example: c.example,
+      exampleTranslation: c.exampleMeaning ?? undefined,
     }
   }
   return {
