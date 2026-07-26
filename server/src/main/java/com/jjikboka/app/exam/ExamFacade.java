@@ -1,6 +1,8 @@
 package com.jjikboka.app.exam;
 
+import com.jjikboka.core.card.CardStatsService;
 import com.jjikboka.core.card.ExamRescheduler;
+import com.jjikboka.core.review.ExamFeedService;
 import com.jjikboka.core.review.ExamService;
 import com.jjikboka.core.review.ExamView;
 import com.jjikboka.shared.error.BusinessException;
@@ -9,8 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 /**
  * 시험 CRUD 조립 (API-32~35, app 파사드). 시험 정보(core.review)와 복습 일정 재배치(core.card)를 한 트랜잭션으로 엮는다 —
@@ -23,14 +27,26 @@ public class ExamFacade {
 
     private final ExamService examService;
     private final ExamRescheduler examRescheduler;
+    private final CardStatsService cardStatsService;
+    private final ExamFeedService examFeedService;
 
-    ExamFacade(ExamService examService, ExamRescheduler examRescheduler) {
+    ExamFacade(ExamService examService, ExamRescheduler examRescheduler,
+               CardStatsService cardStatsService, ExamFeedService examFeedService) {
         this.examService = examService;
         this.examRescheduler = examRescheduler;
+        this.cardStatsService = cardStatsService;
+        this.examFeedService = examFeedService;
     }
 
+    /** 시험 목록 + 각 시험의 시험범위 기억률(태깅 카드들의 FSRS R 평균)을 조립해 준다(대상 없으면 memoryRate=null). */
+    @Transactional(readOnly = true)
     public ExamListResponse list(Long userId) {
-        return new ExamListResponse(examService.list(userId));
+        LocalDateTime now = LocalDateTime.now();
+        List<ExamView> exams = examService.list(userId).stream()
+                .map(exam -> exam.withMemoryRate(
+                        cardStatsService.averageRecallOf(userId, examFeedService.cardIdsForExam(exam.id()), now)))
+                .toList();
+        return new ExamListResponse(exams);
     }
 
     @Transactional
