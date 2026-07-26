@@ -13,6 +13,7 @@ public record FlashcardItem(
         String word,
         String contextMeaning,
         String example,
+        String exampleMeaning,   // 예문의 한글 뜻(플래시카드 앞면: 예문 + 예문뜻)
         int boxLevel,
         Double recallProb,
         String pronunciation,
@@ -24,7 +25,7 @@ public record FlashcardItem(
 
     static FlashcardItem from(Card card, LocalDateTime now) {
         return new FlashcardItem(card.getId(), card.getWord(), card.getContextMeaning(),
-                card.getExample(), card.getBoxLevel(), card.currentRetrievability(now),
+                card.getExample(), card.getExampleMeaning(), card.getBoxLevel(), card.currentRetrievability(now),
                 card.getPronunciation(), card.getPos(), card.getTags(), card.getEmoji(),
                 card.getMnemonicImagePath());
     }
