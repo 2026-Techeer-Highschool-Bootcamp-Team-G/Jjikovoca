@@ -1,28 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { AppHeader } from '@/widgets/app-header'
 import { DdayCard } from '@/widgets/dday-card'
 import { RecentCarousel } from '@/widgets/recent-cards'
-import { Tabs, ListHeader, IconCalendar } from '@/shared/ui'
-import type { FeedSubject } from '@/entities/card'
+import { IconCalendar } from '@/shared/ui'
 import { attend } from '@/entities/exp'
 import { fetchExams } from '@/entities/exam'
 import { fetchRecommendation } from '@/features/study'
 
-const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
-  { key: 'ALL', label: '전체' },
-  { key: 'ENGLISH', label: '영어' },
-  { key: 'MATH', label: '수학' },
-]
-
 /**
- * 게임형 홈 (F-16) — 03 홈. 상단은 시험 D-day·시험범위 기억률·오늘 복습 중심.
+ * 게임형 홈 (F-16) — 03 홈. 영어 전용 MVP: 과목 탭·최근카드 헤더 제거, 목표 시험 일정 + 플래시 카드만.
  * 게임 상태(Lv/XP/연속/퀘스트)는 마이페이지로, 동기부여 명언은 학습 시작 로딩으로 이동했다.
  */
 export function HomePage() {
   const navigate = useNavigate()
-  const [subject, setSubject] = useState<FeedSubject>('ALL')
 
   // 실 API 조회 — 실패/빈 응답은 가짜값으로 가리지 않고 빈 상태로 정직하게 표시
   const exams = useQuery({ queryKey: ['exams'], queryFn: fetchExams })
@@ -88,13 +80,9 @@ export function HomePage() {
         )}
       </div>
 
-      <div style={{ marginTop: 10, background: 'var(--color-bg-primary)' }}>
-        <Tabs tabs={SUBJECT_TABS} value={subject} onChange={setSubject} />
-        <ListHeader title="최근 카드" link="전체 보기" onLink={() => navigate('/wrong-note')} />
-      </div>
-
-      <div style={{ padding: '4px 0 24px' }}>
-        <RecentCarousel subject={subject} />
+      {/* 플래시 카드(최근 카드) — 영어 전용이라 과목 필터 없이 전체 노출 */}
+      <div style={{ padding: '16px 0 24px' }}>
+        <RecentCarousel subject="ALL" />
       </div>
     </div>
   )
