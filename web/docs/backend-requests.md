@@ -61,7 +61,11 @@
 
 ## 6. 기타 매핑·후속
 
-- ⚠️ **PDF 내보내기가 `.txt` 로 다운로드됨**: 백엔드 export 렌더러가 기본 `stub`(텍스트)로 동작 → 다운로드 파일이 `.txt`(내용도 텍스트, PDF 아님, 안 열림). **백엔드 조치 필요**: `APP_EXPORT_RENDERER=chromium` + Playwright headless chromium 설치(`npx playwright install chromium`)로 실제 PDF 렌더. (재현: `POST /api/export/note` → `Content-Disposition: filename="…​.txt"`, 첫 바이트가 `%PDF` 아닌 텍스트) 프론트는 downloadUrl 을 그대로 여는 정상 동작.
+- ⚠️ **PDF 내보내기가 여전히 `.txt` + 다운로드 404 (재확인 2026-07-26)** — 코드·디스크 증거로 **둘 다 백엔드**로 확정. 프론트는 정상(백엔드가 준 `downloadUrl`을 `<a href download>`로 그대로 열 뿐, 확장자·파일명·저장위치를 만들지 않음: `features/export/api/exportApi.ts:17`, `pages/export-done/ui/ExportDonePage.tsx:45`).
+  - **증상 1 — `.txt` 출력 (렌더러 stub 모드)**: `server application.yml`의 `app.export.renderer: ${APP_EXPORT_RENDERER:stub}` 기본값이 **stub** → `StubExportRenderer`(`@ConditionalOnProperty(..., havingValue="stub", matchIfMissing=true)`)가 `.txt` 생성. PDF/PNG는 `ChromiumExportRenderer`(`havingValue="chromium"`)에서만. **디스크 증거**(`server/data/exports/`): 예전 `export-18.pdf·19.png·20.pdf`(=한때 chromium 정상 작동)가 있으나 최근 `export-31.txt` → **현재 백엔드가 stub 모드로 기동된 상태**.
+    - 조치: `APP_EXPORT_RENDERER=chromium` + Playwright Chromium 바이너리 설치(`npx playwright install chromium`, 컨테이너면 OS 의존 패키지 포함) 후 재시작. 코드는 이미 지원하므로 **런타임 설정만** 바꾸면 됨.
+  - **증상 2 — "File wasn't available on site"(다운로드 404)**: `downloadUrl = "/api/export/{id}/download"`(상대경로, `ExportFacade.java:60`) → 프론트는 프록시로 정상 요청. `ExportController.download`가 `exportStorage.load(id)` 실패 시 **404 `EXPORT_NOT_FOUND`**("파일이 만료되었거나 존재하지 않습니다"). 즉 생성 때 쓴 파일이 다운로드 시점에 `app.export.dir`(`APP_EXPORT_DIR:./data/exports`)에 없음 = 파일 유실.
+    - 조치: `APP_EXPORT_DIR`을 영속 경로로(도커면 `./data/exports` 볼륨 마운트), 생성↔다운로드가 **같은 인스턴스/작업디렉토리**를 보도록, 파일 유지 중 `export_log`(DB) 리셋 방지 및 소유자(`verifyOwned`) 일치 확인.
 - **내보내기 범위→cardIds**: "몰라요만/헷갈려요만/전체" 필터를 실제 카드 선택으로 매핑(현재 전체=미지정으로 요청)
 - ~~**프리미엄 해지**~~: `DELETE /api/premium` + 마이 해지 UI → ✅ **완료**(PR #253, 만료까지 유지)
 - ~~**탈퇴**~~: `DELETE /api/account`(soft delete+토큰폐기) → ✅ **완료**(PR #253)
