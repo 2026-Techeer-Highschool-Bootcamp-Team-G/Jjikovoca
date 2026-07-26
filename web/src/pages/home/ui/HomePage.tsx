@@ -5,7 +5,7 @@ import { AppHeader } from '@/widgets/app-header'
 import { GameStatusCard } from '@/widgets/game-status'
 import { DdayCard } from '@/widgets/dday-card'
 import { RecentCarousel } from '@/widgets/recent-cards'
-import { Tabs, ListHeader } from '@/shared/ui'
+import { Tabs, ListHeader, IconCalendar } from '@/shared/ui'
 import type { FeedSubject } from '@/entities/card'
 import { fetchExpSummary, attend } from '@/entities/exp'
 import { fetchExams } from '@/entities/exam'
@@ -99,27 +99,26 @@ export function HomePage() {
               cursor: 'pointer',
             }}
           >
-            📅 시험을 등록하고 D-day·복습 일정을 받아보세요
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <IconCalendar size={16} />
+              시험을 등록하고 D-day·복습 일정을 받아보세요
+            </span>
             <span aria-hidden>›</span>
           </button>
         )}
 
-        {/* 홈 QA #4 — 동기부여 문구 (D-day 카드 아래) */}
-        <div
+        {/* 홈 QA #4 — 동기부여 문구를 인용구로 표시 (좌측 세로선 + 이탤릭) */}
+        <blockquote
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '10px 14px',
-            borderRadius: 12,
-            background: 'var(--color-bg-secondary)',
+            margin: 0,
+            padding: '2px 0 2px 12px',
+            borderLeft: '3px solid var(--color-brand-primary)',
           }}
         >
-          <span style={{ fontSize: 15 }} aria-hidden>
-            💪
+          <span style={{ fontSize: 13, fontWeight: 500, fontStyle: 'italic', color: 'var(--color-text-secondary)' }}>
+            “{quote}”
           </span>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-secondary)' }}>{quote}</span>
-        </div>
+        </blockquote>
       </div>
 
       <div style={{ marginTop: 16, background: 'var(--color-bg-primary)' }}>
