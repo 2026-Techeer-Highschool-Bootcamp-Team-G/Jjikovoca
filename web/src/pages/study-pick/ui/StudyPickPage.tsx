@@ -80,15 +80,8 @@ export function StudyPickPage() {
       </div>
 
       <div style={{ display: 'flex', gap: 8, padding: '0 var(--spacing-xl)', marginTop: 16 }}>
-        <Button
-          variant="weak"
-          size="lg"
-          block
-          disabled={count === 0}
-          style={{ opacity: count === 0 ? 0.4 : 1 }}
-          onClick={() => navigate('/exam-select')}
-        >
-          시험 지정
+        <Button variant="weak" size="lg" block onClick={() => navigate(-1)}>
+          취소
         </Button>
         <Button block size="lg" disabled={count === 0} style={{ opacity: count === 0 ? 0.4 : 1 }} onClick={start}>
           선택({count}) 학습 시작
