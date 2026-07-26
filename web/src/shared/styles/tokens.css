@@ -30,6 +30,12 @@
   --color-brand-strong: #2272eb;
   --color-brand-weak: #e8f3ff;
 
+  /* 형광펜 악센트 — 앱 로고 포인트 컬러(#FFD84D, 형광펜=보카). 파랑=주색, 옐로우=악센트(하이라이트·보상·강조)만. 위 텍스트는 짙은 잉크 */
+  --color-accent: #ffd84d;
+  --color-accent-strong: #ffc93d;
+  --color-accent-weak: #fff3d1;
+  --color-on-accent: #191f28;
+
   --color-text-primary: #191f28;
   --color-text-secondary: #6b7684;
   --color-text-tertiary: #b0b8c1;
@@ -50,7 +56,7 @@
   --color-danger-primary: #f04452;
   --color-danger-weak: #fee9ea;
 
-  --color-highlight: #ffe45e;
+  --color-highlight: var(--color-accent); /* 형광펜 하이라이트 = 로고 옐로우 */
   --color-overlay-dim: rgba(0, 0, 0, 0.6);
 
   /* ===== Spacing ===== */

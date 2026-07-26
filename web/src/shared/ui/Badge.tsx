@@ -15,7 +15,7 @@ const FILL: Record<BadgeColor, { bg: string; fg: string }> = {
   blue: { bg: 'var(--color-brand-primary)', fg: 'var(--color-text-inverse)' },
   green: { bg: 'var(--color-success-primary)', fg: 'var(--color-text-inverse)' },
   red: { bg: 'var(--color-danger-primary)', fg: 'var(--color-text-inverse)' },
-  yellow: { bg: 'var(--color-warning-primary)', fg: 'var(--yellow-900)' },
+  yellow: { bg: 'var(--color-accent)', fg: 'var(--color-on-accent)' },
   grey: { bg: 'var(--grey-500)', fg: 'var(--color-text-inverse)' },
 }
 
@@ -23,7 +23,7 @@ const WEAK: Record<BadgeColor, { bg: string; fg: string }> = {
   blue: { bg: 'var(--color-brand-weak)', fg: 'var(--color-text-brand)' },
   green: { bg: 'var(--color-success-weak)', fg: 'var(--color-success-primary)' },
   red: { bg: 'var(--color-danger-weak)', fg: 'var(--color-text-danger)' },
-  yellow: { bg: 'var(--color-warning-weak)', fg: 'var(--yellow-900)' },
+  yellow: { bg: 'var(--color-accent-weak)', fg: 'var(--color-on-accent)' },
   grey: { bg: 'var(--color-bg-secondary)', fg: 'var(--color-text-secondary)' },
 }
 

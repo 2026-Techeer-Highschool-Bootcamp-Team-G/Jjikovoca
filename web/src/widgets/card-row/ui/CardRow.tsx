@@ -93,7 +93,7 @@ export function CardRow({
               padding: speaking ? '0 3px' : undefined,
               borderRadius: speaking ? 4 : undefined,
               background: speaking
-                ? 'linear-gradient(transparent 58%, rgba(49,130,246,0.28) 58%)'
+                ? 'linear-gradient(transparent 58%, var(--color-accent) 58%)'
                 : undefined,
               transition: 'background 160ms ease',
             }}

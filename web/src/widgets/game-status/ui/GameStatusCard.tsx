@@ -66,7 +66,8 @@ export function GameStatusCard({
                 style={{
                   width: `${ratio * 100}%`,
                   height: '100%',
-                  background: 'var(--color-brand-primary)',
+                  // 보상(XP)은 로고 옐로우 골드 그라데이션 — 파란 주색·CTA와 구분해 성취감 강조
+                  background: 'linear-gradient(90deg, var(--color-accent), var(--color-accent-strong))',
                   borderRadius: 3,
                 }}
               />
