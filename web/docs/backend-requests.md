@@ -61,6 +61,7 @@
 
 ## 6. 기타 매핑·후속
 
+- ⚠️ **PDF 내보내기가 `.txt` 로 다운로드됨**: 백엔드 export 렌더러가 기본 `stub`(텍스트)로 동작 → 다운로드 파일이 `.txt`(내용도 텍스트, PDF 아님, 안 열림). **백엔드 조치 필요**: `APP_EXPORT_RENDERER=chromium` + Playwright headless chromium 설치(`npx playwright install chromium`)로 실제 PDF 렌더. (재현: `POST /api/export/note` → `Content-Disposition: filename="…​.txt"`, 첫 바이트가 `%PDF` 아닌 텍스트) 프론트는 downloadUrl 을 그대로 여는 정상 동작.
 - **내보내기 범위→cardIds**: "몰라요만/헷갈려요만/전체" 필터를 실제 카드 선택으로 매핑(현재 전체=미지정으로 요청)
 - ~~**프리미엄 해지**~~: `DELETE /api/premium` + 마이 해지 UI → ✅ **완료**(PR #253, 만료까지 유지)
 - ~~**탈퇴**~~: `DELETE /api/account`(soft delete+토큰폐기) → ✅ **완료**(PR #253)
