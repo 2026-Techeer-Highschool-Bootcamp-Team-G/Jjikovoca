@@ -59,6 +59,9 @@ class Card {
     @Column
     private String example;
 
+    @Column(name = "example_meaning")
+    private String exampleMeaning;   // 예문의 한글 뜻(플래시카드 앞면). 기존 카드는 NULL.
+
     // WORD enrichment (Phase 5) — 발음(IPA 표기)·품사·유형태그(JSON 배열)·이모지. 기존 카드는 NULL.
     @Column
     private String pronunciation;
@@ -158,6 +161,7 @@ class Card {
         card.contextMeaning = command.contextMeaning();
         card.dictMeaning = command.dictMeaning();
         card.example = command.example();
+        card.exampleMeaning = command.exampleMeaning();
         card.pronunciation = command.pronunciation();
         card.pos = command.pos();
         card.tags = command.tags();
@@ -217,6 +221,10 @@ class Card {
 
     String getExample() {
         return example;
+    }
+
+    String getExampleMeaning() {
+        return exampleMeaning;
     }
 
     String getPronunciation() {
