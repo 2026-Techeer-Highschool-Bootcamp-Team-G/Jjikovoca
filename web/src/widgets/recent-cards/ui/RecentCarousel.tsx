@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchCards, cardToRecent, FlashCard } from '@/entities/card'
 import type { FeedSubject, RecentCard, FlashCardModel } from '@/entities/card'
 
-const CARD_H = 440
+const CARD_H = 500
 
 /** 홈 최근 카드 — 좌우 스와이프 캐러셀 + 탭 플립(공용 FlashCard). 실 카드(/api/cards) */
 export function RecentCarousel({ subject = 'ALL' }: { subject?: FeedSubject }) {
