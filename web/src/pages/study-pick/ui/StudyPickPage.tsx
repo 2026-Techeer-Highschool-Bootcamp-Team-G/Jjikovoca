@@ -1,17 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Tabs, Chip, Button, SearchBar } from '@/shared/ui'
+import { Chip, Button, SearchBar } from '@/shared/ui'
 import { CardRow } from '@/widgets/card-row'
 import type { CardRowView } from '@/widgets/card-row'
 import { fetchCards, fetchCardCounts } from '@/entities/card'
-import type { Card, CardCounts, FeedSubject } from '@/entities/card'
-
-const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
-  { key: 'ALL', label: '전체' },
-  { key: 'ENGLISH', label: '영어' },
-  { key: 'MATH', label: '수학' },
-]
+import type { Card, CardCounts } from '@/entities/card'
 
 type Status = 'ALL' | 'GRADUATED' | 'WAITING' | 'WEAK'
 const STATUS_CHIPS: { key: Status; label: string; countKey?: keyof CardCounts }[] = [
@@ -37,12 +31,11 @@ function toRow(c: Card): CardRowView {
 /** 직접 선택 모드 (09-2, F-28) — 카드를 체크로 골라 학습 세트 구성 */
 export function StudyPickPage() {
   const navigate = useNavigate()
-  const [subject, setSubject] = useState<FeedSubject>('ALL')
   const [status, setStatus] = useState<Status>('ALL')
   const [picked, setPicked] = useState<Set<number>>(new Set())
 
-  // 실 카드 목록 — 여기서 고른 cardIds 로 PICK 학습 큐를 만든다
-  const { data, isLoading } = useQuery({ queryKey: ['cards', subject], queryFn: () => fetchCards(subject) })
+  // 실 카드 목록 — 여기서 고른 cardIds 로 PICK 학습 큐를 만든다. 영어 전용이라 과목 필터 없음
+  const { data, isLoading } = useQuery({ queryKey: ['cards', 'ALL'], queryFn: () => fetchCards('ALL') })
   const rows = (data ?? []).map(toRow)
   const counts = useQuery({ queryKey: ['card-counts'], queryFn: fetchCardCounts })
   const chipLabel = (c: (typeof STATUS_CHIPS)[number]) =>
@@ -73,10 +66,6 @@ export function StudyPickPage() {
 
       <div style={{ padding: '12px var(--spacing-xl) 0' }}>
         <SearchBar placeholder="단어 · 문제 · 개념 검색" />
-      </div>
-
-      <div style={{ marginTop: 12, background: 'var(--color-bg-primary)' }}>
-        <Tabs tabs={SUBJECT_TABS} value={subject} onChange={setSubject} />
       </div>
 
       <div style={{ display: 'flex', gap: 8, padding: '0 var(--spacing-xl)', marginTop: 16 }}>

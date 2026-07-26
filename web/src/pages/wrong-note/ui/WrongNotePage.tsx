@@ -1,18 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Tabs, Chip, Button, SearchBar, BottomSheet } from '@/shared/ui'
+import { Chip, Button, SearchBar, BottomSheet } from '@/shared/ui'
 import { CardRow } from '@/widgets/card-row'
 import type { CardRowView } from '@/widgets/card-row'
 import { StudySetupSheet } from '@/features/study-setup'
 import { fetchCards, fetchCardCounts } from '@/entities/card'
-import type { Card, CardCounts, FeedSubject } from '@/entities/card'
-
-const SUBJECT_TABS: { key: FeedSubject; label: string }[] = [
-  { key: 'ALL', label: '전체' },
-  { key: 'ENGLISH', label: '영어' },
-  { key: 'MATH', label: '수학' },
-]
+import type { Card, CardCounts } from '@/entities/card'
 
 type Status = 'ALL' | 'GRADUATED' | 'WAITING' | 'WEAK' | 'UNTAGGED'
 const STATUS_CHIPS: { key: Status; label: string; countKey?: keyof CardCounts }[] = [
@@ -43,9 +37,8 @@ function toRow(c: Card): CardRowView {
 /** 오답노트 (F-04) — 06 오답노트 */
 export function WrongNotePage() {
   const navigate = useNavigate()
-  const [subject, setSubject] = useState<FeedSubject>('ALL')
-  // 실 피드 조회 — 실패/빈 응답을 데모로 가리지 않고 실제 카드만 표시(캡처 카드도 서버 저장되어 여기 포함됨)
-  const { data, isLoading, isError } = useQuery({ queryKey: ['cards', subject], queryFn: () => fetchCards(subject) })
+  // 영어 전용 MVP — 과목 필터 없이 전체(=영어) 카드 조회
+  const { data, isLoading, isError } = useQuery({ queryKey: ['cards', 'ALL'], queryFn: () => fetchCards('ALL') })
   const rows = (data ?? []).map(toRow)
   // 상태칩 배지 카운트
   const counts = useQuery({ queryKey: ['card-counts'], queryFn: fetchCardCounts })
@@ -118,10 +111,6 @@ export function WrongNotePage() {
         <SearchBar placeholder="단어 · 문제 · 개념 검색" onClick={() => navigate('/search')} />
       </div>
 
-      <div style={{ marginTop: 12, background: 'var(--color-bg-primary)' }}>
-        <Tabs tabs={SUBJECT_TABS} value={subject} onChange={setSubject} />
-      </div>
-
       <div
         style={{
           display: 'flex',
@@ -177,13 +166,9 @@ export function WrongNotePage() {
             onSpeak={() => handleSpeak(row)}
             onExamTag={row.untagged ? () => navigate('/exam-select', { state: { cardId: row.id } }) : undefined}
             onClick={() => {
-              // 영어 단어는 상세 페이지가 없어 이동하지 않고 가벼운 햅틱(진동)만 준다.
-              // 눌림 시각 효과는 CardRow 가 담당. (수학 문제 상세 라우팅은 후속)
-              if (row.showSpeaker) {
-                navigator.vibrate?.(12)
-                return
-              }
-              navigate('/math-problem')
+              // 영어 전용 — 단어는 상세 페이지가 없어 이동하지 않고 가벼운 햅틱(진동)만 준다.
+              // 눌림 시각 효과는 CardRow 가 담당.
+              navigator.vibrate?.(12)
             }}
           />
         ))}

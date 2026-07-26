@@ -4,7 +4,6 @@ import { StudyLayout } from './StudyLayout'
 import { RequireAuth } from './RequireAuth'
 import { HomePage } from '@/pages/home'
 import { WrongNotePage } from '@/pages/wrong-note'
-import { MathReviewPage } from '@/pages/math-review'
 import { ReportPage } from '@/pages/report'
 import { MyPage } from '@/pages/my'
 import { CapturePage } from '@/pages/capture'
@@ -26,7 +25,6 @@ import { ExportPage } from '@/pages/export'
 import { ExportDonePage } from '@/pages/export-done'
 import { StudyPickPage } from '@/pages/study-pick'
 import { CardDonePage } from '@/pages/card-done'
-import { MathProblemPage } from '@/pages/math-problem'
 import { ExamSelectPage } from '@/pages/exam-select'
 
 /**
@@ -66,7 +64,6 @@ export const router = createBrowserRouter([
         children: [
           { path: 'flashcard', element: <FlashcardPage /> },
           { path: 'cloze', element: <ClozePage /> },
-          { path: 'math-review', element: <MathReviewPage /> },
           { path: 'exam', element: <ExamPage /> },
           { path: 'archive', element: <ArchivePage /> },
           { path: 'notifications', element: <NotificationsPage /> },
@@ -79,7 +76,6 @@ export const router = createBrowserRouter([
           { path: 'export', element: <ExportPage /> },
           { path: 'export-done', element: <ExportDonePage /> },
           { path: 'card-done', element: <CardDonePage /> },
-          { path: 'math-problem', element: <MathProblemPage /> },
           { path: 'capture', element: <CapturePage /> },
           { path: 'exam-select', element: <ExamSelectPage /> },
         ],

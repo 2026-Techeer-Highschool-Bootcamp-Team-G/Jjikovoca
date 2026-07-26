@@ -77,15 +77,6 @@ export function ReportPage() {
   // 통계 카드
   const newCards = `${basic?.newCards ?? 0}장`
   const accWord = basic?.accuracy.word != null ? `${Math.round(basic.accuracy.word * 100)}%` : '—'
-  const accMath = basic?.accuracy.problem != null ? `${Math.round(basic.accuracy.problem * 100)}%` : '—'
-
-  // 과목별 학습 비중(도넛)
-  const breakdown = basic?.subjectBreakdown ?? []
-  const mathB = breakdown.find((b) => b.subject === 'MATH')
-  const engB = breakdown.find((b) => b.subject === 'ENGLISH')
-  const totalMin = breakdown.reduce((a, b) => a + b.minutes, 0)
-  const mathPct = Math.round((mathB?.ratio ?? 0) * 100)
-  const engPct = Math.round((engB?.ratio ?? 0) * 100)
 
   // 잔디 — 이번 달 날짜별 level. 총 학습분
   const grassByDate = new Map(grass.map((g) => [g.date, g]))
@@ -106,9 +97,8 @@ export function ReportPage() {
   const maxMin = Math.max(60, ...last7.map((x) => x.minutes))
   const avgMin = Math.round(basic?.rhythm.avgSessionMinutes ?? 0)
 
-  // 약한 개념(프리미엄) — 과목별 분리
+  // 약한 개념(프리미엄) — 영어 전용
   const weakEng = (full?.weakConcepts ?? []).filter((w) => w.subject === 'ENGLISH')
-  const weakMath = (full?.weakConcepts ?? []).filter((w) => w.subject === 'MATH')
 
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
@@ -128,27 +118,10 @@ export function ReportPage() {
       </header>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '16px var(--spacing-xl) 24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 9, ...entrance(mounted, 0) }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9, ...entrance(mounted, 0) }}>
           <StatCard label="새로 만든 카드" value={newCards} />
           <StatCard label="영어 정답률" value={accWord} accent />
-          <StatCard label="수학 정답률" value={accMath} accent />
         </div>
-
-        {/* 과목별 학습 비중 도넛 */}
-        <Card style={entrance(mounted, 0.12)}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-primary)' }}>이번 달 과목별 학습 비중</span>
-          {totalMin > 0 ? (
-            <div style={{ display: 'flex', gap: 24, alignItems: 'center', justifyContent: 'center' }}>
-              <Donut total={fmtMin(totalMin)} mathPct={mathPct} />
-              <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <LegendRow color="var(--blue-500)" subject="수학" pct={`${mathPct}%`} pctColor="var(--blue-500)" detail={`${mathB?.minutes ?? 0}분 · ${mathB?.count ?? 0}문제`} />
-                <LegendRow color="var(--teal-500)" subject="영어" pct={`${engPct}%`} pctColor="var(--teal-500)" detail={`${engB?.minutes ?? 0}분 · ${engB?.count ?? 0}단어`} />
-              </div>
-            </div>
-          ) : (
-            <EmptyRow text="이번 달 학습 기록이 아직 없어요" />
-          )}
-        </Card>
 
         {/* 학습 잔디 */}
         <Card style={entrance(mounted, 0.18)}>
@@ -238,14 +211,10 @@ export function ReportPage() {
           <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>나의 약한 개념</span>
           {full == null ? (
             <EmptyRow text="🔒 프리미엄에서 약한 개념 분석을 볼 수 있어요" />
-          ) : weakEng.length === 0 && weakMath.length === 0 ? (
+          ) : weakEng.length === 0 ? (
             <EmptyRow text="아직 약한 개념이 없어요 — 잘하고 있어요!" />
           ) : (
-            <div style={{ display: 'flex', gap: 14 }}>
-              <WeakColumn title="영어" color="var(--teal-500)" items={weakEng} onPick={() => navigate('/flashcard')} />
-              <div style={{ width: 1, background: 'var(--color-border-default)', alignSelf: 'stretch' }} aria-hidden />
-              <WeakColumn title="수학" color="var(--blue-500)" items={weakMath} onPick={() => navigate('/math-review')} />
-            </div>
+            <WeakColumn title="영어" color="var(--teal-500)" items={weakEng} onPick={() => navigate('/flashcard')} />
           )}
         </Card>
       </div>
@@ -298,69 +267,6 @@ function StatCard({ label, value, accent = false }: { label: string; value: stri
   )
 }
 
-function Donut({ total, mathPct }: { total: string; mathPct: number }) {
-  const sweep = useCountUp(100, 900)
-  const blueEnd = Math.min(sweep, mathPct)
-  return (
-    <div
-      style={{
-        width: 120,
-        height: 120,
-        borderRadius: '50%',
-        background: `conic-gradient(var(--blue-500) 0% ${blueEnd}%, var(--teal-500) ${blueEnd}% ${sweep}%, var(--color-bg-secondary) ${sweep}% 100%)`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-      }}
-    >
-      <div
-        style={{
-          width: 78,
-          height: 78,
-          borderRadius: '50%',
-          background: 'var(--color-bg-elevated)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text-primary)' }}>{total}</span>
-        <span style={{ fontSize: 9, color: 'var(--color-text-tertiary)' }}>총 학습</span>
-      </div>
-    </div>
-  )
-}
-
-function LegendRow({
-  color,
-  subject,
-  pct,
-  pctColor,
-  detail,
-}: {
-  color: string
-  subject: string
-  pct: string
-  pctColor: string
-  detail: string
-}) {
-  return (
-    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-      <span style={{ width: 10, height: 10, borderRadius: '50%', background: color, flexShrink: 0 }} />
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'baseline', fontSize: 14, fontWeight: 700 }}>
-          <span style={{ color: 'var(--color-text-primary)' }}>{subject}</span>
-          <span style={{ color: pctColor }}>
-            <CountUp value={pct} />
-          </span>
-        </div>
-        <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>{detail}</span>
-      </div>
-    </div>
-  )
-}
 
 // 약한 개념 과목 열 (영어/수학)
 function WeakColumn({
