@@ -161,14 +161,18 @@ export function StudySetupSheet({ onStart }: Props) {
       {/* 복습 유형 — 두 방식 모두에서 선택 가능(오늘의 추천도 유형은 사용자가 고름) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <span style={label}>복습 유형</span>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <TypeChip active={type === 'FLASHCARD'} label="플래시카드" onClick={() => setType('FLASHCARD')} />
           <TypeChip active={type === 'CLOZE'} label="빈칸 퀴즈" onClick={() => setType('CLOZE')} />
+          {/* PDF 내보내기 — 우측 정렬. 학습이 아니라 시험지 내보내기 진입 */}
+          <div style={{ marginLeft: 'auto' }}>
+            <TypeChip active={type === 'PDF'} label="PDF ↗" onClick={() => setType('PDF')} />
+          </div>
         </div>
       </div>
 
       <Button block size="lg" onClick={() => onStart(method, type)}>
-        학습 시작
+        {type === 'PDF' ? (method === 'TODAY' ? 'PDF 내보내기' : '단어 선택하기') : '학습 시작'}
       </Button>
     </>
   )
