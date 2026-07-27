@@ -132,6 +132,52 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retried 
   return (body ? body.data : (undefined as T))
 }
 
+/**
+ * 인증이 필요한 바이너리 다운로드 — Authorization 헤더로 fetch 해 Blob 과 파일명을 반환한다.
+ * 내보내기 다운로드(GET /api/export/{id}/download)처럼 JWT 필수 엔드포인트는 앵커 네비게이션으로
+ * 열면 헤더가 안 실려 401/403 이 나므로(브라우저가 download.txt 로 처리), 반드시 이 헬퍼로 받는다.
+ * 401/403(인증 만료)은 apiFetch 와 같은 규약으로 refresh 후 1회 재시도한다.
+ */
+export async function apiDownload(
+  path: string,
+  retried = false,
+): Promise<{ blob: Blob; filename: string | null }> {
+  const headers = new Headers()
+  const token = getAccessToken()
+  if (token) headers.set('Authorization', `Bearer ${token}`)
+
+  const res = await fetch(`${API_BASE}${path}`, { headers })
+
+  // 인증 실패 → refresh 재발급 후 1회 재시도(apiFetch 와 동일 규약).
+  // 파일 응답이라 봉투가 없으므로 401/403 을 모두 인증 실패로 본다(업무 거부 봉투 판별 불가).
+  if ((res.status === 401 || res.status === 403) && !retried) {
+    if (await refreshTokens()) return apiDownload(path, true)
+    clearTokens()
+    throw new ApiError(res.status, '로그인이 필요합니다.')
+  }
+  if (!res.ok) {
+    throw new ApiError(res.status, `다운로드에 실패했습니다 (${res.status})`)
+  }
+
+  const filename = parseFilename(res.headers.get('Content-Disposition'))
+  return { blob: await res.blob(), filename }
+}
+
+/** Content-Disposition 헤더에서 filename 추출(RFC 5987 filename*= 우선, 없으면 filename=). */
+function parseFilename(disposition: string | null): string | null {
+  if (!disposition) return null
+  const star = /filename\*=(?:UTF-8'')?([^;]+)/i.exec(disposition)
+  if (star) {
+    try {
+      return decodeURIComponent(star[1].trim().replace(/^"|"$/g, ''))
+    } catch {
+      /* fall through */
+    }
+  }
+  const plain = /filename="?([^";]+)"?/i.exec(disposition)
+  return plain ? plain[1].trim() : null
+}
+
 export function apiGet<T>(path: string): Promise<T> {
   return apiFetch<T>(path)
 }
