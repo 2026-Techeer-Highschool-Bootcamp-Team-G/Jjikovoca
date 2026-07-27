@@ -51,8 +51,17 @@ class GeminiApi {
      * 단어 분석은 단순해 lite로도 충분하므로 지연을 줄이고, 실패 시 flash로 폴백한다.
      */
     String generate(String prompt, List<GeminiImage> images, boolean jsonOutput, boolean fast) {
+        return generate(prompt, images, jsonOutput, fast, null);
+    }
+
+    /**
+     * responseSchema가 있으면 <b>구조화 출력</b>으로 강제한다 — 모델(특히 flash-lite)이 필드를 생략하지 못하게 스키마의
+     * required를 지킨 JSON만 내도록 한다(WORD 분석의 example·exampleMeaning 누락 방지, #369). null이면 스키마 미지정.
+     */
+    String generate(String prompt, List<GeminiImage> images, boolean jsonOutput, boolean fast,
+                    Map<String, Object> responseSchema) {
         List<String> models = fast ? properties.getWordModels() : properties.getModels();
-        Map<String, Object> body = buildBody(prompt, images, jsonOutput);
+        Map<String, Object> body = buildBody(prompt, images, jsonOutput, responseSchema);
         RuntimeException last = null;
         for (String model : models) {
             try {
@@ -108,8 +117,12 @@ class GeminiApi {
                 .block();
     }
 
-    /** contents[0].parts = [text, inline_data...]. jsonOutput이면 generationConfig.responseMimeType 지정. */
-    private Map<String, Object> buildBody(String prompt, List<GeminiImage> images, boolean jsonOutput) {
+    /**
+     * contents[0].parts = [text, inline_data...]. jsonOutput이면 generationConfig.responseMimeType을 지정하고,
+     * responseSchema가 있으면 함께 실어 구조화 출력을 강제한다(required 필드 누락 방지).
+     */
+    private Map<String, Object> buildBody(String prompt, List<GeminiImage> images, boolean jsonOutput,
+                                          Map<String, Object> responseSchema) {
         List<Map<String, Object>> parts = new ArrayList<>();
         parts.add(Map.of("text", prompt));
         if (images != null) {
@@ -122,7 +135,12 @@ class GeminiApi {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("contents", List.of(Map.of("parts", parts)));
         if (jsonOutput) {
-            body.put("generationConfig", Map.of("responseMimeType", "application/json"));
+            Map<String, Object> generationConfig = new LinkedHashMap<>();
+            generationConfig.put("responseMimeType", "application/json");
+            if (responseSchema != null) {
+                generationConfig.put("responseSchema", responseSchema);
+            }
+            body.put("generationConfig", generationConfig);
         }
         return body;
     }
