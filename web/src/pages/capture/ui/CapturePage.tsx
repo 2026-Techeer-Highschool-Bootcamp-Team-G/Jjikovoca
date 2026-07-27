@@ -5,6 +5,7 @@ import { BottomSheet } from '@/shared/ui'
 import {
   CaptureMethodSheet,
   CameraView,
+  CropStage,
   CaptureEditor,
   AnalyzingView,
   AnalysisResult,
@@ -16,13 +17,12 @@ import type { CaptureResult } from '@/features/capture'
 import type { Card } from '@/entities/card'
 import { fetchMe } from '@/entities/user'
 
-type Phase = 'method' | 'camera' | 'edit' | 'analyzing' | 'done'
+type Phase = 'method' | 'camera' | 'crop' | 'edit' | 'analyzing' | 'done'
 
 /**
- * 촬영 · AI 분석 플로우 (05, F-02/F-03).
- * 방식 선택 → 사진 촬영(라이브 카메라) / 앨범에서 선택(파일) → 드래그로 형광펜·네모 박스 크롭 → 분석.
- * 네모 박스(문제)가 있으면 수학 분석(→ 05-9), 형광펜만이면 영어 분석(→ 결과).
- * /capture?phase=analyzing[&subject=math] 로 진입하면 분석 단계부터 시작(정적 데모 체인 호환).
+ * 촬영 · AI 분석 플로우 (05, F-02/F-03) — 영어 전용 MVP.
+ * 방식 선택 → 사진 촬영(라이브 카메라) / 앨범에서 선택(파일) → 영역 자르기(선택) → 형광펜으로 단어 표시 → 분석.
+ * /capture?phase=analyzing 로 진입하면 분석 단계부터 시작(정적 데모 체인 호환).
  */
 export function CapturePage() {
   const navigate = useNavigate()
@@ -30,8 +30,9 @@ export function CapturePage() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [phase, setPhase] = useState<Phase>(params.get('phase') === 'analyzing' ? 'analyzing' : 'method')
-  const [isMath, setIsMath] = useState(params.get('subject') === 'math')
   const [imageSrc, setImageSrc] = useState<string | null>(null)
+  // 크롭 단계에서 잘라낸 이미지(없으면=건너뛰면 원본 imageSrc 사용)
+  const [croppedSrc, setCroppedSrc] = useState<string | null>(null)
   // 형광펜 영역별 크롭(base64) — WORD 다중 단어 분석. CaptureEditor 에서 추출
   const [cropImages, setCropImages] = useState<string[]>([])
   // 분석 결과 카드(폴링에서 수신) — 결과 화면에 실 카드로 전달
@@ -58,18 +59,19 @@ export function CapturePage() {
           navigate('/limit') // 무료 한도 초과
           return
         }
+        // 문맥 이미지 — 크롭했으면 잘린 영역, 아니면 원본. 형광펜 크롭 좌표계와 일치한다.
+        const src = croppedSrc ?? imageSrc
         // WORD: 형광펜 영역별 크롭 배열을 보낸다(단어마다 카드 생성). 크롭 실패 시 전체 이미지로 폴백.
-        const wordCrops = cropImages.length > 0 ? cropImages : imageSrc ? [imageSrc] : undefined
+        const wordCrops = cropImages.length > 0 ? cropImages : src ? [src] : undefined
         // 크롭을 프론트에서 OCR 해 단어 힌트(words)를 함께 보낸다 → 백엔드 단어키 캐시로 Gemini 재호출 절감.
         // AnalyzingView 가 떠 있는 동안 실행돼 OCR 지연이 사용자에게 숨는다. 실패는 "" 폴백(하위호환).
-        const words = !isMath && wordCrops ? await ocrWords(wordCrops) : undefined
+        const words = wordCrops ? await ocrWords(wordCrops) : undefined
         if (cancelled) return
         const { jobId } = await analyzeCapture({
-          type: isMath ? 'PROBLEM' : 'WORD',
-          fullImage: imageSrc ?? undefined,
-          cropImages: !isMath ? wordCrops : undefined,
-          words: !isMath ? words : undefined,
-          cropImage: imageSrc && isMath ? imageSrc : undefined,
+          type: 'WORD',
+          fullImage: src ?? undefined,
+          cropImages: wordCrops,
+          words,
         })
         const poll = async () => {
           if (cancelled) return
@@ -92,7 +94,7 @@ export function CapturePage() {
       if (pollTimer) clearTimeout(pollTimer)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, isMath])
+  }, [phase])
 
   const onFile = (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
@@ -104,7 +106,7 @@ export function CapturePage() {
     reader.onload = () => {
       if (typeof reader.result === 'string') {
         setImageSrc(reader.result)
-        setPhase('edit')
+        setPhase('crop')
       } else {
         setError('이미지를 읽지 못했어요. 다른 사진을 선택해 주세요.')
       }
@@ -114,8 +116,7 @@ export function CapturePage() {
   }
 
   const onEditDone = (result: CaptureResult) => {
-    setIsMath(result.hasBox)
-    setCropImages(result.hasBox ? [] : result.cropImages) // WORD 만 크롭 배열 사용
+    setCropImages(result.cropImages)
     setPhase('analyzing')
   }
 
@@ -145,7 +146,7 @@ export function CapturePage() {
         <CameraView
           onCapture={(dataUrl) => {
             setImageSrc(dataUrl)
-            setPhase('edit')
+            setPhase('crop')
           }}
           onClose={() => setPhase('method')}
           onPickFile={() => fileRef.current?.click()}
@@ -154,8 +155,25 @@ export function CapturePage() {
     )
   }
 
+  if (phase === 'crop' && imageSrc) {
+    return (
+      <CropStage
+        imageSrc={imageSrc}
+        onDone={(cropped) => {
+          setCroppedSrc(cropped)
+          setPhase('edit')
+        }}
+        onSkip={() => {
+          setCroppedSrc(null) // 건너뛰기 → 원본 그대로
+          setPhase('edit')
+        }}
+        onClose={() => setPhase('method')}
+      />
+    )
+  }
+
   if (phase === 'edit' && imageSrc) {
-    return <CaptureEditor imageSrc={imageSrc} onDone={onEditDone} onClose={() => setPhase('method')} />
+    return <CaptureEditor imageSrc={croppedSrc ?? imageSrc} onDone={onEditDone} onClose={() => setPhase('method')} />
   }
 
   if (phase === 'analyzing') {
@@ -195,8 +213,8 @@ export function CapturePage() {
         </div>
       )
     }
-    return <AnalyzingView subject={isMath ? 'MATH' : 'ENGLISH'} />
+    return <AnalyzingView />
   }
 
-  return <AnalysisResult isMath={isMath} cards={resultCards} onBack={() => navigate(-1)} />
+  return <AnalysisResult cards={resultCards} onBack={() => navigate(-1)} />
 }
