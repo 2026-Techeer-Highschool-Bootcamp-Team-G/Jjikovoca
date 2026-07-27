@@ -2,8 +2,6 @@ import { useState } from 'react'
 
 const CHIP_GRADIENT = 'linear-gradient(180deg, #ffea7a, #ffd84d)'
 
-type Subject = 'ENGLISH' | 'MATH'
-
 // F-03 v1.7 — 분석 로딩 동기부여 문구 풀(초기 7종, 프론트 로컬 상수). 매 진입 랜덤 표시.
 const QUOTES = [
   '"오늘의 1시간이 내일의 후회를 없앤다"',
@@ -15,38 +13,19 @@ const QUOTES = [
   '"시작이 반이다, 일단 책을 펴자"',
 ]
 
-const CONTENT: Record<
-  Subject,
-  {
-    emoji: string
-    title: string
-    subtitle: [string, string]
-    chips: string[]
-    countNote: string
-    quota: string
-  }
-> = {
-  ENGLISH: {
-    emoji: '✨',
-    title: '문맥을 읽고 있어요',
-    subtitle: ['AI가 지문 전체를 읽고 형광펜 친 단어의', '"이 지문에서의 뜻"을 찾는 중 · 최대 10초'],
-    chips: ['sound', 'take charge of', 'urgent'],
-    countNote: '단어 3개 · AI 호출은 1회만 차감돼요',
-    quota: '오늘 무료 분석 3 / 5회 사용',
-  },
-  MATH: {
-    emoji: '🧠',
-    title: '사고의 단계를 만들고 있어요',
-    subtitle: ['필기와 인쇄 원문을 구분해 읽고,', '풀이 과정을 사고 단계로 정리하는 중 · 최대 10초'],
-    chips: ['원문 추출 ✓', '사고 단계 구성 중…', '풀이 진단'],
-    countNote: '문제 1개 · AI 호출은 1회만 차감돼요',
-    quota: '오늘 무료 분석 4 / 5회 사용',
-  },
+// 영어 전용 MVP — 문맥 읽는 로딩 콘텐츠(수학 분석은 화면에서 제거)
+const CONTENT = {
+  emoji: '✨',
+  title: '문맥을 읽고 있어요',
+  subtitle: ['AI가 지문 전체를 읽고 형광펜 친 단어의', '"이 지문에서의 뜻"을 찾는 중 · 최대 10초'] as [string, string],
+  chips: ['sound', 'take charge of', 'urgent'],
+  countNote: '단어 3개 · AI 호출은 1회만 차감돼요',
+  quota: '오늘 무료 분석 3 / 5회 사용',
 }
 
 // AI 분석 중 (26:231 / 05-8 80:663) — 문맥 읽는 로딩 + 동기부여 문구(F-03 v1.7) + 진행 칩 + 무료 쿼터
-export function AnalyzingView({ subject = 'ENGLISH' }: { subject?: Subject }) {
-  const c = CONTENT[subject]
+export function AnalyzingView() {
+  const c = CONTENT
   // 진입 시 7종 풀에서 랜덤 1개 고정 (렌더마다 바뀌지 않도록 초기화 함수 사용)
   const [quote] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)])
   return (
