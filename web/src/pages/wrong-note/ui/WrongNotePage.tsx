@@ -159,7 +159,7 @@ export function WrongNotePage() {
       </div>
 
       {/* 카드 리스트 — 하단 고정 학습하기/네비를 위한 여백 확보(스크롤) */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 var(--spacing-xl) 150px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 var(--spacing-xl) 176px' }}>
         {rows.map((row) => (
           <CardRow
             key={row.id}
@@ -189,7 +189,7 @@ export function WrongNotePage() {
           position: 'fixed',
           left: '50%',
           transform: 'translateX(-50%)',
-          bottom: 'calc(84px + env(safe-area-inset-bottom))',
+          bottom: 'calc(108px + env(safe-area-inset-bottom))',
           width: '100%',
           maxWidth: 430,
           padding: '0 var(--spacing-xl)',
