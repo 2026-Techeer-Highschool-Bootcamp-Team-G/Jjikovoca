@@ -21,7 +21,6 @@ import { PayDonePage } from '@/pages/pay-done'
 import { LimitPage } from '@/pages/limit'
 import { SearchPage } from '@/pages/search'
 import { WithdrawPage } from '@/pages/withdraw'
-import { ExportPage } from '@/pages/export'
 import { ExportDonePage } from '@/pages/export-done'
 import { StudyPickPage } from '@/pages/study-pick'
 import { CardDonePage } from '@/pages/card-done'
@@ -73,7 +72,6 @@ export const router = createBrowserRouter([
           { path: 'limit', element: <LimitPage /> },
           { path: 'search', element: <SearchPage /> },
           { path: 'withdraw', element: <WithdrawPage /> },
-          { path: 'export', element: <ExportPage /> },
           { path: 'export-done', element: <ExportDonePage /> },
           { path: 'card-done', element: <CardDonePage /> },
           { path: 'capture', element: <CapturePage /> },

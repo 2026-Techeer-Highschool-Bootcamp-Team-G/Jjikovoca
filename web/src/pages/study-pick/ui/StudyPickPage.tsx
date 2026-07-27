@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { Chip, Button, SearchBar } from '@/shared/ui'
 import { CardRow } from '@/widgets/card-row'
 import type { CardRowView } from '@/widgets/card-row'
+import { createExport } from '@/features/export'
 import { fetchCards, fetchCardCounts } from '@/entities/card'
 import type { Card, CardCounts } from '@/entities/card'
 
@@ -32,8 +33,10 @@ function toRow(c: Card): CardRowView {
 export function StudyPickPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  // 학습 설정에서 고른 복습 유형(없으면 플래시카드) — 이 값으로 학습 화면을 라우팅
-  const type = (location.state as { type?: 'FLASHCARD' | 'CLOZE' } | null)?.type ?? 'FLASHCARD'
+  // 학습 설정에서 고른 복습 유형/모드. mode='PDF'면 선택 단어를 PDF로 내보내는 화면
+  const nav = location.state as { type?: 'FLASHCARD' | 'CLOZE'; mode?: 'PDF' } | null
+  const type = nav?.type ?? 'FLASHCARD'
+  const isPdf = nav?.mode === 'PDF'
   const [status, setStatus] = useState<Status>('ALL')
   const [picked, setPicked] = useState<Set<number>>(new Set())
 
@@ -56,16 +59,39 @@ export function StudyPickPage() {
   const start = () =>
     navigate(type === 'CLOZE' ? '/cloze' : '/flashcard', { state: { cardIds: [...picked] } })
 
+  // PDF 모드 — 선택 단어로 시험지 내보내기(→ /export-done)
+  const exportPdf = useMutation({
+    mutationFn: () => createExport({ type: 'PDF_WORDTEST', cardIds: [...picked] }),
+    onSuccess: (r) => navigate('/export-done', { state: { downloadUrl: r.downloadUrl, kind: 'WORD' } }),
+  })
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', padding: '12px var(--spacing-xl) 0' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--color-text-primary)' }}>오답노트</h1>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--color-text-primary)' }}>단어장</h1>
           <span style={{ fontSize: 13, color: 'var(--color-text-brand)' }}>{count}개 선택됨</span>
         </div>
-        <button type="button" style={{ background: 'none', border: 'none', fontSize: 13, fontWeight: 500, color: 'var(--color-text-brand)', cursor: 'pointer' }}>
-          PDF ↗
-        </button>
+        {isPdf && (
+          <button
+            type="button"
+            disabled={count === 0 || exportPdf.isPending}
+            onClick={() => exportPdf.mutate()}
+            style={{
+              background: 'var(--color-brand-primary)',
+              color: 'var(--color-text-inverse)',
+              border: 'none',
+              borderRadius: 'var(--radius-lg)',
+              padding: '6px 14px',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: count === 0 || exportPdf.isPending ? 'default' : 'pointer',
+              opacity: count === 0 || exportPdf.isPending ? 0.4 : 1,
+            }}
+          >
+            {exportPdf.isPending ? '만드는 중…' : `PDF 내보내기${count > 0 ? ` (${count})` : ''}`}
+          </button>
+        )}
       </div>
 
       <div style={{ padding: '12px var(--spacing-xl) 0' }}>
@@ -76,9 +102,12 @@ export function StudyPickPage() {
         <Button variant="weak" size="lg" block onClick={() => navigate(-1)}>
           취소
         </Button>
-        <Button block size="lg" disabled={count === 0} style={{ opacity: count === 0 ? 0.4 : 1 }} onClick={start}>
-          선택({count}) 학습 시작
-        </Button>
+        {/* PDF 모드는 상단 'PDF 내보내기' 버튼으로 내보내므로 하단엔 학습 시작 없음 */}
+        {!isPdf && (
+          <Button block size="lg" disabled={count === 0} style={{ opacity: count === 0 ? 0.4 : 1 }} onClick={start}>
+            선택({count}) 학습 시작
+          </Button>
+        )}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px var(--spacing-xl) 8px' }}>
