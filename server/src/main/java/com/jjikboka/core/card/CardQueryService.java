@@ -1,5 +1,7 @@
 package com.jjikboka.core.card;
 
+import com.jjikboka.core.review.GradeCount;
+import com.jjikboka.core.review.StudyStatsService;
 import com.jjikboka.shared.error.BusinessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -29,27 +31,39 @@ public class CardQueryService {
 
     private final CardRepository cardRepository;
     private final PremiumQueryService premiumQueryService;
+    private final StudyStatsService studyStatsService;
 
-    CardQueryService(CardRepository cardRepository, PremiumQueryService premiumQueryService) {
+    CardQueryService(CardRepository cardRepository, PremiumQueryService premiumQueryService,
+                     StudyStatsService studyStatsService) {
         this.cardRepository = cardRepository;
         this.premiumQueryService = premiumQueryService;
+        this.studyStatsService = studyStatsService;
     }
 
+    /** 피드(API-7) — 카드마다 등급 카운트(알아요·몰라요·헷갈려요)를 실어 준다. FE가 단어장 4분류를 이 값으로 계산한다. */
     @Transactional(readOnly = true)
     public List<CardSummary> getFeed(Long userId, String subject) {
         List<Card> cards = (subject == null || SUBJECT_ALL.equals(subject))
                 ? cardRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId)
                 : cardRepository.findByUserIdAndSubjectAndDeletedAtIsNullOrderByCreatedAtDesc(userId, subject);
-        return cards.stream().map(CardSummary::from).toList();
+        Map<Long, GradeCount> grades = studyStatsService.gradeCounts(userId);
+        return cards.stream()
+                .map(card -> CardSummary.from(card, grades.getOrDefault(card.getId(), GradeCount.ZERO)))
+                .toList();
     }
 
-    /** 상태칩 카운트(API-7) — 전체·졸업·오늘복습 대기 수를 한 번에 집계한다. */
+    /**
+     * 단어장 칩 카운트(API-7) — 제품 기준으로 센다: 전체·졸업완료(알아요≥4)·복습대기(졸업 아님)·약점유형(몰라요+헷갈려요&gt;알아요).
+     * 라이트너 박스/FSRS 졸업 플래그가 아니라 study_log 누적 등급 기준이라 FE 칩 필터와 정합한다(홈의 "오늘 복습"은 별도 경로).
+     */
     @Transactional(readOnly = true)
     public CardCounts getCounts(Long userId) {
-        return new CardCounts(
-                cardRepository.countByUserIdAndDeletedAtIsNull(userId),
-                cardRepository.countGraduatedTotal(userId),
-                cardRepository.countReviewDue(userId, LocalDateTime.now()));
+        long total = cardRepository.countByUserIdAndDeletedAtIsNull(userId);
+        Map<Long, GradeCount> grades = studyStatsService.gradeCounts(userId);
+        long graduated = grades.values().stream().filter(GradeCount::graduated).count();
+        long weak = grades.values().stream().filter(GradeCount::weak).count();
+        long reviewDue = total - graduated;   // 졸업완료 아님 = 복습대기
+        return new CardCounts(total, graduated, reviewDue, weak);
     }
 
     /**
