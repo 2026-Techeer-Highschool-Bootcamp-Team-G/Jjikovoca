@@ -2,6 +2,7 @@ export {
   apiFetch,
   apiGet,
   apiPost,
+  apiDownload,
   ApiError,
   mediaUrl,
   getAccessToken,
