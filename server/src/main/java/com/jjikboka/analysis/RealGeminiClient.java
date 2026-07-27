@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 실 Gemini 클라이언트 (API-6·16·41). {@code gemini.mock=false}일 때만 활성 — {@link GeminiApi}로 generateContent를 호출하고
@@ -54,6 +56,37 @@ class RealGeminiClient implements GeminiClient {
             }
             """;
 
+    /**
+     * WORD 구조화 출력 스키마(#369). flash-lite가 example·exampleMeaning 등을 생략하지 못하게 required로 강제한다 —
+     * responseMimeType만으론 필드 누락을 못 막아 예문/해석이 null로 저장되던 문제를 근본 차단. subject는 fallback(ENGLISH)이라 선택.
+     */
+    private static final Map<String, Object> WORD_SCHEMA = buildWordSchema();
+
+    private static Map<String, Object> buildWordSchema() {
+        Map<String, Object> properties = new LinkedHashMap<>();
+        properties.put("subject", strType());
+        properties.put("word", strType());
+        properties.put("contextMeaning", strType());
+        properties.put("dictMeaning", strType());
+        properties.put("example", strType());
+        properties.put("exampleMeaning", strType());
+        properties.put("pronunciation", strType());
+        properties.put("pos", strType());
+        properties.put("tags", Map.of("type", "ARRAY", "items", strType()));
+        properties.put("emoji", strType());
+
+        Map<String, Object> schema = new LinkedHashMap<>();
+        schema.put("type", "OBJECT");
+        schema.put("properties", properties);
+        schema.put("required", List.of("word", "contextMeaning", "dictMeaning", "example", "exampleMeaning",
+                "pronunciation", "pos", "tags", "emoji"));
+        return schema;
+    }
+
+    private static Map<String, Object> strType() {
+        return Map.of("type", "STRING");
+    }
+
     private final GeminiApi geminiApi;
     private final ObjectMapper objectMapper;
 
@@ -66,7 +99,10 @@ class RealGeminiClient implements GeminiClient {
     public AnalysisContent generate(String type, List<GeminiImage> images) {
         boolean problem = "PROBLEM".equals(type);
         // WORD는 빠른 모델 우선(fast=true) — 단어 분석은 단순해 lite로 지연을 줄인다. PROBLEM은 정확도 위해 기본 체인.
-        String raw = geminiApi.generate(problem ? PROBLEM_PROMPT : WORD_PROMPT, images, true, !problem);
+        // WORD는 responseSchema로 필드 누락(example·exampleMeaning)을 강제 차단(#369). PROBLEM은 중첩 구조라 스키마 미적용.
+        String raw = problem
+                ? geminiApi.generate(PROBLEM_PROMPT, images, true, false)
+                : geminiApi.generate(WORD_PROMPT, images, true, true, WORD_SCHEMA);
         JsonNode node = readJson(raw);
         if (problem) {
             return new AnalysisContent(
