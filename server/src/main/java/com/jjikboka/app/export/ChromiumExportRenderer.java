@@ -52,7 +52,11 @@ class ChromiumExportRenderer implements ExportRenderer {
         boolean image = "JPG_CARD".equals(type);
         String html = "PDF_WORDTEST".equals(type) ? buildWordTestHtml(cards) : buildHtml(type, cards);
         try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
+            // 컨테이너(비루트 유저)에서 headless Chromium 구동 필수 플래그 — 없으면 샌드박스 초기화 실패로 launch 예외(#403).
+            // --disable-dev-shm-usage는 작은 /dev/shm(도커 기본 64MB)에서 크래시 방지.
+            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
+                    .setHeadless(true)
+                    .setArgs(List.of("--no-sandbox", "--disable-dev-shm-usage")));
             try {
                 Page page = browser.newPage();
                 page.setContent(html);
