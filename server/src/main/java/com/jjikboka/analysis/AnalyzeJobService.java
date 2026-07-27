@@ -27,6 +27,12 @@ public class AnalyzeJobService {
         return analyzeJobRepository.save(AnalyzeJob.pending(userId)).getId();
     }
 
+    /** 사용자의 누적 분석 접수 횟수 — 시현용 무료 추출 하드캡(총 N회) 판정에 app 조립 레벨이 쓴다. */
+    @Transactional(readOnly = true)
+    public long countForUser(Long userId) {
+        return analyzeJobRepository.countByUserId(userId);
+    }
+
     /** 워커 처리 시작 — RUNNING. 각 전이는 독립 트랜잭션으로 즉시 커밋해 폴링에 보이게 한다. */
     @Transactional
     public void markRunning(Long jobId) {
