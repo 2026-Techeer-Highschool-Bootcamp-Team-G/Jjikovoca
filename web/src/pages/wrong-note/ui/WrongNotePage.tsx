@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { Chip, Button, SearchBar, BottomSheet } from '@/shared/ui'
 import { CardRow } from '@/widgets/card-row'
 import type { CardRowView } from '@/widgets/card-row'
 import { StudySetupSheet } from '@/features/study-setup'
+import { createExport } from '@/features/export'
 import { fetchCards } from '@/entities/card'
 import type { Card } from '@/entities/card'
 
@@ -47,6 +48,12 @@ export function WrongNotePage() {
   const [status, setStatus] = useState<Status>('ALL')
   const [setupOpen, setSetupOpen] = useState(false)
   const [voice, setVoice] = useState<Locale>('US') // 발음 국가 선택(기본 미국)
+
+  // 오늘 복습 + PDF → 단어장 시험지를 바로 내보내기(→ /export-done)
+  const exportPdf = useMutation({
+    mutationFn: () => createExport({ type: 'PDF_WORDTEST' }),
+    onSuccess: (r) => navigate('/export-done', { state: { downloadUrl: r.downloadUrl, kind: 'WORD' } }),
+  })
 
   // 분류 — 졸업완료/복습대기는 graduated 로 클라 필터. 약점유형은 등급별 카운트(백엔드) 필요 → 준비 중
   const filtered = allCards.filter((c) => {
@@ -105,7 +112,7 @@ export function WrongNotePage() {
         <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--color-text-primary)' }}>단어장</h1>
         <button
           type="button"
-          onClick={() => navigate('/export')}
+          onClick={() => setSetupOpen(true)}
           style={{
             background: 'var(--color-brand-primary)',
             color: 'var(--color-text-inverse)',
@@ -206,11 +213,64 @@ export function WrongNotePage() {
         <StudySetupSheet
           onStart={(method, type) => {
             setSetupOpen(false)
+            if (type === 'PDF') {
+              // 오늘 복습 → 바로 내보내기 / 직접 선택 → 단어 선택 페이지(PDF 모드)
+              if (method === 'PICK') navigate('/study-pick', { state: { mode: 'PDF' } })
+              else exportPdf.mutate()
+              return
+            }
             if (method === 'PICK') navigate('/study-pick', { state: { type } })
             else navigate(type === 'FLASHCARD' ? '/flashcard' : '/cloze')
           }}
         />
       </BottomSheet>
+
+      {/* PDF 생성 중 오버레이 */}
+      {exportPdf.isPending && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 60,
+          }}
+        >
+          <div style={{ background: 'var(--color-bg-elevated)', borderRadius: 16, padding: '22px 30px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+            <div
+              aria-hidden
+              style={{ width: 32, height: 32, borderRadius: '50%', border: '3px solid var(--color-brand-weak)', borderTopColor: 'var(--color-brand-primary)', animation: 'jjik-spin 0.8s linear infinite' }}
+            />
+            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)' }}>PDF를 만들고 있어요…</span>
+          </div>
+        </div>
+      )}
+      {exportPdf.isError && (
+        <button
+          type="button"
+          onClick={() => exportPdf.reset()}
+          style={{
+            position: 'fixed',
+            left: '50%',
+            bottom: 'calc(100px + env(safe-area-inset-bottom))',
+            transform: 'translateX(-50%)',
+            background: 'var(--color-danger-weak)',
+            color: 'var(--color-text-danger)',
+            border: 'none',
+            padding: '10px 16px',
+            borderRadius: 12,
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: 'pointer',
+            zIndex: 60,
+            boxShadow: 'var(--shadow-card)',
+          }}
+        >
+          PDF 생성에 실패했어요. 다시 시도해 주세요.
+        </button>
+      )}
     </div>
   )
 }
