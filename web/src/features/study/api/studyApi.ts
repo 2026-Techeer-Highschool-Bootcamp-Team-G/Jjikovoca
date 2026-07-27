@@ -5,6 +5,13 @@ import type { ReasonTag } from '@/entities/card'
 export type StudyActivity = 'RETRY' | 'FLASHCARD' | 'CLOZE' | 'MATH_REVIEW'
 export type StudyResult = 'KNOW' | 'CONFUSED' | 'DONT_KNOW'
 
+/** 경험치 적립 델타 (API-11 study 응답) — 이번 적립분·누적·레벨업. 정답 아니면 earned=0 */
+export interface ExpDelta {
+  earned: number
+  total: number
+  levelUp: boolean
+}
+
 /** 플래시카드 큐 항목 (미졸업 WORD) */
 export interface FlashcardQueueCard {
   id: number
@@ -57,6 +64,7 @@ export interface StudyRecordResult {
   boxLevel: number
   nextReviewAt: string
   graduated: boolean
+  exp?: ExpDelta // 백엔드가 이미 반환(API-11) — 게임 엔딩 XP 집계용. 하위호환 optional
 }
 
 /** 학습 기록(단일 진입점) — POST /api/cards/{id}/study (F-05·09·19·26) */
