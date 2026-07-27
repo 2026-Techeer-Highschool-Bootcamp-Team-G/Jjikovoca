@@ -5,6 +5,8 @@ import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -26,10 +28,27 @@ import java.util.List;
 @ConditionalOnProperty(prefix = "app.export", name = "renderer", havingValue = "chromium")
 class ChromiumExportRenderer implements ExportRenderer {
 
+    private static final Logger log = LoggerFactory.getLogger(ChromiumExportRenderer.class);
     private static final String WORD_TEST_TEMPLATE = "templates/export/word-test.html";
 
+    /** Chromium 실패 시 폴백 엔진 — PdfBoxExportRenderer는 주입 의존성이 없어 직접 인스턴스화한다(브라우저 없이 항상 동작). */
+    private final PdfBoxExportRenderer fallback = new PdfBoxExportRenderer();
+
+    /**
+     * Chromium으로 렌더하되, 브라우저 미설치·구동 실패·폰트 문제 등으로 예외가 나면 pdfbox(구 포맷)로 폴백해
+     * export가 통째로 실패(job FAILED·환불)하는 것을 막는다. 폴백은 WARN 로그로 드러내 은폐하지 않는다(원인 추적).
+     */
     @Override
     public Rendered render(String type, List<CardSummary> cards) {
+        try {
+            return renderWithChromium(type, cards);
+        } catch (RuntimeException e) {
+            log.warn("Chromium 렌더 실패 — pdfbox 구 포맷으로 폴백. 원인: {}", e.toString());
+            return fallback.render(type, cards);
+        }
+    }
+
+    private Rendered renderWithChromium(String type, List<CardSummary> cards) {
         boolean image = "JPG_CARD".equals(type);
         String html = "PDF_WORDTEST".equals(type) ? buildWordTestHtml(cards) : buildHtml(type, cards);
         try (Playwright playwright = Playwright.create()) {
