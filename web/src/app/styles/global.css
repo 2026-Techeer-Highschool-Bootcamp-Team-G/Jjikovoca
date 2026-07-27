@@ -432,3 +432,14 @@ button {
     transform: translateX(4px);
   }
 }
+
+/* 온보딩 형광펜 밑줄 — 단어 위를 왼쪽에서 오른쪽으로 쓱 칠하듯 늘어남(반복) */
+@keyframes jjik-hl-sweep {
+  0% {
+    transform: scaleX(0);
+  }
+  45%,
+  100% {
+    transform: scaleX(1);
+  }
+}
