@@ -7,6 +7,7 @@ import { GradeButtons } from '@/features/study-grade'
 import type { Grade } from '@/features/study-grade'
 import { fetchFlashcards, recordStudy } from '@/features/study'
 import type { FlashcardQueueCard } from '@/features/study'
+import type { GameResultItem } from '@/features/game-result'
 import { FlashCard, generateMnemonic } from '@/entities/card'
 import type { FlashCardModel } from '@/entities/card'
 
@@ -56,6 +57,9 @@ export function FlashcardPage() {
       recordStudy(cur.id, { activity: 'FLASHCARD', result: grade, durationMs }),
   })
 
+  // 게임 세션 누적(엔딩 종합용) — 각 카드 grade/획득XP. 리렌더 불필요라 ref 로 보관
+  const session = useRef<{ items: GameResultItem[]; totalXp: number; levelUp: boolean }>({ items: [], totalXp: 0, levelUp: false })
+
   // AI 연상 이미지 온디맨드 생성 — 생성된 경로는 카드별로 보관해 즉시 반영(쿼터 초과 시 이모지 폴백 유지)
   const [genMap, setGenMap] = useState<Record<number, string>>({})
   const mnemonic = useMutation({
@@ -63,11 +67,25 @@ export function FlashcardPage() {
     onSuccess: (r, cardId) => setGenMap((m) => ({ ...m, [cardId]: r.mnemonicImagePath })),
   })
 
-  const handleGrade = (grade: Grade) => {
+  const handleGrade = async (grade: Grade) => {
     const durationMs = Math.round(performance.now() - shownAt.current)
-    if (cur?.id != null) record.mutate({ grade, durationMs }) // 실 학습 기록(+소요시간)
+    let earnedXp = 0
+    if (cur?.id != null) {
+      try {
+        const res = await record.mutateAsync({ grade, durationMs }) // 실 학습 기록(+소요시간, exp)
+        earnedXp = res.exp?.earned ?? 0
+        session.current.totalXp += earnedXp
+        if (res.exp?.levelUp) session.current.levelUp = true
+      } catch {
+        // 기록 실패해도 게임 흐름은 유지(earnedXp=0)
+      }
+    }
+    const items = [...session.current.items, { cardId: cur?.id ?? 0, grade, earnedXp }]
+    session.current.items = items
     if (pos + 1 >= total) {
-      navigate('/card-done')
+      navigate('/game-result', {
+        state: { type: 'FLASHCARD', items, totalXp: session.current.totalXp, levelUp: session.current.levelUp },
+      })
       return
     }
     setIdx(pos + 1)

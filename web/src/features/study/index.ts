@@ -4,6 +4,7 @@ export { fetchFlashcards, recordStudy, fetchRecommendation } from './api/studyAp
 export type {
   StudyActivity,
   StudyResult,
+  ExpDelta,
   FlashcardQueueCard,
   StudyRecordBody,
   StudyRecordResult,

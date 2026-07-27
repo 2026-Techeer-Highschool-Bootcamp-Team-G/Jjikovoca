@@ -4,6 +4,8 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { NavigationBar, Button, StudyLoading } from '@/shared/ui'
 import { fetchClozeQueue, submitClozeAnswer, regenerateCloze } from '@/features/cloze'
 import type { ClozeJudge } from '@/features/cloze'
+import type { Grade } from '@/features/study-grade'
+import type { GameResultItem } from '@/features/game-result'
 
 /** 빈칸 퀴즈 (F-06) — 인라인 빈칸 입력 + 서버 판정. 콤보·XP·해설은 백엔드 응답(optional) */
 export function ClozePage() {
@@ -18,6 +20,8 @@ export function ClozePage() {
   const [combo, setCombo] = useState(0) // 연속 정답(백엔드 combo 우선). 오답 시 0
   // AI 재생성한 예문 오버라이드 (cardId → 새 clozeText/hints)
   const [overrides, setOverrides] = useState<Record<number, { clozeText: string; hints: string[] }>>({})
+  // 게임 세션 누적(엔딩 종합용) — 힌트 사용 여부로 grade 도출
+  const session = useRef<{ items: GameResultItem[]; totalXp: number; levelUp: boolean }>({ items: [], totalXp: 0, levelUp: false })
 
   // 실 큐 조회 — 정답 미포함(치팅 방지). 판정은 항상 서버
   const queue = useQuery({
@@ -45,6 +49,12 @@ export function ClozePage() {
       setResult(r)
       // 백엔드 combo 우선, 미배포면 클라 추정(정답 +1 / 오답 0)
       setCombo((prev) => r.combo ?? (r.correct ? prev + 1 : 0))
+      // 힌트 사용 여부로 grade 도출: 무힌트 정답=알아요 / 힌트 정답=헷갈려요 / 오답=몰라요
+      const grade: Grade = r.correct ? (revealed.size > 0 ? 'CONFUSED' : 'KNOW') : 'DONT_KNOW'
+      const earnedXp = r.exp?.earned ?? 0
+      session.current.items = [...session.current.items, { cardId: cur.cardId, grade, earnedXp, correct: r.correct }]
+      session.current.totalXp += earnedXp
+      if (r.exp?.levelUp) session.current.levelUp = true
     },
   })
 
@@ -59,7 +69,9 @@ export function ClozePage() {
 
   const next = () => {
     if (pos + 1 >= total) {
-      navigate('/wrong-note')
+      navigate('/game-result', {
+        state: { type: 'CLOZE', items: session.current.items, totalXp: session.current.totalXp, levelUp: session.current.levelUp },
+      })
       return
     }
     setIdx(pos + 1)

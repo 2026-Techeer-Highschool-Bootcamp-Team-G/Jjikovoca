@@ -24,6 +24,7 @@ import { WithdrawPage } from '@/pages/withdraw'
 import { ExportDonePage } from '@/pages/export-done'
 import { StudyPickPage } from '@/pages/study-pick'
 import { CardDonePage } from '@/pages/card-done'
+import { GameResultPage } from '@/pages/game-result'
 import { ExamSelectPage } from '@/pages/exam-select'
 
 /**
@@ -74,6 +75,7 @@ export const router = createBrowserRouter([
           { path: 'withdraw', element: <WithdrawPage /> },
           { path: 'export-done', element: <ExportDonePage /> },
           { path: 'card-done', element: <CardDonePage /> },
+          { path: 'game-result', element: <GameResultPage /> },
           { path: 'capture', element: <CapturePage /> },
           { path: 'exam-select', element: <ExamSelectPage /> },
         ],
