@@ -97,9 +97,7 @@ class AnalysisWorker {
     /** 기존 단일 호출 경로(PROBLEM, 또는 크롭 0~1개 WORD) — 카드 1개 생성 후 model 반환. */
     private String analyzeSingle(AnalyzeEvents.AnalyzeRequested event) {
         List<GeminiImage> images = loadImages(event);
-        // WORD 단일 크롭도 단어키 캐시를 쓴다. PROBLEM은 힌트 없음 → 이미지 해시 경로.
-        String wordHint = "WORD".equals(event.type()) ? wordAt(event, 0) : null;
-        AnalysisContent content = analyze(event.type(), wordHint, images);
+        AnalysisContent content = analyze(event.type(), images);
         String imagePath = (event.cropImageRefs() == null || event.cropImageRefs().isEmpty())
                 ? null : event.cropImageRefs().get(0);
         cardCreationService.create(toCommand(event, content, imagePath));
@@ -117,14 +115,12 @@ class AnalysisWorker {
                 : VisionImageScaler.downscale(loadOne(event.fullImageRef()), PASSAGE_MAX_DIM);
 
         // 크롭(단어)마다 Gemini 호출을 전용 풀에 동시에 던진다(팬아웃) — 지연이 N배 대신 ≈1콜.
-        // 동시성은 geminiCallExecutor의 상한(4)이 제어한다(429 방어). 크롭별 OCR 힌트(wordAt)를 함께 넘긴다.
+        // 동시성은 geminiCallExecutor의 상한(4)이 제어한다(429 방어). 각 크롭 이미지가 분석의 진실 소스다.
         List<String> refs = event.cropImageRefs();
         List<CompletableFuture<String>> futures = new ArrayList<>();
-        for (int i = 0; i < refs.size(); i++) {
-            String cropRef = refs.get(i);
-            String wordHint = wordAt(event, i);
+        for (String cropRef : refs) {
             futures.add(CompletableFuture.supplyAsync(
-                    () -> analyzeOneCrop(event, cropRef, full, wordHint), geminiCallExecutor));
+                    () -> analyzeOneCrop(event, cropRef, full), geminiCallExecutor));
         }
 
         // 전부 join 후 성공(model != null)만 수집. 실패는 analyzeOneCrop에서 흡수(null)돼 격리된다.
@@ -144,7 +140,7 @@ class AnalysisWorker {
      * 하나가 실패해도 다른 크롭의 future는 영향받지 않는다. {@code cardCreationService.create}는 @Transactional이라
      * 각 스레드가 독립 트랜잭션으로 INSERT(병렬 안전). 성공 시 content.model 반환, 실패 시 null.
      */
-    private String analyzeOneCrop(AnalyzeEvents.AnalyzeRequested event, String cropRef, GeminiImage full, String wordHint) {
+    private String analyzeOneCrop(AnalyzeEvents.AnalyzeRequested event, String cropRef, GeminiImage full) {
         try {
             List<GeminiImage> images = new ArrayList<>();
             GeminiImage crop = loadOne(cropRef);
@@ -154,7 +150,7 @@ class AnalysisWorker {
             if (full != null) {
                 images.add(full);   // 지문은 문맥(contextMeaning)용으로 매 호출에 함께 넣는다
             }
-            AnalysisContent content = analyze("WORD", wordHint, images);
+            AnalysisContent content = analyze("WORD", images);
             cardCreationService.create(toCommand(event, content, cropRef));
             return content.model();
         } catch (RuntimeException e) {
@@ -163,18 +159,12 @@ class AnalysisWorker {
         }
     }
 
-    /** 단어 힌트가 신뢰 가능하면 단어키 캐시(다른 사진의 같은 단어 재사용), 아니면 이미지 해시 캐시로 분석한다. */
-    private AnalysisContent analyze(String type, String wordHint, List<GeminiImage> images) {
-        String word = GeminiAnalysisCache.normalizeWord(wordHint);
-        return word != null
-                ? geminiAnalysisCache.generateByWord(word, images)
-                : geminiAnalysisCache.generate(type, GeminiAnalysisCache.hash(images), images);
-    }
-
-    /** cropImageRefs와 인덱스 정렬된 OCR 힌트에서 i번째 단어를 꺼낸다(없으면 null). */
-    private static String wordAt(AnalyzeEvents.AnalyzeRequested event, int i) {
-        List<String> words = event.words();
-        return (words != null && i < words.size()) ? words.get(i) : null;
+    /**
+     * 이미지 내용 해시 캐시로 분석한다 — <b>이미지가 유일한 진실 소스</b>. OCR 힌트를 캐시 키로 쓰던 경로는
+     * 오독·교차충돌로 엉뚱한 카드를 냈어(#371) 제거했다. 같은 크롭+지문이면만 캐시 히트라 카드가 항상 이미지와 일치한다.
+     */
+    private AnalysisContent analyze(String type, List<GeminiImage> images) {
+        return geminiAnalysisCache.generate(type, GeminiAnalysisCache.hash(images), images);
     }
 
     /** 참조 하나를 비전 입력으로 로드한다(읽기 실패면 null — 모의/부분 흐름 허용). */
