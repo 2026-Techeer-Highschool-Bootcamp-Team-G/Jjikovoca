@@ -25,7 +25,13 @@ public class FeedFacade {
         this.examFeedService = examFeedService;
     }
 
-    public List<FeedCard> getFeed(Long userId, String subject, Long examId, boolean untagged, String q) {
+    /**
+     * 피드 조립 + 페이지네이션(무한 스크롤). 검색·시험 필터를 먼저 적용한 뒤 그 결과를 페이지로 자른다 —
+     * 필터가 전체 집합에 정확히 걸리도록(페이지 이후가 아니라) 인메모리 슬라이스로 처리한다(단어 수 규모상 충분).
+     * total은 필터 적용 후 전체 개수, hasNext는 다음 페이지 유무. 시험 칩(exams)은 반환 페이지에 대해서만 조회한다.
+     */
+    public CardFeedResponse getFeed(Long userId, String subject, Long examId, boolean untagged, String q,
+                                    int page, int size) {
         List<CardSummary> cards = cardQueryService.getFeed(userId, subject);
 
         if (q != null && !q.isBlank()) {
@@ -41,8 +47,16 @@ public class FeedFacade {
             cards = cards.stream().filter(card -> !tagged.contains(card.id())).toList();
         }
 
-        Map<Long, List<ExamTag>> examsByCard = examFeedService.examsFor(cards.stream().map(CardSummary::id).toList());
-        return cards.stream().map(card -> FeedCard.of(card, examsByCard.get(card.id()))).toList();
+        long total = cards.size();
+        int pageSize = Math.max(1, size);
+        int from = Math.max(0, page) * pageSize;
+        int to = Math.min(from + pageSize, cards.size());
+        List<CardSummary> pageCards = from >= cards.size() ? List.of() : cards.subList(from, to);
+        boolean hasNext = to < cards.size();
+
+        Map<Long, List<ExamTag>> examsByCard = examFeedService.examsFor(pageCards.stream().map(CardSummary::id).toList());
+        List<FeedCard> feed = pageCards.stream().map(card -> FeedCard.of(card, examsByCard.get(card.id()))).toList();
+        return new CardFeedResponse(feed, total, hasNext);
     }
 
     /** 검색어 부분일치(대소문자 무시) — 단어·문맥 뜻·개념·요약 중 하나라도 포함하면 매치. */
