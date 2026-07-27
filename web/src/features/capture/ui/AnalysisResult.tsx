@@ -7,18 +7,17 @@ import { fetchCards, cardToRecent } from '@/entities/card'
 import type { Card, FeedSubject } from '@/entities/card'
 
 interface Props {
-  isMath: boolean
   /** 분석 결과 카드들(폴링에서 전달). 없으면 방금 저장된 최신 카드를 조회 */
   cards?: Card[] | null
   onBack: () => void
 }
 
 // 분석 완료 — 분석 카드는 이미 서버에 저장됨(/api/cards). 결과 카드(들)를 보여주고 홈/오답노트로 유도.
-// 여러 단어를 분석하면 홈 최근 카드처럼 좌우로 스와이프해 모두 확인한다.
-export function AnalysisResult({ isMath, cards, onBack }: Props) {
+// 여러 단어를 분석하면 홈 최근 카드처럼 좌우로 스와이프해 모두 확인한다. (영어 전용 MVP)
+export function AnalysisResult({ cards, onBack }: Props) {
   const navigate = useNavigate()
   const qc = useQueryClient()
-  const subject: FeedSubject = isMath ? 'MATH' : 'ENGLISH'
+  const subject: FeedSubject = 'ENGLISH'
   const provided = cards ?? []
 
   // 분석 카드가 안 넘어오면(폴백/스킵) 방금 저장된 최신 카드를 조회
@@ -38,12 +37,11 @@ export function AnalysisResult({ isMath, cards, onBack }: Props) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>
-      <NavigationBar title={isMath ? '수학 카드' : '영어 카드'} onBack={onBack} />
+      <NavigationBar title="영어 카드" onBack={onBack} />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, padding: '16px 0' }}>
         <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-secondary)', padding: '0 var(--spacing-xl)' }}>
-          ✨ AI가 카드{recents.length > 1 ? ` ${recents.length}개` : ''}를 만들어 오답노트에 저장했어요 — 탭해서{' '}
-          {isMath ? '풀이' : '뜻'}을 확인해요{recents.length > 1 ? ' · 좌우로 넘겨보세요' : ''}
+          ✨ AI가 카드{recents.length > 1 ? ` ${recents.length}개` : ''}를 만들어 오답노트에 저장했어요 — 탭해서 뜻을 확인해요{recents.length > 1 ? ' · 좌우로 넘겨보세요' : ''}
         </p>
         {recents.length > 0 ? (
           <div
