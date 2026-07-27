@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'NanumGothic', 'Apple SD Gothic Neo', 'Noto Sans KR', -apple-system, sans-serif;
+      color: #191f28;
+      padding: 40px 44px;
+      font-size: 15px;
+    }
+
+    /* 헤더 */
+    .head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px; }
+    .title { font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
+    .title .brand { background: #ffe066; padding: 1px 6px; border-radius: 4px; }
+    .meta { color: #4e5968; font-size: 14px; white-space: nowrap; }
+    .meta .blank { display: inline-block; border-bottom: 1px solid #adb5bd; margin: 0 6px; }
+    .meta .w-name { width: 96px; }
+    .meta .w-date { width: 96px; }
+    .meta .w-score { width: 40px; }
+    .subtitle { color: #8b95a1; font-size: 14px; margin: 0 0 28px; }
+
+    /* 단어 목록 (2단) */
+    .words { column-count: 2; column-gap: 56px; margin: 0; padding: 0; list-style: none; }
+    .item {
+      display: flex; align-items: flex-end; gap: 14px;
+      padding: 16px 2px; border-bottom: 1px dotted #dfe3e8;
+      break-inside: avoid;
+    }
+    .item .num { color: #3182f6; font-weight: 700; min-width: 22px; }
+    .item .word { font-weight: 700; font-size: 18px; min-width: 118px; }
+    .item .line { flex: 1; border-bottom: 1px solid #adb5bd; height: 0; margin-bottom: 5px; }
+
+    /* 절취선 */
+    .cut { position: relative; text-align: center; border-top: 1px dashed #c4ccd4; margin: 34px 0 20px; }
+    .cut span {
+      position: relative; top: -11px; background: #fff; padding: 0 14px;
+      color: #8b95a1; font-size: 13px; letter-spacing: -0.3px;
+    }
+
+    /* 정답 */
+    .answers-title { font-weight: 800; font-size: 15px; margin: 0 0 10px; }
+    .answers { column-count: 2; column-gap: 56px; margin: 0; padding: 0; list-style: none; }
+    .answer { font-size: 14px; font-weight: 600; color: #333d4b; padding: 4px 0; break-inside: avoid; }
+    .answer .num { color: #4e5968; font-weight: 700; }
+
+    /* 푸터 */
+    .footer { margin-top: 32px; text-align: right; color: #b0b8c1; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="head">
+    <h1 class="title"><span class="brand">찍어보카</span> 영어 단어 테스트</h1>
+    <div class="meta">
+      이름 <span class="blank w-name"></span>
+      날짜 <span class="blank w-date"></span>
+      점수 <span class="blank w-score"></span>/{{COUNT}}
+    </div>
+  </div>
+  <p class="subtitle">단어의 뜻을 빈칸에 쓰고, 아래 정답선을 잘라 채점하세요.</p>
+
+  <ul class="words">{{WORDS}}</ul>
+
+  <div class="cut"><span>&#9988; 정답 (접거나 잘라서 채점)</span></div>
+
+  <p class="answers-title">정답</p>
+  <ul class="answers">{{ANSWERS}}</ul>
+
+  <div class="footer">jjikoboka · 오답노트에서 자동 생성</div>
+</body>
+</html>
