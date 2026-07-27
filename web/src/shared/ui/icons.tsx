@@ -129,6 +129,15 @@ export const IconBook = (p: IconProps) => (
   </Svg>
 )
 
+// 단어장 — 펼친 책(가운데 책등 + 좌우 페이지)
+export const IconVocab = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 6.5v13" />
+    <path d="M12 6.5C10.3 5.3 7.8 4.8 4 5.2v12.6c3.8-.4 6.3.1 8 1.3" />
+    <path d="M12 6.5c1.7-1.2 4.2-1.7 8-1.3v12.6c-3.8-.4-6.3.1-8 1.3" />
+  </Svg>
+)
+
 export const IconChart = (p: IconProps) => (
   <Svg {...p}>
     <line x1="6" y1="20" x2="6" y2="14" />

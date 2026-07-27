@@ -1,6 +1,6 @@
 import { NavLink, Link } from 'react-router-dom'
 import type { ComponentType } from 'react'
-import { IconBook, IconChart, IconHome, IconUser, AppLogo } from '@/shared/ui'
+import { IconVocab, IconChart, IconHome, IconUser, AppLogo } from '@/shared/ui'
 
 interface Item {
   to: string
@@ -11,7 +11,7 @@ interface Item {
 
 const LEFT: Item[] = [
   { to: '/', label: '홈', icon: IconHome, end: true },
-  { to: '/wrong-note', label: '오답노트', icon: IconBook },
+  { to: '/wrong-note', label: '단어장', icon: IconVocab },
 ]
 const RIGHT: Item[] = [
   { to: '/report', label: '리포트', icon: IconChart },
