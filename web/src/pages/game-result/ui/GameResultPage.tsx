@@ -53,6 +53,16 @@ export function GameResultPage() {
   const { type, items, totalXp, levelUp } = state
   const total = items.length
   const counts = gradeCounts(items)
+  // XP 0 안내 — 적립 대상(알아요/정답)이 있었는데 0이면 오늘 한도 도달, 없으면 획득 방법 안내
+  const hasReward = type === 'CLOZE' ? items.some((i) => i.correct) : counts.KNOW > 0
+  const xpNote =
+    totalXp > 0
+      ? null
+      : hasReward
+        ? '오늘 경험치 한도를 모두 채웠어요 (하루 100 XP)'
+        : type === 'CLOZE'
+          ? '정답을 맞히면 경험치를 받아요'
+          : '알아요를 고르면 경험치를 받아요'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: GRADIENT, overflow: 'hidden' }}>
@@ -80,7 +90,7 @@ export function GameResultPage() {
           )}
         </div>
 
-        <XpSummary totalXp={totalXp} />
+        <XpSummary totalXp={totalXp} note={xpNote} />
 
         {/* 통계 카드 */}
         <div
@@ -116,8 +126,8 @@ export function GameResultPage() {
   )
 }
 
-// 경험치 요약 — 0부터 차오르는 카운트업 + gold 그라디언트
-function XpSummary({ totalXp }: { totalXp: number }) {
+// 경험치 요약 — 0부터 차오르는 카운트업 + gold 그라디언트 (+ XP 0 이유 안내)
+function XpSummary({ totalXp, note }: { totalXp: number; note: string | null }) {
   const shown = useCountUp(totalXp)
   return (
     <div
@@ -147,6 +157,11 @@ function XpSummary({ totalXp }: { totalXp: number }) {
       >
         +{shown} XP
       </span>
+      {note && (
+        <span style={{ marginTop: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-text-tertiary)', textAlign: 'center', lineHeight: 1.4 }}>
+          {note}
+        </span>
+      )}
     </div>
   )
 }
