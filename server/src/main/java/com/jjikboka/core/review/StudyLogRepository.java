@@ -72,4 +72,11 @@ interface StudyLogRepository extends JpaRepository<StudyLog, Long> {
     @Query("SELECT s.result, s.createdAt FROM StudyLog s WHERE s.userId = :userId AND s.activity = 'CLOZE' "
             + "ORDER BY s.createdAt DESC")
     List<Object[]> recentClozeResults(@Param("userId") Long userId, Pageable pageable);
+
+    /**
+     * 카드별 등급 집계(단어장 분류·칩, API-7) — [cardId, result, count]. 활동(FLASHCARD·CLOZE 등) 무관하게
+     * result(KNOW/DONT_KNOW/CONFUSED)별로 센다. 서비스에서 카드별 알아요·몰라요·헷갈려요 카운트로 접는다.
+     */
+    @Query("SELECT s.cardId, s.result, COUNT(s) FROM StudyLog s WHERE s.userId = :userId GROUP BY s.cardId, s.result")
+    List<Object[]> gradeCountsByCard(@Param("userId") Long userId);
 }

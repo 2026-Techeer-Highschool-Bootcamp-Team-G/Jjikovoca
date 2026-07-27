@@ -16,6 +16,8 @@ public record FeedCard(
         String subject,
         String word,
         String contextMeaning,
+        String example,
+        String exampleMeaning,
         String concept,
         String summary,
         int boxLevel,
@@ -25,13 +27,18 @@ public record FeedCard(
         String pos,
         List<String> tags,
         String emoji,
+        int knowCount,
+        int dontKnowCount,
+        int confusedCount,
         List<ExamTag> exams
 ) {
 
     static FeedCard of(CardSummary card, List<ExamTag> exams) {
         return new FeedCard(card.id(), card.type(), card.subject(), card.word(), card.contextMeaning(),
-                card.concept(), card.summary(), card.boxLevel(), card.graduated(), card.createdAt(),
+                card.example(), card.exampleMeaning(), card.concept(), card.summary(),
+                card.boxLevel(), card.graduated(), card.createdAt(),
                 card.pronunciation(), card.pos(), card.tags(), card.emoji(),
+                card.knowCount(), card.dontKnowCount(), card.confusedCount(),
                 exams == null ? List.of() : exams);
     }
 }

@@ -9,6 +9,7 @@ import java.math.RoundingMode;
 import java.sql.Date;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,30 @@ public class StudyStatsService {
     @Transactional(readOnly = true)
     public long studyCount(Long userId, LocalDateTime start, LocalDateTime end) {
         return studyLogRepository.countInPeriod(userId, start, end);
+    }
+
+    /**
+     * 카드별 등급 카운트(단어장 분류·칩, API-7) — 사용자의 모든 study_log를 카드 단위로 접어 알아요·몰라요·헷갈려요 수를 낸다.
+     * 학습 이력이 없는 카드는 맵에 없다(호출부가 {@link GradeCount#ZERO}로 기본 처리). 결과 문자열(KNOW/DONT_KNOW/CONFUSED)만 집계.
+     */
+    @Transactional(readOnly = true)
+    public Map<Long, GradeCount> gradeCounts(Long userId) {
+        Map<Long, int[]> tally = new HashMap<>();   // cardId → [know, dontKnow, confused]
+        for (Object[] row : studyLogRepository.gradeCountsByCard(userId)) {
+            Long cardId = (Long) row[0];
+            String result = (String) row[1];
+            int count = (int) ((Number) row[2]).longValue();
+            int[] g = tally.computeIfAbsent(cardId, k -> new int[3]);
+            switch (result) {
+                case "KNOW" -> g[0] += count;
+                case "DONT_KNOW" -> g[1] += count;
+                case "CONFUSED" -> g[2] += count;
+                default -> { /* 그 외 결과는 등급 분류에 무관 */ }
+            }
+        }
+        Map<Long, GradeCount> counts = new HashMap<>();
+        tally.forEach((cardId, g) -> counts.put(cardId, new GradeCount(g[0], g[1], g[2])));
+        return counts;
     }
 
     /**
