@@ -62,6 +62,20 @@ class RealGeminiClient implements GeminiClient {
      */
     private static final Map<String, Object> WORD_SCHEMA = buildWordSchema();
 
+    /** 예문 보정용 스키마(#399) — example·exampleMeaning 두 필드를 required로 강제. */
+    private static final Map<String, Object> PAIR_SCHEMA = buildPairSchema();
+
+    private static Map<String, Object> buildPairSchema() {
+        Map<String, Object> properties = new LinkedHashMap<>();
+        properties.put("example", strType());
+        properties.put("exampleMeaning", strType());
+        Map<String, Object> schema = new LinkedHashMap<>();
+        schema.put("type", "OBJECT");
+        schema.put("properties", properties);
+        schema.put("required", List.of("example", "exampleMeaning"));
+        return schema;
+    }
+
     private static Map<String, Object> buildWordSchema() {
         Map<String, Object> properties = new LinkedHashMap<>();
         properties.put("subject", strType());
@@ -114,12 +128,41 @@ class RealGeminiClient implements GeminiClient {
                     answerFormat(node),
                     jsonString(node, "solutions"), str(node, "answerValue", null), jsonString(node, "diagnosis"));
         }
+        String word = str(node, "word", null);
+        String example = str(node, "example", null);
+        String exampleMeaning = str(node, "exampleMeaning", null);
+        // 잔여 보정(#399) — 스키마를 걸어도 드물게 예문이 비거나(빈 문자열), 옛 캐시가 null을 물고 있는 경우가 있다.
+        // 둘 중 하나라도 비면 flash로 예문·한글번역을 보정해 항상 채운다(원인 불문). 예문이 있으면 그 문장을 그대로 번역해 정합을 지킨다.
+        if (isBlank(example) || isBlank(exampleMeaning)) {
+            String[] pair = examplePair(word, example);
+            example = isBlank(example) ? pair[0] : example;
+            exampleMeaning = isBlank(exampleMeaning) ? pair[1] : exampleMeaning;
+        }
         return new AnalysisContent(
                 MODEL, str(node, "subject", "ENGLISH"),
-                str(node, "word", null), str(node, "contextMeaning", null),
-                str(node, "dictMeaning", null), str(node, "example", null), str(node, "exampleMeaning", null),
+                word, str(node, "contextMeaning", null),
+                str(node, "dictMeaning", null), example, exampleMeaning,
                 str(node, "pronunciation", null), str(node, "pos", null), strList(node, "tags"), str(node, "emoji", null),
                 null, null, null, null, null, null, null, null, null, null);
+    }
+
+    /**
+     * 예문·한글번역 보정 쌍(#399). existingExample이 있으면 그 문장을 그대로 한국어로 번역해 [예문, 번역]을 돌려주고(정합 유지),
+     * 없으면 단어로 새 예문+번역을 한 번에 생성한다(responseSchema로 두 필드 강제). flash 체인(fast=false)으로 안정성 우선.
+     */
+    private String[] examplePair(String word, String existingExample) {
+        if (!isBlank(existingExample)) {
+            String prompt = "다음 영어 문장의 자연스러운 한국어 번역만 출력하라(따옴표·설명 없이):\n" + existingExample;
+            return new String[]{existingExample, geminiApi.generate(prompt, List.of(), false).strip()};
+        }
+        String prompt = "영어 단어 또는 숙어 '" + word + "'를 자연스럽게 포함한 새 영어 예문 한 문장과 그 한국어 번역을 "
+                + "아래 JSON만 출력하라(코드블록·설명 없이). {\"example\":\"영어 예문 한 문장\",\"exampleMeaning\":\"위 예문의 한국어 번역\"}";
+        JsonNode node = readJson(geminiApi.generate(prompt, List.of(), true, false, PAIR_SCHEMA));
+        return new String[]{str(node, "example", null), str(node, "exampleMeaning", null)};
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     @Override
