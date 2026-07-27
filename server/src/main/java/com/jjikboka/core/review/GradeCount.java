@@ -9,7 +9,7 @@ package com.jjikboka.core.review;
  */
 public record GradeCount(int know, int dontKnow, int confused) {
 
-    static final GradeCount ZERO = new GradeCount(0, 0, 0);
+    public static final GradeCount ZERO = new GradeCount(0, 0, 0);
 
     /** 졸업완료 — 알아요 누적 4회 이상. */
     public boolean graduated() {
