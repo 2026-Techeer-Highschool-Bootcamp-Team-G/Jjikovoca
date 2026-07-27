@@ -39,8 +39,10 @@ class CardController {
             @RequestParam(required = false) String subject,
             @RequestParam(required = false) Long examId,
             @RequestParam(defaultValue = "false") boolean untagged,
-            @RequestParam(required = false) String q) {
-        CardFeedResponse response = new CardFeedResponse(feedFacade.getFeed(userId, subject, examId, untagged, q));
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        CardFeedResponse response = feedFacade.getFeed(userId, subject, examId, untagged, q, page, size);
         return ResponseEntity.ok(ApiResponse.ok(response, "카드 목록 조회가 완료되었습니다."));
     }
 
