@@ -85,6 +85,8 @@ export function ReportPage() {
     const key = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(i + 1)}`
     return grassByDate.get(key)?.level ?? 0
   })
+  // 이번 달 1일의 요일(0=일~6=토) — 그 수만큼 그리드 앞에 빈 칸을 넣어 날짜를 실제 요일 열에 맞춘다
+  const firstWeekday = new Date(today.getFullYear(), today.getMonth(), 1).getDay()
   const totalStudyMin = grass.reduce((a, g) => a + g.minutes, 0)
   const activeDays = grass.filter((g) => g.count > 0).length
 
@@ -133,6 +135,16 @@ export function ReportPage() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 34px)', gap: 6 }}>
+              {/* 요일 헤더 — 일요일 시작(WEEKDAY 순서와 동일) */}
+              {WEEKDAY.map((w) => (
+                <span key={`wd-${w}`} style={{ width: 34, textAlign: 'center', fontSize: 11, fontWeight: 500, color: 'var(--color-text-tertiary)' }}>
+                  {w}
+                </span>
+              ))}
+              {/* 월 시작 요일 오프셋 — 1일이 실제 요일 열에서 시작하도록 빈 칸 */}
+              {Array.from({ length: firstWeekday }, (_, i) => (
+                <span key={`off-${i}`} style={{ width: 34, height: 34 }} aria-hidden />
+              ))}
               {monthLevels.map((lvl, i) => (
                 <span
                   key={i}
