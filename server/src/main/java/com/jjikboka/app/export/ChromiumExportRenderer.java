@@ -8,6 +8,10 @@ import com.microsoft.playwright.Playwright;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -22,10 +26,12 @@ import java.util.List;
 @ConditionalOnProperty(prefix = "app.export", name = "renderer", havingValue = "chromium")
 class ChromiumExportRenderer implements ExportRenderer {
 
+    private static final String WORD_TEST_TEMPLATE = "templates/export/word-test.html";
+
     @Override
     public Rendered render(String type, List<CardSummary> cards) {
         boolean image = "JPG_CARD".equals(type);
-        String html = buildHtml(type, cards);
+        String html = "PDF_WORDTEST".equals(type) ? buildWordTestHtml(cards) : buildHtml(type, cards);
         try (Playwright playwright = Playwright.create()) {
             Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
             try {
@@ -38,6 +44,40 @@ class ChromiumExportRenderer implements ExportRenderer {
             } finally {
                 browser.close();
             }
+        }
+    }
+
+    /**
+     * 단어 테스트 PDF(PDF_WORDTEST) — 리소스 템플릿(word-test.html)에 데이터를 주입한다. 디자인(HTML·CSS)은 자산으로 분리하고
+     * 여기선 번호+단어(필기선)·번호+한글뜻 조각만 만들어 자리표시자를 치환한다. 정답 미노출 원칙과 무관(뜻은 정답선으로 분리 인쇄).
+     */
+    private String buildWordTestHtml(List<CardSummary> cards) {
+        StringBuilder words = new StringBuilder();
+        StringBuilder answers = new StringBuilder();
+        int index = 1;
+        for (CardSummary card : cards) {
+            words.append("<li class=\"item\"><span class=\"num\">").append(index)
+                    .append("</span><span class=\"word\">").append(escape(card.word()))
+                    .append("</span><span class=\"line\"></span></li>");
+            answers.append("<li class=\"answer\"><span class=\"num\">").append(index)
+                    .append(".</span> ").append(escape(card.contextMeaning())).append("</li>");
+            index++;
+        }
+        return loadTemplate(WORD_TEST_TEMPLATE)
+                .replace("{{COUNT}}", String.valueOf(cards.size()))
+                .replace("{{WORDS}}", words.toString())
+                .replace("{{ANSWERS}}", answers.toString());
+    }
+
+    /** 클래스패스 템플릿을 UTF-8 문자열로 읽는다. 없으면 배포 누락이므로 즉시 예외(렌더 실패 → 워커 환불). */
+    private String loadTemplate(String path) {
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(path)) {
+            if (in == null) {
+                throw new IllegalStateException("내보내기 템플릿을 찾을 수 없습니다: " + path);
+            }
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException("내보내기 템플릿 읽기 실패: " + path, e);
         }
     }
 
