@@ -58,6 +58,11 @@ app:
   export:
     dir: ${APP_EXPORT_DIR:./data/exports}
     renderer: ${APP_EXPORT_RENDERER:pdfbox}   # pdfbox | stub | chromium
+  # 시현용 하드캡 — 무료 단어 추출(분석)을 총 N회로 제한(프리미엄 무관). unlimited-email만 예외.
+  # 시현 종료 후 APP_DEMO_EXTRACT_LIMIT를 크게(예: 100000) 주면 캡 해제.
+  demo:
+    extract-limit: ${APP_DEMO_EXTRACT_LIMIT:3}
+    unlimited-email: ${APP_DEMO_UNLIMITED_EMAIL:jjikovoca@gmail.com}
 
 # Gemini 연동 (API-6·16·41). 기본은 모의(mock=true) — 키·원가 없이 흐름이 돌아간다.
 # 실 연동은 GEMINI_MOCK=false + GEMINI_API_KEY 주입 시 RealGeminiClient가 뜬다(계약 불변, 토글만 전환).
