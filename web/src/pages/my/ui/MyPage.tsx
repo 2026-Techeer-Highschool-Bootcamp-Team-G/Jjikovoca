@@ -5,6 +5,7 @@ import { GameStatusCard } from '@/widgets/game-status'
 import { fetchMe, deactivatePremium } from '@/entities/user'
 import { fetchExpSummary } from '@/entities/exp'
 import { fetchExams } from '@/entities/exam'
+import { logout } from '@/features/auth'
 
 // ISO → "M월 D일"
 function mmdd(iso?: string | null): string {
@@ -44,6 +45,15 @@ export function MyPage() {
   const cancel = useMutation({
     mutationFn: deactivatePremium,
     onSuccess: () => qc.invalidateQueries({ queryKey: ['me'] }),
+  })
+
+  // 로그아웃 — refresh 폐기 + 토큰 제거(항상). 다른 계정 데이터가 남지 않게 캐시 비우고 로그인으로
+  const logoutM = useMutation({
+    mutationFn: logout,
+    onSettled: () => {
+      qc.clear()
+      navigate('/login', { replace: true })
+    },
   })
 
   return (
@@ -86,7 +96,12 @@ export function MyPage() {
       <ListRow title="📁 원문 보관함" showArrow onClick={() => navigate('/archive')} />
 
       <SectionLabel>계정</SectionLabel>
-      <ListRow title="📢 공지사항" showArrow />
+      <ListRow title="📢 공지사항" showArrow divider />
+      <ListRow
+        title="🚪 로그아웃"
+        value={logoutM.isPending ? '처리 중…' : undefined}
+        onClick={() => !logoutM.isPending && logoutM.mutate()}
+      />
 
       <button
         type="button"
@@ -98,10 +113,11 @@ export function MyPage() {
           textAlign: 'center',
           fontSize: 12,
           color: 'var(--color-text-tertiary)',
+          textDecoration: 'underline',
           cursor: 'pointer',
         }}
       >
-        로그아웃 &nbsp;·&nbsp; 탈퇴하기
+        회원 탈퇴
       </button>
     </div>
   )
