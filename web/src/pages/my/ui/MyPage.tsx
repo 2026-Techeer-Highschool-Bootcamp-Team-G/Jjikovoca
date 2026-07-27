@@ -96,7 +96,6 @@ export function MyPage() {
       <ListRow title="📁 원문 보관함" showArrow onClick={() => navigate('/archive')} />
 
       <SectionLabel>계정</SectionLabel>
-      <ListRow title="📢 공지사항" showArrow divider />
       <ListRow title="🔒 개인정보 처리방침" showArrow divider onClick={() => navigate('/privacy')} />
       <ListRow
         title="🚪 로그아웃"
