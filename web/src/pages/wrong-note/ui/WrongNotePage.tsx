@@ -101,31 +101,8 @@ export function WrongNotePage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px var(--spacing-xl) 0',
-        }}
-      >
+      <div style={{ padding: '12px var(--spacing-xl) 0' }}>
         <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--color-text-primary)' }}>단어장</h1>
-        <button
-          type="button"
-          onClick={() => setSetupOpen(true)}
-          style={{
-            background: 'var(--color-brand-primary)',
-            color: 'var(--color-text-inverse)',
-            border: 'none',
-            borderRadius: 'var(--radius-lg)',
-            padding: '5px 12px',
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}
-        >
-          PDF ↗
-        </button>
       </div>
 
       <div style={{ padding: '12px var(--spacing-xl) 0' }}>
