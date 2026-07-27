@@ -82,30 +82,29 @@ export function CardRow({
           ✓
         </span>
       )}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, minWidth: 0 }}>
-          <span
-            style={{
-              fontSize: 16,
-              fontWeight: 700,
-              color: 'var(--color-text-primary)',
-              // 재생 중 지금 듣는 단어에 형광펜 하이라이트 (오답노트 QA)
-              padding: speaking ? '0 3px' : undefined,
-              borderRadius: speaking ? 4 : undefined,
-              background: speaking
-                ? 'linear-gradient(transparent 58%, var(--color-accent) 58%)'
-                : undefined,
-              transition: 'background 160ms ease',
-            }}
-          >
-            {row.title}
+      {/* 단어 → 발음기호 → 스피커(발음기호 바로 오른쪽) */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flexWrap: 'wrap' }}>
+        <span
+          style={{
+            fontSize: 16,
+            fontWeight: 700,
+            color: 'var(--color-text-primary)',
+            // 재생 중 지금 듣는 단어에 형광펜 하이라이트
+            padding: speaking ? '0 3px' : undefined,
+            borderRadius: speaking ? 4 : undefined,
+            background: speaking
+              ? 'linear-gradient(transparent 58%, var(--color-accent) 58%)'
+              : undefined,
+            transition: 'background 160ms ease',
+          }}
+        >
+          {row.title}
+        </span>
+        {row.pronunciation && (
+          <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>
+            {row.pronunciation}
           </span>
-          {row.pronunciation && (
-            <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap' }}>
-              {row.pronunciation}
-            </span>
-          )}
-        </div>
+        )}
         {row.showSpeaker && (
           <button
             type="button"
