@@ -119,9 +119,9 @@ function FaceContent({ card, showMeaning, img }: { card: FlashCardModel; showMea
       {card.example ? (
         <div style={{ background: 'var(--color-bg-secondary)', borderRadius: 12, padding: 12, display: 'flex', flexDirection: 'column', gap: 5 }}>
           <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--color-text-tertiary)' }}>예문</span>
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: 'var(--color-text-primary)' }}>{card.example}</p>
+          <p style={{ margin: 0, fontSize: 16, lineHeight: '20px', color: 'var(--color-text-primary)' }}>{card.example}</p>
           {card.exampleTranslation && (
-            <p style={{ margin: 0, fontSize: 12, lineHeight: 1.6, color: 'var(--color-text-secondary)' }}>{card.exampleTranslation}</p>
+            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: 'var(--color-text-secondary)' }}>{card.exampleTranslation}</p>
           )}
         </div>
       ) : (
