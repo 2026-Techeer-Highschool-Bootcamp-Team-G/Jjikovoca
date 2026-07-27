@@ -2,7 +2,9 @@ import type { ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { NavigationBar } from '@/shared/ui'
 
-const EMAIL = 'jjikovoca@gmail.com'
+const EMAIL = 'techeer.team.g@gmail.com'
+const OFFICER = '조성훈'
+const PHONE = '010-2835-7183'
 const EFFECTIVE = '2026년 7월 28일'
 
 /**
@@ -79,8 +81,10 @@ export function PrivacyPage() {
 
         <Section title="7. 문의처">
           <p style={p}>
-            개인정보 처리에 관한 문의는 아래로 연락해 주세요.<br />
-            이메일: <a href={`mailto:${EMAIL}`} style={{ color: 'var(--color-brand-primary)', fontWeight: 600 }}>{EMAIL}</a>
+            개인정보 처리에 관한 문의는 개인정보 보호책임자에게 연락해 주세요.<br />
+            개인정보 보호책임자: {OFFICER}<br />
+            이메일: <a href={`mailto:${EMAIL}`} style={{ color: 'var(--color-brand-primary)', fontWeight: 600 }}>{EMAIL}</a><br />
+            연락처: <a href={`tel:${PHONE.replace(/-/g, '')}`} style={{ color: 'var(--color-brand-primary)', fontWeight: 600 }}>{PHONE}</a>
           </p>
         </Section>
 
