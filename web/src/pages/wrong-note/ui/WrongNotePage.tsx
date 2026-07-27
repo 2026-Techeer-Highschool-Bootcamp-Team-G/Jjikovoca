@@ -35,6 +35,9 @@ function toRow(c: Card): CardRowView {
     exams: exams.map((e) => e.title),
     untagged: exams.length === 0,
     showSpeaker: isWord,
+    // 단어 카드 뒷면 — 클릭 시 예문(영어)·해석(한글) 펼침. 백엔드가 제공할 때만 값이 있다
+    example: isWord ? (c.example ?? undefined) : undefined,
+    exampleTranslation: isWord ? (c.exampleMeaning ?? undefined) : undefined,
   }
 }
 
@@ -152,6 +155,7 @@ export function WrongNotePage() {
             onSpeak={() => handleSpeak(row)}
             onExamTag={row.untagged ? () => navigate('/exam-select', { state: { cardId: row.id } }) : undefined}
             onClick={() => navigator.vibrate?.(12)}
+            expandable
           />
         ))}
         {rows.length === 0 && (
