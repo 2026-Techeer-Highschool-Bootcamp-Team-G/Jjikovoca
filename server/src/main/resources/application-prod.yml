@@ -13,6 +13,10 @@ gemini:
   mock: false
   api-key: ${GEMINI_API_KEY}
 
+app:
+  export:
+    renderer: ${APP_EXPORT_RENDERER:chromium}   # prod는 디자인 PDF(word-test.html) 위해 chromium. 이미지에 Chromium·한글폰트 포함(Dockerfile)
+
 logging:
   level:
     org.hibernate.SQL: warn        # prod에선 SQL 로그 off
