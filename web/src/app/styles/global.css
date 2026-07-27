@@ -388,3 +388,47 @@ button {
     transform: scale(1.6);
   }
 }
+
+/* 콤보 불꽃 — 활활 타오르듯 불규칙하게 흔들림(콤보↑ 시 duration 짧게 = 더 세게). 개수·속도는 컴포넌트에서 조절 */
+@keyframes jjik-flame {
+  0% {
+    transform: scale(1) rotate(0deg) translateY(0);
+    opacity: 0.9;
+  }
+  25% {
+    transform: scale(1.12) rotate(-5deg) translateY(-2px);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.94) rotate(4deg) translateY(0);
+    opacity: 0.82;
+  }
+  75% {
+    transform: scale(1.08) rotate(-3deg) translateY(-1px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg) translateY(0);
+    opacity: 0.9;
+  }
+}
+
+/* 잘못된 입력 — 좌우로 빠르게 흔들림 1회(0.4s). 무한 jjik-shake 와 달리 에러 피드백 1회용 */
+@keyframes jjik-error-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
