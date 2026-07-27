@@ -14,6 +14,7 @@ import { ArchivePage } from '@/pages/archive'
 import { OnboardingPage } from '@/pages/onboarding'
 import { LoginPage } from '@/pages/login'
 import { RegisterPage } from '@/pages/register'
+import { PrivacyPage } from '@/pages/privacy'
 import { NotificationsPage } from '@/pages/notifications'
 import { PaywallPage } from '@/pages/paywall'
 import { PayPage } from '@/pages/pay'
@@ -40,6 +41,7 @@ export const router = createBrowserRouter([
       { path: 'onboarding', element: <OnboardingPage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
+      { path: 'privacy', element: <PrivacyPage /> },
     ],
   },
   // 보호 — 인증 필요(가드가 미인증 시 /login 으로 리다이렉트)
