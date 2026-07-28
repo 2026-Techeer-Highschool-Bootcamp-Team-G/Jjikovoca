@@ -35,7 +35,7 @@ export function OnboardingPage() {
     else finish()
   }
   const finish = () => {
-    localStorage.setItem('jjik.onboarded', '1') // 최초 1회 노출 — 이후 로그인 직행
+    // 온보딩 노출 여부는 인증 상태로만 판단한다(RequireAuth) — 로그인 전이면 항상 온보딩
     navigate('/login')
   }
 
