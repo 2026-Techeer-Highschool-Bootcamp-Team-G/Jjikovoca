@@ -1,0 +1,17 @@
+<!-- @dsCard group="Colors" viewport="700x180" name="다크 테마" subtitle="data-theme=\"dark\" 스코프가 덮어쓰는 시맨틱 색 (FR-17)" -->
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css"><style>
+body{margin:0;padding:16px;background:var(--color-bg-secondary);font-family:var(--font-sans)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.pane{border-radius:12px;padding:12px;background:var(--color-bg-primary);border:1px solid var(--color-border-default);display:flex;flex-direction:column;gap:8px}
+.ttl{font-size:11px;font-weight:700;color:var(--color-text-primary)}
+.sw{display:flex;gap:6px}.sw span{flex:1;height:26px;border-radius:6px;border:1px solid var(--color-border-default)}
+.cap{font-size:10px;color:var(--color-text-tertiary)}
+</style></head><body>
+<div class="grid">
+  <div class="pane"><span class="ttl">라이트 · 배경/표면</span><div class="sw"><span style="background:var(--color-bg-secondary)"></span><span style="background:var(--color-bg-primary)"></span><span style="background:var(--color-bg-elevated)"></span></div><span class="cap">#f2f4f6 · #ffffff · #ffffff</span></div>
+  <div class="pane" data-theme="dark" style="background:var(--color-bg-primary)"><span class="ttl">다크 · 배경/표면</span><div class="sw"><span style="background:var(--color-bg-secondary)"></span><span style="background:var(--color-bg-primary)"></span><span style="background:var(--color-bg-elevated)"></span></div><span class="cap">#121317 · #1c1d23 · #23252c</span></div>
+  <div class="pane"><span class="ttl">라이트 · 텍스트/브랜드</span><div class="sw"><span style="background:var(--color-text-primary)"></span><span style="background:var(--color-text-secondary)"></span><span style="background:var(--color-brand-primary)"></span><span style="background:var(--color-brand-weak)"></span></div><span class="cap">#191f28 · #6b7684 · #3182f6 · #e8f3ff</span></div>
+  <div class="pane" data-theme="dark" style="background:var(--color-bg-primary)"><span class="ttl">다크 · 텍스트/브랜드</span><div class="sw"><span style="background:var(--color-text-primary)"></span><span style="background:var(--color-text-secondary)"></span><span style="background:var(--color-brand-primary)"></span><span style="background:var(--color-brand-weak)"></span></div><span class="cap">#f2f4f6 · #a4acb9 · #4593fc · #17304d</span></div>
+</div>
+</body></html>

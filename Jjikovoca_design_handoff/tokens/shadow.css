@@ -1,0 +1,11 @@
+:root{
+  --shadow-card:0 2px 8px rgba(0,0,0,0.08);
+  --shadow-modal:0 8px 24px rgba(0,0,0,0.16);
+  --shadow-fab:0 5px 12px rgba(14,61,140,0.35);
+
+  /* 실측 예외 — 플래시카드 면, 로고, XP 칩 */
+  --shadow-flashcard:0 8px 24px rgba(0,0,0,0.12);
+  --shadow-logo:0 8px 18px rgba(25,31,40,0.14);
+  --shadow-xp-chip:0 6px 16px rgba(242,191,26,0.5);
+  --shadow-select-dot:0 1px 3px rgba(0,0,0,0.12);
+}

@@ -1,0 +1,28 @@
+/* 타이포 토큰 — 앱 실측값. 전용 타입 스케일 없이 컴포넌트별 px 값을 그대로 사용하므로 실측치를 토큰화했다. */
+:root{
+  --font-sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard Variable",Pretendard,system-ui,"Segoe UI",sans-serif;
+  --font-body:var(--font-sans);
+
+  /* weight — 400 기본 / 500 강조(라벨·선택) / 700 제목·단어 */
+  --font-weight-regular:400;
+  --font-weight-medium:500;
+  --font-weight-bold:700;
+
+  /* size — 앱 실측 스케일 */
+  --font-size-10:10px;   /* 탭 라벨, 태그 */
+  --font-size-11:11px;   /* 배지(sm), 헬퍼, XP */
+  --font-size-12:12px;   /* 캡션, 보조 설명 */
+  --font-size-13:13px;   /* 리스트 부제, 링크, 칩 카운트 */
+  --font-size-14:14px;   /* 본문 작게, 칩 */
+  --font-size-15:15px;   /* 본문·버튼(md)·입력 */
+  --font-size-16:16px;   /* 카드 행 제목, 예문 */
+  --font-size-17:17px;   /* 리스트 제목, 내비 타이틀, 버튼(lg) */
+  --font-size-20:20px;   /* 홈 브랜드 로고타입 */
+  --font-size-22:22px;   /* 페이지 제목 */
+  --font-size-28:28px;   /* 단어(플래시카드), 로그인 타이틀 */
+
+  /* line-height */
+  --line-height-tight:1.2;
+  --line-height-snug:1.5;
+  --line-height-normal:1.6;
+}

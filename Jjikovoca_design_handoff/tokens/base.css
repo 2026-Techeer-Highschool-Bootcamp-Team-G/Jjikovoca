@@ -1,0 +1,4 @@
+/* 앱 리셋 — web/src/app/styles/global.css 발췌 */
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:var(--font-sans);background:var(--color-bg-secondary);color:var(--color-text-primary);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+button{font:inherit;cursor:pointer}

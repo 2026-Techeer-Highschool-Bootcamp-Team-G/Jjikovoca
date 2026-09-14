@@ -1,0 +1,9 @@
+/* 찍어보카는 자체 웹폰트를 번들하지 않는다. 코드베이스 스택: -apple-system → Apple SD Gothic Neo → Pretendard → system-ui.
+   Pretendard 는 시스템에 없을 수 있어 CDN(jsDelivr) 가변 폰트를 선언해 동일한 렌더를 재현한다. (대체 표기: 저장소에 폰트 바이너리 없음) */
+@font-face{
+  font-family:"Pretendard Variable";
+  font-weight:45 920;
+  font-style:normal;
+  font-display:swap;
+  src:url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/woff2/PretendardVariable.woff2") format("woff2-variations");
+}

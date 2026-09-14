@@ -1,0 +1,7 @@
+{
+  "tool_name": "mcp__claude_ai_Notion__notion-update-page",
+  "tool_input_preview": "{\"page_id\":\"3db04552316d81088819ee1341f7bc55\",\"command\":\"update_content\",\"content_updates\":[{\"old_str\":\"| 2026-09-14 | 최초 제작·등록(기록 규칙 §5 프로젝트 종료 동기화를 스킬화). 상태=실험(end-to-end 호출 검증 전). |\",\"new_str\":\"| 2...",
+  "error": "{\"name\":\"APIResponseError\",\"code\":\"validation_error\",\"status\":400,\"headers\":{},\"body\":\"{\\\"object\\\":\\\"error\\\",\\\"status\\\":400,\\\"code\\\":\\\"validation_error\\\",\\\"message\\\":\\\"No matches found for | 2026-09-14 | 최초 제작·등록(기록 규칙 §5 프로젝트 종료 동기화를 스킬화). 상태=실험(end-to-end 호출 검증 전). |.\\\",\\\"request_id\\\":\\\"0f12c1fe-674a-4fbf-822e-7bcc2034eafa\\\"}\",\"request_id\":\"0f12c1fe-674a-4fbf-822e-7bcc2034eafa\",\"message\":\"No matches found for | 2026-09-14 | 최초 제작·등록(기록 규칙 §5 프로젝트 종료 동기화를 스킬화). 상태=실험(end-to-end 호출 검증 전). |.\"}",
+  "timestamp": "2026-09-14T00:37:03.683Z",
+  "retry_count": 2
+}

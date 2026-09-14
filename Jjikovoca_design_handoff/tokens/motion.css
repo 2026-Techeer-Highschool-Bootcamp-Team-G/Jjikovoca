@@ -1,0 +1,68 @@
+/* 모션 — web/src/app/styles/global.css 의 키프레임. 이름(jjik-*)을 그대로 유지해 코드/디자인 매핑이 어긋나지 않게 한다. */
+:root{
+  --ease-standard:cubic-bezier(0.4,0,0.2,1); /* @kind other */   /* 탭 인디케이터 슬라이드 */
+  --ease-flip:cubic-bezier(0.2,0.8,0.3,1); /* @kind other */     /* 카드 3D 플립 0.5s */
+  --ease-spring:cubic-bezier(0.2,0.9,0.3,1.2); /* @kind other */ /* 성공 팝 오버슈트 */
+  --duration-fast:120ms; /* @kind other */   /* 눌림 */
+  --duration-base:200ms; /* @kind other */   /* 색 전환 */
+  --duration-slow:500ms; /* @kind other */   /* 플립 */
+}
+
+@keyframes omc-overlay-in{from{opacity:0}to{opacity:1}}
+@keyframes omc-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+/* 인식 성공: 종이 둘레 노란 글로우 펄스 */
+@keyframes jjik-edge-glow{0%,100%{opacity:.4}50%{opacity:.95}}
+/* 스파클 트윙클(인스턴스마다 delay 스태거) */
+@keyframes jjik-twinkle{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+/* 브래킷 등장 스케일-인 */
+@keyframes jjik-bracket-in{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+/* 캡처: 화이트 플래시 */
+@keyframes jjik-flash{0%{opacity:0}24%{opacity:.9}100%{opacity:0}}
+/* 캡처: 스파클 버스트 400ms */
+@keyframes jjik-burst{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}40%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.7)}}
+/* 인식 전: 스캔 라인 */
+@keyframes jjik-scan{0%{top:2%;opacity:0}15%{opacity:1}85%{opacity:1}100%{top:96%;opacity:0}}
+/* AI 분석 중: 둥실 떠오름 */
+@keyframes jjik-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+/* 회전 — 스피너·스캔 링 공용 */
+@keyframes jjik-spin{to{transform:rotate(360deg)}}
+/* 스켈레톤 시머 */
+@keyframes jjik-shimmer-sweep{0%{transform:translateX(-140%) skewX(-12deg)}100%{transform:translateX(320%) skewX(-12deg)}}
+/* 오토포커스 링 숨쉬기 */
+@keyframes jjik-breathe{0%,100%{transform:scale(.9);opacity:.45}50%{transform:scale(1.08);opacity:1}}
+/* 통통 튀는 점 3개 */
+@keyframes jjik-dots{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-4px)}}
+/* 네모 박스 마칭 앤츠 */
+@keyframes jjik-march{to{stroke-dashoffset:-18}}
+/* 형광펜 잉크 시머 */
+@keyframes jjik-highlight-shimmer{0%,100%{opacity:.82;filter:saturate(1)}50%{opacity:1;filter:saturate(1.25)}}
+@keyframes jjik-highlight-in{from{transform:scaleY(.4);opacity:.4}to{transform:scaleY(1);opacity:1}}
+/* +5 XP 칩 상승 */
+@keyframes jjik-xp-rise{0%{opacity:0;transform:translate(-50%,12px) scale(.8)}25%{opacity:1}100%{opacity:0;transform:translate(-50%,-44px) scale(1)}}
+/* 인식 완료 체크 팝 */
+@keyframes jjik-check-pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}35%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+/* 셔터 링 펄스 */
+@keyframes jjik-shutter-pulse{0%{opacity:.55;transform:scale(1)}70%{opacity:0;transform:scale(1.5)}100%{opacity:0;transform:scale(1.5)}}
+/* 일일 퀘스트 무지개 텍스트 */
+@keyframes jjik-rainbow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+/* '오늘 복습' 브랜드 글로우 */
+@keyframes jjik-brand-glow{0%,100%{box-shadow:0 0 0 1.5px rgba(49,130,246,.7),0 0 12px rgba(49,130,246,.3)}50%{box-shadow:0 0 0 1.5px rgba(49,130,246,.95),0 0 22px rgba(49,130,246,.6)}}
+/* 주기적 흔들림 */
+@keyframes jjik-shake{0%,88%,100%{transform:translateX(0) rotate(0)}91%{transform:translateX(-1.5px) rotate(-.8deg)}94%{transform:translateX(1.5px) rotate(.8deg)}97%{transform:translateX(-1px) rotate(-.4deg)}}
+/* 발음 재생 중 행 강조 */
+@keyframes jjik-speak-pulse{0%,100%{box-shadow:0 0 0 1.5px rgba(49,130,246,.45),0 0 10px rgba(49,130,246,.18)}50%{box-shadow:0 0 0 1.5px rgba(49,130,246,.85),0 0 18px rgba(49,130,246,.42)}}
+@keyframes jjik-speak-bob{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+/* 성공 팝 + 링 */
+@keyframes jjik-pop-spring{0%{opacity:0;transform:scale(.3)}55%{opacity:1;transform:scale(1.14)}75%{transform:scale(.94)}100%{transform:scale(1)}}
+@keyframes jjik-success-ring{0%{opacity:.6;transform:scale(.6)}100%{opacity:0;transform:scale(1.6)}}
+/* 순차 등장 */
+@keyframes jjik-rise-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+/* 컨페티 (--tx/--ty/--r) */
+@keyframes jjik-confetti-burst{0%{opacity:0;transform:translate(0,0) scale(.5) rotate(0)}15%{opacity:1}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(1) rotate(var(--r))}}
+/* 콤보 불꽃 */
+@keyframes jjik-flame{0%{transform:scale(1) rotate(0) translateY(0);opacity:.9}25%{transform:scale(1.12) rotate(-5deg) translateY(-2px);opacity:1}50%{transform:scale(.94) rotate(4deg) translateY(0);opacity:.82}75%{transform:scale(1.08) rotate(-3deg) translateY(-1px);opacity:1}100%{transform:scale(1) rotate(0) translateY(0);opacity:.9}}
+/* 잘못된 입력 1회 흔들림 */
+@keyframes jjik-error-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+/* 온보딩 형광펜 밑줄 쓸기 */
+@keyframes jjik-hl-sweep{0%{transform:scaleX(0)}45%,100%{transform:scaleX(1)}}

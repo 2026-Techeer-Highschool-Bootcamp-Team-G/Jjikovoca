@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"export PATH=\\\"/opt/homebrew/bin:$PATH\\\"\\nMAIN=/Users/chosunghoon/Desktop/Second_Brain/Project/EduLens/Jjikovoca/Jjikovoca\\ngit -C \\\"$MAIN\\\" fetch origin -q 2>&1 | tail -1\\nfor br in main f...",
+  "error": "Exit code 1\n=== origin/main : AuthController 엔드포인트 ===\n=== origin/feature/7-auth-login : AuthController 엔드포인트 ===\n=== origin/be/9-auth-refresh : AuthController 엔드포인트 ===",
+  "timestamp": "2026-07-23T09:34:26.931Z",
+  "retry_count": 1
+}

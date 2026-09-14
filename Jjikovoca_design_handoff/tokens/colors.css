@@ -1,0 +1,159 @@
+/* 찍어보카 컬러 토큰 — web/src/shared/styles/tokens.css 와 1:1 (Toss TDS 계열 팔레트) */
+:root{
+  /* ===== Primitives ===== */
+  --common-white:#ffffff;
+  --grey-50:#f9fafb;
+  --grey-100:#f2f4f6;
+  --grey-200:#e5e8eb;
+  --grey-300:#d1d6db;
+  --grey-400:#b0b8c1;
+  --grey-500:#8b95a1;
+  --grey-600:#6b7684;
+  --grey-700:#4e5968;
+  --grey-900:#191f28;
+  --blue-500:#3182f6;
+  --blue-600:#2272eb;
+  --teal-500:#1bc1bd;
+  --teal-50:#e7f8f8;
+  --green-500:#05c072;
+  --yellow-500:#ffc342;
+  --yellow-900:#4a3b14;
+  --red-500:#f04452;
+  --highlight-300:#ffe45e;
+
+  /* ===== Semantic — Brand ===== */
+  --color-brand-primary:#3182f6;
+  --color-brand-strong:#2272eb;
+  --color-brand-weak:#e8f3ff;
+
+  /* 형광펜 악센트 — 로고 포인트 컬러. 파랑=주색, 옐로우=악센트(하이라이트·보상·강조) 전용 */
+  --color-accent:#ffd84d;
+  --color-accent-strong:#ffc93d;
+  --color-accent-weak:#fff3d1;
+  --color-on-accent:#191f28;
+
+  /* ===== Semantic — Text ===== */
+  --color-text-primary:#191f28;
+  --color-text-secondary:#6b7684;
+  --color-text-tertiary:#b0b8c1;
+  --color-text-inverse:#ffffff;
+  --color-text-brand:#3182f6;
+  --color-text-danger:#f04452;
+
+  /* ===== Semantic — Surface ===== */
+  --color-bg-primary:#ffffff;
+  --color-bg-secondary:#f2f4f6;
+  --color-bg-elevated:#ffffff;
+  --color-border-default:#e5e8eb;
+
+  /* ===== Semantic — Status ===== */
+  --color-success-primary:#05c072;
+  --color-success-weak:#e8f8f0;
+  --color-warning-primary:#ffc342;
+  --color-warning-weak:#fff9e7;
+  --color-danger-primary:#f04452;
+  --color-danger-weak:#fee9ea;
+
+  --color-highlight:var(--color-accent);
+  --color-overlay-dim:rgba(0,0,0,0.6);
+  --color-overlay-dialog:rgba(20,21,26,0.4);
+
+  /* ===== D-day 경각심 스케일 (DdayCard) ===== */
+  --color-dday-safe-bg:#e3f6ea;
+  --color-dday-safe-fg:#0a8a55;
+  --color-dday-soon-bg:#eef7d6;
+  --color-dday-soon-fg:#5f9a12;
+  --color-dday-near-bg:#fff0dd;
+  --color-dday-near-fg:#e07a1e;
+  --color-dday-urgent-bg:#ffe5e7;
+  --color-dday-urgent-fg:#e5484d;
+
+  /* ===== 결과 색 (정답/오답 accent) ===== */
+  --color-result-correct:#0a8a55;
+  --color-result-wrong:#e5484d;
+
+  /* ===== 알/헷/몰 3단계 자기평가 (FR-18 단어장 누적 횟수) ===== */
+  --color-rating-know:#3182f6;
+  --color-rating-know-weak:#e8f3ff;
+  --color-rating-confused:#e07a1e;
+  --color-rating-confused-weak:#fff0dd;
+  --color-rating-dont-know:#f04452;
+  --color-rating-dont-know-weak:#fee9ea;
+
+  /* ===== 학습 잔데 4단 스일 (FR-14) ===== */
+  --color-grass-0:#f2f4f6;
+  --color-grass-1:#c6e0ff;
+  --color-grass-2:#8ec1fb;
+  --color-grass-3:#4593fc;
+  --color-grass-4:#2272eb;
+
+  /* ===== 그라데이션 ===== */
+  --gradient-logo:linear-gradient(180deg,#4593fc,#2272eb); /* @kind color */
+  --gradient-marker:linear-gradient(180deg,#ffea7a,#ffd84d); /* @kind color */
+  --gradient-concept:linear-gradient(90deg,#e8f3ff 0%,#e7f8f8 100%); /* @kind color */
+  --gradient-premium:linear-gradient(90deg,#191f28,#333d4b); /* @kind color */
+  --gradient-auth:linear-gradient(180deg,var(--color-brand-weak) 0%,var(--color-bg-primary) 55%); /* @kind color */
+  --gradient-xp:linear-gradient(90deg,var(--color-accent),var(--color-accent-strong)); /* @kind color */
+  --gradient-highlighter:linear-gradient(transparent 55%,var(--color-accent) 55%); /* @kind color */
+}
+/* ===== 다크 테마 (FR-17 · html[data-theme="dark"]) =====
+   '시스템 자동'은 런타입에 light/dark 중 하나로 해속해 data-theme 에 기장한다. */
+[data-theme="dark"]{
+  --color-text-primary:#f2f4f6;
+  --color-text-secondary:#a4acb9;
+  --color-text-tertiary:#6b7684;
+  --color-text-inverse:#111317;
+  --color-text-brand:#61a5ff;
+  --color-text-danger:#ff707a;
+
+  --color-bg-primary:#1c1d23;
+  --color-bg-secondary:#121317;
+  --color-bg-elevated:#23252c;
+  --color-border-default:#2f323a;
+
+  --color-brand-primary:#4593fc;
+  --color-brand-strong:#61a5ff;
+  --color-brand-weak:#17304d;
+
+  --color-accent:#ffd84d;
+  --color-accent-strong:#ffc93d;
+  --color-accent-weak:#3a300f;
+  --color-on-accent:#191f28;
+
+  --color-success-primary:#2ed48b;
+  --color-success-weak:#102e22;
+  --color-warning-primary:#ffce5c;
+  --color-warning-weak:#332a12;
+  --color-danger-primary:#ff6b74;
+  --color-danger-weak:#3a1f22;
+
+  --color-overlay-dim:rgba(0,0,0,0.72);
+  --color-overlay-dialog:rgba(0,0,0,0.6);
+
+  --color-dday-safe-bg:#102e22;--color-dday-safe-fg:#2ed48b;
+  --color-dday-soon-bg:#25300f;--color-dday-soon-fg:#a8d45c;
+  --color-dday-near-bg:#3a2812;--color-dday-near-fg:#ffa94d;
+  --color-dday-urgent-bg:#3a1f22;--color-dday-urgent-fg:#ff707a;
+
+  --color-result-correct:#2ed48b;
+  --color-result-wrong:#ff707a;
+
+  --color-rating-know:#61a5ff;
+  --color-rating-know-weak:#17304d;
+  --color-rating-confused:#ffa94d;
+  --color-rating-confused-weak:#3a2812;
+  --color-rating-dont-know:#ff707a;
+  --color-rating-dont-know-weak:#3a1f22;
+
+  --color-grass-0:#23252c;
+  --color-grass-1:#1d3a5c;
+  --color-grass-2:#2b5d9e;
+  --color-grass-3:#3d82d8;
+  --color-grass-4:#61a5ff;
+
+  --gradient-concept:linear-gradient(90deg,#17304d 0%,#123534 100%); /* @kind color */
+  --gradient-auth:linear-gradient(180deg,#17304d 0%,var(--color-bg-secondary) 55%); /* @kind color */
+  --gradient-premium:linear-gradient(90deg,#23252c,#32363f); /* @kind color */
+}
+a{color:var(--color-text-brand);text-decoration:none}
+a:hover{color:var(--color-brand-strong)}

@@ -1,0 +1,38 @@
+<!-- @dsCard group="Components" viewport="700x300" name="Tags & Ratings" subtitle="다중 태그 칩 · 태그 필터 탭 · 알/헷/몰 누적 횟수" -->
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>Tags & Ratings</title><link rel="stylesheet" href="../../styles.css"><style>body{margin:0;padding:16px;background:var(--color-bg-secondary);font-family:var(--font-sans)}#root{display:flex;flex-direction:column;gap:12px}.panel{background:var(--color-bg-primary);border:1px solid var(--color-border-default);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}.t{font-size:12px;font-weight:700;color:var(--color-text-primary)}.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head><body><div id="root"></div><script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+const { TagChip, TagList, TagFilterTabs, RatingCounts, SegmentedControl } = window.DesignSystem_1cf846
+function Demo(){
+  const [tag,setTag] = React.useState('EXAM_MID')
+  return (<>
+    <div className="panel"><span className="t">태그 칩 — 시험 태그 / 사용자 태그 / +N / 삭제</span>
+      <div className="row">
+        <TagChip kind="exam" label="중간고사" dday={7} />
+        <TagChip kind="exam" label="기말고사" dday={46} />
+        <TagChip label="#수능특강" />
+        <TagChip label="#중요" active />
+        <TagChip kind="more" label="+2" />
+        <TagChip label="#동사" onRemove={()=>{}} />
+      </div>
+      <div className="row"><TagList tags={[{label:'중간고사',kind:'exam',dday:7},{label:'#수능특강'},{label:'#중요'},{label:'#형용사'},{label:'#독해'}]} /></div>
+    </div>
+    <div className="panel"><span className="t">단어장 태그 필터 탭</span>
+      <TagFilterTabs active={tag} onSelect={setTag} onManage={()=>{}} items={[
+        {key:'ALL',label:'전체',count:128},
+        {key:'EXAM_MID',label:'중간고사',kind:'exam',dday:7,count:42},
+        {key:'#수능특강',label:'#수능특강',count:21},
+        {key:'#형용사',label:'#형용사',count:33},
+      ]} />
+    </div>
+    <div className="panel"><span className="t">알/헷/몰 누적 횟수 (FR-18)</span>
+      <div className="row"><RatingCounts know={6} confused={1} dontKnow={0} /><RatingCounts know={0} confused={2} dontKnow={6} /><RatingCounts size="sm" know={2} confused={4} dontKnow={3} /></div>
+    </div>
+  </>)
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo />)
+</script></body></html>

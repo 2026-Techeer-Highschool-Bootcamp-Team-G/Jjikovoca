@@ -1,0 +1,24 @@
+:root{
+  --spacing-xs:4px;
+  --spacing-sm:8px;
+  --spacing-md:12px;
+  --spacing-lg:16px;
+  --spacing-xl:20px;   /* 화면 좌우 기본 여백 */
+  --spacing-2xl:24px;
+  --spacing-3xl:32px;
+
+  /* 레이아웃 상수 — 모바일 단일 컬럼 앱 */
+  --layout-app-max-width:480px;
+  --layout-nav-height:56px;        /* NavigationBar */
+  --layout-bottom-nav-height:82px; /* BottomNav (+ safe-area) */
+  --layout-touch-min:44px;         /* 최소 터치 영역 */
+
+  /* Capacitor 앱 셸 Safe-area — 노치·다이내믹 아일랜드 침범 금지 (NFR 5-1 / 제약 §7-5) */
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-left:env(safe-area-inset-left,0px);
+  --safe-right:env(safe-area-inset-right,0px);
+  --layout-header-offset:calc(var(--layout-nav-height) + var(--safe-top));
+  --layout-bottom-nav-offset:calc(var(--layout-bottom-nav-height) + var(--safe-bottom));
+  --layout-cta-bottom:calc(108px + var(--safe-bottom)); /* 하단 탭 위에 떠 있는 주 CTA */
+}

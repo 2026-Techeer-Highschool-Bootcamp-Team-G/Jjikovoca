@@ -1,0 +1,11 @@
+<!-- @dsCard group="Motion" viewport="700x170" name="Easing & duration" subtitle="표준 · 플립 · 스프링 / 120 · 200 · 500ms" -->
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css"><style>body{margin:0;padding:16px;background:var(--color-bg-primary);font-family:var(--font-sans);color:var(--color-text-primary)}.g{display:flex;gap:10px;flex-wrap:wrap}.sw{width:104px}.chip{height:56px;border-radius:10px;border:1px solid rgba(0,0,0,.06)}.n{font-size:11px;margin-top:6px;color:var(--color-text-secondary);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.v{font-size:11px;color:var(--color-text-tertiary);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}</style></head><body><div style="display:flex;flex-direction:column;gap:10px">
+<div class="v">--ease-standard cubic-bezier(.4,0,.2,1) — 탭 인디케이터 슬라이드 280ms</div>
+<div class="v">--ease-flip cubic-bezier(.2,.8,.3,1) — 카드 3D 플립 500ms</div>
+<div class="v">--ease-spring cubic-bezier(.2,.9,.3,1.2) — 성공 팝 600ms(오버슈트)</div>
+<div style="display:flex;gap:14px;align-items:center;margin-top:4px">
+<span style="width:34px;height:34px;border-radius:50%;border:3px solid var(--color-brand-weak);border-top-color:var(--color-brand-primary);animation:jjik-spin .8s linear infinite"></span>
+<span style="width:34px;height:34px;border-radius:10px;background:var(--color-success-primary);animation:jjik-pop-spring 1.6s var(--ease-spring) infinite"></span>
+<span style="font-size:18px;color:var(--yellow-500);animation:jjik-twinkle 1.4s ease-in-out infinite">✦</span>
+<span style="font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;background:var(--gradient-marker);color:var(--yellow-900);animation:jjik-shake 3s ease-in-out infinite">⚡ +5 XP</span>
+</div></div></body></html>

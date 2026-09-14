@@ -1,0 +1,27 @@
+<!-- @dsCard group="Components" viewport="700x300" name="Feedback" subtitle="성공 그래픽 · 학습 로딩 · 캡처 보상 · 네트워크 오류" -->
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css"><style>body{margin:0;padding:16px;background:var(--color-bg-secondary)}#root{display:flex;gap:14px;align-items:stretch}.panel{flex:1;background:var(--color-bg-primary);border-radius:16px;display:flex;align-items:center;justify-content:center;position:relative;min-height:210px;overflow:hidden}</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head><body><div id="root"></div><script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+const { SuccessGraphic, StudyLoading, CaptureFlash, OfflineNotice } = window.DesignSystem_1cf846
+function Flash(){
+  const [on,setOn] = React.useState(true)
+  React.useEffect(()=>{ const t = setInterval(()=>{ setOn(false); setTimeout(()=>setOn(true),80) }, 1800); return ()=>clearInterval(t) },[])
+  return (<div className="panel" style={{background:'var(--grey-900)'}}>
+    <span style={{color:'var(--grey-500)',fontFamily:'var(--font-sans)',fontSize:12}}>촬영 화면</span>
+    <CaptureFlash active={on} />
+  </div>)
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<>
+  <div className="panel"><SuccessGraphic /></div>
+  <div className="panel"><StudyLoading quote="틀린 문제는 실력이 자라는 자리" /></div>
+  <Flash />
+  <div className="panel" style={{padding:0,alignItems:'stretch',flexDirection:'column'}}>
+    <OfflineNotice variant="banner" title="오프라인이에요 — 저장은 연결 후 반영돼요" onRetry={()=>{}} />
+    <OfflineNotice description="단어장을 불러오지 못했어요 — 연결을 확인하고 다시 시도해주세요" onRetry={()=>{}} />
+  </div>
+</>)
+</script></body></html>

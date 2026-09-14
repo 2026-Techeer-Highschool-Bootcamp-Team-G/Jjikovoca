@@ -1,0 +1,27 @@
+<!-- @dsCard group="Components" viewport="700x380" name="Study Flow" subtitle="복습 방식·유형 선택 카드 · 예문 빈칸 판정" -->
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>Study Flow</title><link rel="stylesheet" href="../../styles.css"><style>body{margin:0;padding:16px;background:var(--color-bg-secondary);font-family:var(--font-sans)}#root{display:flex;gap:14px;align-items:flex-start}#root>div{flex:1;display:flex;flex-direction:column;gap:10px}</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head><body><div id="root"></div><script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+const { StudyOptionCard, ClozeCard } = window.DesignSystem_1cf846
+function Demo(){
+  const [mode,setMode] = React.useState('WRONG')
+  const [v,setV] = React.useState('inevitible')
+  return (<>
+    <div>
+      <StudyOptionCard emoji="🏷️" title="태그로 복습" description="#수능특강 태그가 붙은 단어만" meta="21개" selected={mode==='TAG'} onClick={()=>setMode('TAG')} />
+      <StudyOptionCard emoji="✅" title="직접 골라 복습" description="단어장에서 다중 선택" selected={mode==='PICK'} onClick={()=>setMode('PICK')} />
+      <StudyOptionCard emoji="🔥" title="오답률 높은 단어" description="몰라요 빈도순 출제" meta="6개" selected={mode==='WRONG'} onClick={()=>setMode('WRONG')} />
+      <StudyOptionCard emoji="✏️" title="예문 빈칸 채우기" description="아직 만들 예문이 없어요" disabled />
+    </div>
+    <div>
+      <ClozeCard sentence="A change of plan seemed ___." translation="계획 변경은 피할 수 없어 보였다." value={v} onChange={setV} hint="첫 글자 i · 10글자" />
+      <ClozeCard sentence="A change of plan seemed ___." judged correct={false} value="inevitible" word="inevitable" meaning="피할 수 없는" />
+    </div>
+  </>)
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo />)
+</script></body></html>

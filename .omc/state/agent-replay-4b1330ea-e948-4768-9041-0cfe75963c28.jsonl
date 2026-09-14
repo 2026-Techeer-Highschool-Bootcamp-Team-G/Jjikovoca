@@ -1,2 +1,7 @@
 {"t":0,"agent":"system","event":"skill_invoked","skill_name":"staged-commit-workflow"}
 {"t":0,"agent":"system","event":"skill_invoked","skill_name":"github-issue-pr-workflow"}
+{"t":0,"agent":"a5b5db0","agent_type":"unknown","event":"agent_stop","success":true,"duration_ms":0}
+{"t":0,"agent":"a3de142","agent_type":"unknown","event":"agent_stop","success":true,"duration_ms":0}
+{"t":0,"agent":"aeb6f1a","agent_type":"unknown","event":"agent_stop","success":true,"duration_ms":0}
+{"t":0,"agent":"system","event":"skill_invoked","skill_name":"github-issue-pr-workflow"}
+{"t":0,"agent":"a8ccdd6","agent_type":"unknown","event":"agent_stop","success":true,"duration_ms":0}

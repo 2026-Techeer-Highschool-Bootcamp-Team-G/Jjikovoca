@@ -1,0 +1,13 @@
+:root{
+  --radius-xs:4px;    /* 배지 */
+  --radius-sm:8px;    /* D-day 칩 */
+  --radius-md:12px;   /* 버튼(md), 입력, 카드 행 */
+  --radius-lg:16px;   /* 버튼(lg), 다이얼로그, 상태 카드 */
+  --radius-full:999px;/* 칩, 발음 필, XP 칩 */
+
+  /* 실측 예외값 — 그리드에 스냅하지 않고 소스 그대로 유지 */
+  --radius-card-14:14px;  /* DdayCard, PremiumCard */
+  --radius-card-20:20px;  /* 플래시카드 면, 바텀시트 상단 */
+  --radius-logo-24:24px;  /* 로그인 로고 스퀘어(96px) */
+  --radius-logo-13:13px;  /* BottomNav FAB 래퍼(56px 로고) */
+}

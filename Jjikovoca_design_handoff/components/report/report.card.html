@@ -1,0 +1,22 @@
+<!-- @dsCard group="Components" viewport="700x300" name="Report" subtitle="정답률 도넛 · 주간 학습 시간 막대 · 학습 잔디" -->
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>Report</title><link rel="stylesheet" href="../../styles.css"><style>body{margin:0;padding:16px;background:var(--color-bg-secondary);font-family:var(--font-sans)}#root{display:flex;gap:14px;align-items:flex-start}.panel{flex:1;background:var(--color-bg-primary);border:1px solid var(--color-border-default);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}.t{font-size:12px;font-weight:700;color:var(--color-text-primary)}</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head><body><div id="root"></div><script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+const { DonutChart, MiniBarChart, StreakGrid } = window.DesignSystem_1cf846
+const mix = [
+  { label: '알아요', value: 62, color: 'var(--color-rating-know)' },
+  { label: '헷갈려요', value: 24, color: 'var(--color-rating-confused)' },
+  { label: '몰라요', value: 14, color: 'var(--color-rating-dont-know)' },
+]
+const weekly = [12,24,8,31,18,42,26].map((v,i)=>({label:'월화수목금토일'[i], value:v}))
+const grass = Array.from({length:63},(_,i)=>[0,1,2,3,4,3,2,1,0][i%9])
+ReactDOM.createRoot(document.getElementById('root')).render(<>
+  <div className="panel"><span className="t">정답률 · 알헷몰 비중</span><DonutChart size={110} centerValue="78%" centerLabel="정답률" segments={mix} /></div>
+  <div className="panel"><span className="t">주간 학습 시간</span><MiniBarChart data={weekly} height={92} /></div>
+  <div className="panel"><span className="t">학습 잔디</span><StreakGrid days={grass} weeks={9} cell={11} streakDays={16} /></div>
+</>)
+</script></body></html>

@@ -1,0 +1,50 @@
+<!-- @dsCard group="Components" viewport="700x340" name="Core" subtitle="버튼 · 칩 · 배지 · 입력 · 세그먼트 · 태그 · 탭 · 목록 · 아이콘" -->
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css"><style>body{margin:0;padding:16px;background:var(--color-bg-secondary)}#root{display:flex;flex-direction:column;gap:14px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.panel{background:var(--color-bg-primary);border-radius:12px;overflow:hidden}</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head><body><div id="root"></div><script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+const { Button, Chip, Badge, TextField, SearchBar, Tabs, ListRow, ListHeader, Icon, ICON_NAMES, SegmentedControl, TagChip, TagList } = window.DesignSystem_1cf846
+function Demo(){
+  const [tab, setTab] = React.useState('word')
+  const [theme, setTheme] = React.useState('light')
+  const [v, setV] = React.useState('')
+  return (<>
+    <div className="row">
+      <Button>학습하기</Button>
+      <Button variant="weak">회원가입</Button>
+      <Button variant="ghost">건너뛰기</Button>
+      <Button size="lg">시작하기</Button>
+      <Button disabled>비활성</Button>
+    </div>
+    <div className="row">
+      <Chip active>전체 24</Chip><Chip>졸업완료 6</Chip><Chip>복습대기 18</Chip>
+      <Badge>유형</Badge><Badge color="green">졸업</Badge><Badge color="red" variant="weak">오답</Badge>
+      <Badge color="yellow">복습예정</Badge><Badge color="grey" variant="weak">영어</Badge>
+    </div>
+    <div className="row">
+      <SegmentedControl value={theme} onChange={setTheme} options={[{value:'light',label:'라이트'},{value:'dark',label:'다크'},{value:'system',label:'시스템 자동'}]} />
+      <TagChip kind="exam" label="중간고사" dday={7} />
+      <TagList tags={[{label:'#수능특강'},{label:'#중요'},{label:'#형용사'}]} />
+    </div>
+    <div className="row" style={{gap:12,alignItems:'flex-start'}}>
+      <div style={{flex:'1 1 240px'}}><TextField label="이메일" value={v} onChange={setV} placeholder="이메일" helper="학교 메일도 괜찮아요" /></div>
+      <div style={{flex:'1 1 200px',paddingTop:22}}><SearchBar placeholder="단어 · 문제 · 개념 검색" /></div>
+    </div>
+    <div className="row" style={{gap:12,alignItems:'stretch'}}>
+      <div className="panel" style={{flex:'1 1 300px'}}><Tabs tabs={[{key:'word',label:'단어'},{key:'problem',label:'문제'},{key:'all',label:'전체'}]} value={tab} onChange={setTab} /></div>
+      <div className="panel" style={{flex:'1 1 320px'}}>
+        <ListHeader title="학습" link="전체 보기" />
+        <ListRow icon={<Icon name="calendar" size={20} />} title="시험 일정" value="중간고사 D-7" valueColor="var(--color-brand-primary)" divider onClick={()=>{}} />
+        <ListRow icon={<Icon name="book" size={20} />} title="태그 관리" subtitle="사용자 정의 태그 7개" onClick={()=>{}} />
+      </div>
+    </div>
+    <div className="row" style={{color:'var(--color-text-secondary)'}}>
+      {ICON_NAMES.map(n => <Icon key={n} name={n} size={22} />)}
+    </div>
+  </>)
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo />)
+</script></body></html>
