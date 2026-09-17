@@ -11,7 +11,6 @@ import {
   AnalysisResult,
   analyzeCapture,
   pollAnalyzeJob,
-  ocrWords,
 } from '@/features/capture'
 import type { CaptureResult } from '@/features/capture'
 import type { Card } from '@/entities/card'
@@ -63,15 +62,11 @@ export function CapturePage() {
         const src = croppedSrc ?? imageSrc
         // WORD: 형광펜 영역별 크롭 배열을 보낸다(단어마다 카드 생성). 크롭 실패 시 전체 이미지로 폴백.
         const wordCrops = cropImages.length > 0 ? cropImages : src ? [src] : undefined
-        // 크롭을 프론트에서 OCR 해 단어 힌트(words)를 함께 보낸다 → 백엔드 단어키 캐시로 Gemini 재호출 절감.
-        // AnalyzingView 가 떠 있는 동안 실행돼 OCR 지연이 사용자에게 숨는다. 실패는 "" 폴백(하위호환).
-        const words = wordCrops ? await ocrWords(wordCrops) : undefined
         if (cancelled) return
         const { jobId } = await analyzeCapture({
           type: 'WORD',
           fullImage: src ?? undefined,
           cropImages: wordCrops,
-          words,
         })
         const poll = async () => {
           if (cancelled) return
