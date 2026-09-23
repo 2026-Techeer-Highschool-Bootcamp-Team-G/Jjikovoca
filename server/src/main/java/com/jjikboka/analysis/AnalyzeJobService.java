@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,8 +56,7 @@ public class AnalyzeJobService {
      */
     @Transactional
     public Optional<AnalyzeJobClaim> claim(Long jobId) {
-        LocalDateTime now = LocalDateTime.now();
-        int claimed = analyzeJobRepository.claim(jobId, now, now.plusSeconds(LEASE_BASE_SECONDS));
+        int claimed = analyzeJobRepository.claim(jobId, LEASE_BASE_SECONDS);
         if (claimed == 0) {
             return Optional.empty();   // 다른 실행자가 이미 소유(경합 패배) 또는 종결 상태
         }
@@ -69,7 +67,7 @@ public class AnalyzeJobService {
     /** watchdog 재수거 후보 id — claimable(PENDING·lease 만료 RUNNING). 소유는 각 후보를 claim해 다시 판정한다. */
     @Transactional(readOnly = true)
     public List<Long> findClaimableIds() {
-        return analyzeJobRepository.findClaimableIds(LocalDateTime.now(), CLAIM_BATCH_LIMIT);
+        return analyzeJobRepository.findClaimableIds(CLAIM_BATCH_LIMIT);
     }
 
     /** 이번 claim의 attempts가 재시도 상한을 넘었는지 — 넘으면 워커가 처리 없이 FAILED 확정 + 환불한다. */

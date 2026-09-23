@@ -1,6 +1,9 @@
 package com.jjikboka.analysis;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
@@ -35,5 +38,14 @@ abstract class AnalyzeJobTestSupport {
         registry.add("spring.data.redis.host", REDIS::getHost);
         registry.add("spring.data.redis.port", () -> REDIS.getMappedPort(6379));
         registry.add("gemini.mock", () -> "true");
+    }
+
+    @Autowired
+    protected JdbcTemplate jdbcTemplate;
+
+    /** 테스트 간 격리 — 공유 컨테이너라 이전 테스트가 남긴 analyze_job 행이 claim·조회에 끼어들지 않게 매 테스트 전에 비운다. */
+    @BeforeEach
+    void cleanAnalyzeJob() {
+        jdbcTemplate.update("DELETE FROM analyze_job");
     }
 }

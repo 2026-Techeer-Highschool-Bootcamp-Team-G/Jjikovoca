@@ -3,8 +3,6 @@ package com.jjikboka.app.analysis;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDateTime;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -29,7 +27,7 @@ class AnalyzeJobWatchdogTest extends AnalysisWorkerTestSupport {
 
     @Test
     void lease가_만료된_RUNNING_job을_watchdog가_재수거해_DONE으로_만든다() {
-        long jobId = insertJob(insertUser(), "RUNNING", LocalDateTime.now().minusMinutes(10),
+        long jobId = insertJob(insertUser(), "RUNNING", -10,
                 "{\"type\":\"WORD\",\"cropImageRefs\":[\"crop-b.png\"]}");
 
         watchdog.sweep();
@@ -40,7 +38,7 @@ class AnalyzeJobWatchdogTest extends AnalysisWorkerTestSupport {
 
     @Test
     void lease가_살아있는_RUNNING_job은_watchdog가_건드리지_않는다() {
-        long jobId = insertJob(insertUser(), "RUNNING", LocalDateTime.now().plusMinutes(10),
+        long jobId = insertJob(insertUser(), "RUNNING", 10,
                 "{\"type\":\"WORD\",\"cropImageRefs\":[\"crop-c.png\"]}");
 
         watchdog.sweep();
@@ -49,11 +47,18 @@ class AnalyzeJobWatchdogTest extends AnalysisWorkerTestSupport {
         assertThat(cardCount(jobId)).isZero();
     }
 
-    private long insertJob(long userId, String status, LocalDateTime leaseUntil, String payloadJson) {
+    private long insertJob(long userId, String status, Integer leaseMinutesFromNow, String payloadJson) {
         jdbcTemplate.update(
-                "INSERT INTO analyze_job (user_id, status, lease_until, attempts, payload_json) VALUES (?, ?, ?, 0, ?)",
-                userId, status, leaseUntil, payloadJson);
-        return jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
+                "INSERT INTO analyze_job (user_id, status, attempts, payload_json) VALUES (?, ?, 0, ?)",
+                userId, status, payloadJson);
+        Long id = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
+        if (leaseMinutesFromNow != null) {
+            // lease_until도 DB 시계(NOW(6))로 세팅 — 프로덕션 claim/조회가 NOW(6)로 판정하므로 테스트도 같은 시계를 써 시간대에 흔들리지 않는다.
+            jdbcTemplate.update(
+                    "UPDATE analyze_job SET lease_until = DATE_ADD(NOW(6), INTERVAL ? MINUTE) WHERE id=?",
+                    leaseMinutesFromNow, id);
+        }
+        return id;
     }
 
     private String jobStatus(long jobId) {

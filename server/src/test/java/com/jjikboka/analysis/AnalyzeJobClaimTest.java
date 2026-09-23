@@ -2,9 +2,7 @@ package com.jjikboka.analysis;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -25,9 +23,6 @@ class AnalyzeJobClaimTest extends AnalyzeJobTestSupport {
 
     @Autowired
     private AnalyzeJobRepository analyzeJobRepository;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @Test
     void PENDING_job을_claim하면_RUNNING으로_전이하고_attempts가_1이_된다() {
@@ -56,8 +51,8 @@ class AnalyzeJobClaimTest extends AnalyzeJobTestSupport {
     void lease가_만료된_RUNNING_job은_다시_claim되어_재처리된다() {
         Long jobId = analyzeJobService.create(1L, null);
         // RUNNING이지만 lease가 과거 — 워커가 사망한 상태를 흉내 낸다.
-        jdbcTemplate.update("UPDATE analyze_job SET status='RUNNING', lease_until=?, attempts=1 WHERE id=?",
-                LocalDateTime.now().minusMinutes(10), jobId);
+        jdbcTemplate.update("UPDATE analyze_job SET status='RUNNING', lease_until=DATE_SUB(NOW(6), INTERVAL 10 MINUTE), attempts=1 WHERE id=?",
+                jobId);
 
         Optional<AnalyzeJobClaim> claim = analyzeJobService.claim(jobId);
 
@@ -106,10 +101,10 @@ class AnalyzeJobClaimTest extends AnalyzeJobTestSupport {
         Long expiredRunning = analyzeJobService.create(1L, null);
         Long done = analyzeJobService.create(1L, null);
 
-        jdbcTemplate.update("UPDATE analyze_job SET status='RUNNING', lease_until=? WHERE id=?",
-                LocalDateTime.now().plusMinutes(10), liveRunning);
-        jdbcTemplate.update("UPDATE analyze_job SET status='RUNNING', lease_until=? WHERE id=?",
-                LocalDateTime.now().minusMinutes(10), expiredRunning);
+        jdbcTemplate.update("UPDATE analyze_job SET status='RUNNING', lease_until=DATE_ADD(NOW(6), INTERVAL 10 MINUTE) WHERE id=?",
+                liveRunning);
+        jdbcTemplate.update("UPDATE analyze_job SET status='RUNNING', lease_until=DATE_SUB(NOW(6), INTERVAL 10 MINUTE) WHERE id=?",
+                expiredRunning);
         analyzeJobService.markDone(done);
 
         List<Long> claimable = analyzeJobService.findClaimableIds();

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,8 +52,8 @@ class AnalysisConsistencyTest extends AnalysisWorkerTestSupport {
         analysisWorker.processClaimable(jobId);   // 카드 1 생성 + DONE
 
         // 완료 뒤에도 유실·중복 전달로 다시 claimable해진 상황을 흉내낸다(RUNNING + lease 만료).
-        jdbcTemplate.update("UPDATE analyze_job SET status='RUNNING', lease_until=?, attempts=1 WHERE id=?",
-                LocalDateTime.now().minusMinutes(10), jobId);
+        jdbcTemplate.update("UPDATE analyze_job SET status='RUNNING', lease_until=DATE_SUB(NOW(6), INTERVAL 10 MINUTE), attempts=1 WHERE id=?",
+                jobId);
 
         analysisWorker.processClaimable(jobId);   // 재claim해 재분석 — 멱등 가드가 중복 카드를 막는다
 
@@ -64,7 +63,7 @@ class AnalysisConsistencyTest extends AnalysisWorkerTestSupport {
 
     @Test
     void lease_만료_RUNNING을_재처리하면_DONE에_도달하고_카드_1개다() {
-        long jobId = insertJob("RUNNING", LocalDateTime.now().minusMinutes(10), 1, insertUser(),
+        long jobId = insertJob("RUNNING", -10, 1, insertUser(),
                 "{\"type\":\"WORD\",\"cropImageRefs\":[\"c4.png\"]}");
 
         analysisWorker.processClaimable(jobId);
@@ -94,11 +93,18 @@ class AnalysisConsistencyTest extends AnalysisWorkerTestSupport {
         assertThat(usedCount(userId)).isZero();
     }
 
-    private long insertJob(String status, LocalDateTime leaseUntil, int attempts, long userId, String payloadJson) {
+    private long insertJob(String status, Integer leaseMinutesFromNow, int attempts, long userId, String payloadJson) {
         jdbcTemplate.update(
-                "INSERT INTO analyze_job (user_id, status, lease_until, attempts, payload_json) VALUES (?, ?, ?, ?, ?)",
-                userId, status, leaseUntil, attempts, payloadJson);
-        return jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
+                "INSERT INTO analyze_job (user_id, status, attempts, payload_json) VALUES (?, ?, ?, ?)",
+                userId, status, attempts, payloadJson);
+        Long id = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
+        if (leaseMinutesFromNow != null) {
+            // lease_until도 DB 시계(NOW(6))로 세팅 — 프로덕션 claim/조회가 NOW(6)로 판정하므로 같은 시계를 써 시간대에 흔들리지 않는다.
+            jdbcTemplate.update(
+                    "UPDATE analyze_job SET lease_until = DATE_ADD(NOW(6), INTERVAL ? MINUTE) WHERE id=?",
+                    leaseMinutesFromNow, id);
+        }
+        return id;
     }
 
     private String jobStatus(long jobId) {

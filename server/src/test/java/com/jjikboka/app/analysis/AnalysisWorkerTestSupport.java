@@ -1,5 +1,6 @@
 package com.jjikboka.app.analysis;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -57,6 +58,14 @@ abstract class AnalysisWorkerTestSupport {
 
     @Autowired
     protected JdbcTemplate jdbcTemplate;
+
+    /** 테스트 간 격리 — 공유 컨테이너라 이전 테스트 잔여 행이 끼어들지 않게 매 테스트 전에 관련 테이블을 비운다(FK 순서: card→quota→job). */
+    @BeforeEach
+    void cleanTables() {
+        jdbcTemplate.update("DELETE FROM card");
+        jdbcTemplate.update("DELETE FROM user_quota_daily");
+        jdbcTemplate.update("DELETE FROM analyze_job");
+    }
 
     /** 유니크 이메일로 app_user를 만들고 id를 돌려준다 — 처리(카드 INSERT·quota 환불·exp)가 FK를 만족하게 한다. */
     protected long insertUser() {
