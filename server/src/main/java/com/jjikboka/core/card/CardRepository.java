@@ -33,6 +33,16 @@ interface CardRepository extends JpaRepository<Card, Long> {
     List<Card> findByUserIdAndAnalyzeJobIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long userId, Long analyzeJobId);
 
     /**
+     * 멱등 카드 가드(P1-6) — 같은 (analyze_job_id, image_path) 카드가 이미 있는지. 재처리(watchdog·재시도)가
+     * 카드를 중복 생성하지 않게 INSERT 전에 확인한다. image_path NULL-세이프 비교(크롭 없는 단일 카드도 1개로 못박음).
+     * soft-delete 포함해 존재로 본다 — 지운 카드가 있었다면 재분석이 되살리지 않게(중복 방지 우선).
+     */
+    @Query("SELECT COUNT(c) > 0 FROM Card c WHERE c.analyzeJobId = :analyzeJobId "
+            + "AND ((:imagePath IS NULL AND c.imagePath IS NULL) OR c.imagePath = :imagePath)")
+    boolean existsByAnalyzeJobIdAndImagePath(@Param("analyzeJobId") Long analyzeJobId,
+                                             @Param("imagePath") String imagePath);
+
+    /**
      * 원문 보관함(API-36) — 해당 월[start, end) 안의 크롭 원문(image_path 존재) 카드를 최신순으로.
      * soft-delete 제외. 일자별 그룹핑은 서비스에서 한다.
      */
