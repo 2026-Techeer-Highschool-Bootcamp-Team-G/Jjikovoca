@@ -3,6 +3,7 @@ package com.jjikboka.core.card;
 import com.jjikboka.shared.error.BusinessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
@@ -40,7 +41,12 @@ public class QuotaConsumeService {
         }
     }
 
-    /** 분석 최종 실패 시 차감을 되돌린다(사가 보상, 13 §6). 멱등하게 호출돼도 0 미만으로 내려가지 않는다. */
+    /**
+     * 분석 최종 실패 시 차감을 되돌린다(사가 보상, 13 §6). 멱등하게 호출돼도 0 미만으로 내려가지 않는다.
+     * consume과 달리 워커·watchdog가 <b>트랜잭션 밖에서 독립 호출</b>하므로 자체 트랜잭션을 열어
+     * {@code @Modifying} 환불 UPDATE가 트랜잭션 없이 실행되는 것을 막는다.
+     */
+    @Transactional
     public void refund(Long userId) {
         quotaRepository.decrement(userId, LocalDate.now());
     }
