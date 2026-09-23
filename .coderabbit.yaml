@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "ko-KR" # 리뷰 언어를 한국어로 설정
+early_access: false
+
+reviews:
+  profile: "chill" # 리뷰 성향: "chill"(부드럽고 핵심 위주) 또는 "assertive"(엄격하고 꼼꼼함)
+  request_changes_workflow: false
+  high_level_summary: true # PR 상단 요약(Walkthrough) 생성 여부
+  poem: false # 하단 시(poem) 생성 여부 — 불필요하므로 끔
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true # PR 생성 시 자동 리뷰 실행
+    drafts: false # Draft PR은 자동 리뷰 제외
+
+  # 자동 생성 파일 등 리뷰가 불필요한 경로는 제외
+  path_filters:
+    - "!**/*.lock"
+    - "!**/package-lock.json"
+    - "!**/yarn.lock"
+    - "!**/dist/**"
+    - "!**/build/**"
+
+chat:
+  auto_reply: true # @coderabbitai 멘션 시 자동 답장
