@@ -19,9 +19,9 @@ public class QuotaConsumeService {
     private static final int PREMIUM_LIMIT = 100;
 
     private final UserQuotaDailyRepository quotaRepository;
-    private final PremiumQueryService premiumQueryService;
+    private final PremiumService premiumQueryService;
 
-    QuotaConsumeService(UserQuotaDailyRepository quotaRepository, PremiumQueryService premiumQueryService) {
+    QuotaConsumeService(UserQuotaDailyRepository quotaRepository, PremiumService premiumQueryService) {
         this.quotaRepository = quotaRepository;
         this.premiumQueryService = premiumQueryService;
     }

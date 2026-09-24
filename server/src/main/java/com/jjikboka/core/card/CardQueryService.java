@@ -30,10 +30,10 @@ public class CardQueryService {
     private static final DateTimeFormatter MONTH_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM");
 
     private final CardRepository cardRepository;
-    private final PremiumQueryService premiumQueryService;
+    private final PremiumService premiumQueryService;
     private final StudyStatsService studyStatsService;
 
-    CardQueryService(CardRepository cardRepository, PremiumQueryService premiumQueryService,
+    CardQueryService(CardRepository cardRepository, PremiumService premiumQueryService,
                      StudyStatsService studyStatsService) {
         this.cardRepository = cardRepository;
         this.premiumQueryService = premiumQueryService;

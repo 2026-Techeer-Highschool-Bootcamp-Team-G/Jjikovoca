@@ -2,7 +2,7 @@ package com.jjikboka.app.export;
 
 import com.jjikboka.core.card.CardQueryService;
 import com.jjikboka.core.card.CardSummary;
-import com.jjikboka.core.card.PremiumQueryService;
+import com.jjikboka.core.card.PremiumService;
 import com.jjikboka.core.card.QuotaConsumeService;
 import com.jjikboka.core.export.ExportLogService;
 import com.jjikboka.shared.error.BusinessException;
@@ -24,14 +24,14 @@ public class ExportFacade {
 
     private static final int EXPIRES_IN = 3600;
 
-    private final PremiumQueryService premiumQueryService;
+    private final PremiumService premiumQueryService;
     private final QuotaConsumeService quotaConsumeService;
     private final CardQueryService cardQueryService;
     private final ExportLogService exportLogService;
     private final ExportRenderer exportRenderer;
     private final ExportStorage exportStorage;
 
-    ExportFacade(PremiumQueryService premiumQueryService,
+    ExportFacade(PremiumService premiumQueryService,
                  QuotaConsumeService quotaConsumeService,
                  CardQueryService cardQueryService,
                  ExportLogService exportLogService,

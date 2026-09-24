@@ -1,7 +1,7 @@
 package com.jjikboka.core.stats;
 
 import com.jjikboka.core.card.CardStatsService;
-import com.jjikboka.core.card.PremiumQueryService;
+import com.jjikboka.core.card.PremiumService;
 import com.jjikboka.core.review.StudyStats;
 import com.jjikboka.core.review.StudyStatsService;
 import com.jjikboka.core.review.SubjectMinutes;
@@ -33,12 +33,12 @@ public class ReportService {
 
     private final StudyStatsService studyStatsService;
     private final CardStatsService cardStatsService;
-    private final PremiumQueryService premiumQueryService;
+    private final PremiumService premiumQueryService;
     private final ReportSnapshotService reportSnapshotService;
 
     ReportService(StudyStatsService studyStatsService,
                   CardStatsService cardStatsService,
-                  PremiumQueryService premiumQueryService,
+                  PremiumService premiumQueryService,
                   ReportSnapshotService reportSnapshotService) {
         this.studyStatsService = studyStatsService;
         this.cardStatsService = cardStatsService;
