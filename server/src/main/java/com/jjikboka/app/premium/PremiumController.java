@@ -1,6 +1,6 @@
 package com.jjikboka.app.premium;
 
-import com.jjikboka.core.card.PremiumService;
+import com.jjikboka.subscription.PremiumService;
 import com.jjikboka.common.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

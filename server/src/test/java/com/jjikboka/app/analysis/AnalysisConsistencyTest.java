@@ -1,6 +1,6 @@
 package com.jjikboka.app.analysis;
 
-import com.jjikboka.core.card.QuotaService;
+import com.jjikboka.quota.QuotaService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionTemplate;
