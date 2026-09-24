@@ -1,4 +1,4 @@
-package com.jjikboka.core.export;
+package com.jjikboka.export;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
