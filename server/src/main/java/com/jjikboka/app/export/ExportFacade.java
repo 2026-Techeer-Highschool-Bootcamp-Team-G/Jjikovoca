@@ -3,7 +3,7 @@ package com.jjikboka.app.export;
 import com.jjikboka.core.card.CardQueryService;
 import com.jjikboka.core.card.CardSummary;
 import com.jjikboka.core.card.PremiumService;
-import com.jjikboka.core.card.QuotaConsumeService;
+import com.jjikboka.core.card.QuotaService;
 import com.jjikboka.core.export.ExportLogService;
 import com.jjikboka.shared.error.BusinessException;
 import org.springframework.http.HttpStatus;
@@ -25,14 +25,14 @@ public class ExportFacade {
     private static final int EXPIRES_IN = 3600;
 
     private final PremiumService premiumQueryService;
-    private final QuotaConsumeService quotaConsumeService;
+    private final QuotaService quotaConsumeService;
     private final CardQueryService cardQueryService;
     private final ExportLogService exportLogService;
     private final ExportRenderer exportRenderer;
     private final ExportStorage exportStorage;
 
     ExportFacade(PremiumService premiumQueryService,
-                 QuotaConsumeService quotaConsumeService,
+                 QuotaService quotaConsumeService,
                  CardQueryService cardQueryService,
                  ExportLogService exportLogService,
                  ExportRenderer exportRenderer,

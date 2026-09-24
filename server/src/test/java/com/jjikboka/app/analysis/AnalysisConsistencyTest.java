@@ -1,6 +1,6 @@
 package com.jjikboka.app.analysis;
 
-import com.jjikboka.core.card.QuotaConsumeService;
+import com.jjikboka.core.card.QuotaService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -19,7 +19,7 @@ class AnalysisConsistencyTest extends AnalysisWorkerTestSupport {
     private AnalysisWorker analysisWorker;
 
     @Autowired
-    private QuotaConsumeService quotaConsumeService;
+    private QuotaService quotaConsumeService;
 
     @Autowired
     private TransactionTemplate txTemplate;

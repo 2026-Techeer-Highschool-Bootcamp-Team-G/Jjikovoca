@@ -19,11 +19,11 @@ public class ClozeService {
 
     private final CardRepository cardRepository;
     private final PremiumService premiumQueryService;
-    private final QuotaConsumeService quotaConsumeService;
+    private final QuotaService quotaConsumeService;
 
     ClozeService(CardRepository cardRepository,
                  PremiumService premiumQueryService,
-                 QuotaConsumeService quotaConsumeService) {
+                 QuotaService quotaConsumeService) {
         this.cardRepository = cardRepository;
         this.premiumQueryService = premiumQueryService;
         this.quotaConsumeService = quotaConsumeService;

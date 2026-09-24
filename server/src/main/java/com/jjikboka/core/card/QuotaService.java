@@ -8,22 +8,31 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 
 /**
- * 일일 분석 한도 차감 (core.card 공개 진입점, NFR-02). 조회는 {@link QuotaQueryService}, 차감·환불은 여기.
+ * 일일 AI 분석 한도 (core.card 공개 진입점, NFR-02). 조회(getToday)·차감(consume)·환불(refund)을 한 서비스로 묶는다.
  * 한도는 프리미엄 여부로 결정(free 5 · premium 100)하고, 초과 시 429 QUOTA_EXCEEDED로 원자적 차단한다.
- * 트랜잭션은 호출자(app 조립)가 소유 — quota 차감과 job 생성이 한 커밋으로 원자화된다.
+ * 차감 트랜잭션은 호출자(app 조립)가 소유 — quota 차감과 job 생성이 한 커밋으로 원자화된다.
  */
 @Service
-public class QuotaConsumeService {
+public class QuotaService {
 
     private static final int FREE_LIMIT = 5;
     private static final int PREMIUM_LIMIT = 100;
 
     private final UserQuotaDailyRepository quotaRepository;
-    private final PremiumService premiumQueryService;
+    private final PremiumService premiumService;
 
-    QuotaConsumeService(UserQuotaDailyRepository quotaRepository, PremiumService premiumQueryService) {
+    QuotaService(UserQuotaDailyRepository quotaRepository, PremiumService premiumService) {
         this.quotaRepository = quotaRepository;
-        this.premiumQueryService = premiumQueryService;
+        this.premiumService = premiumService;
+    }
+
+    /** 오늘의 사용량·한도 조회(/api/me). 한도는 프리미엄 여부로 결정. 차감은 하지 않는다. */
+    public QuotaStatus getToday(Long userId) {
+        int used = quotaRepository.findByUserIdAndQuotaDate(userId, LocalDate.now())
+                .map(UserQuotaDaily::getUsedCount)
+                .orElse(0);
+        int limit = premiumService.isPremium(userId) ? PREMIUM_LIMIT : FREE_LIMIT;
+        return new QuotaStatus(used, limit);
     }
 
     /**
@@ -32,7 +41,7 @@ public class QuotaConsumeService {
      */
     public void consume(Long userId) {
         LocalDate today = LocalDate.now();
-        int limit = premiumQueryService.isPremium(userId) ? PREMIUM_LIMIT : FREE_LIMIT;
+        int limit = premiumService.isPremium(userId) ? PREMIUM_LIMIT : FREE_LIMIT;
         quotaRepository.insertIgnore(userId, today);
         int updated = quotaRepository.tryIncrement(userId, today, limit);
         if (updated == 0) {
@@ -43,7 +52,7 @@ public class QuotaConsumeService {
 
     /**
      * 분석 최종 실패 시 차감을 되돌린다(사가 보상, 13 §6). 멱등하게 호출돼도 0 미만으로 내려가지 않는다.
-     * consume과 달리 워커·watchdog가 <b>트랜잭션 밖에서 독립 호출</b>하므로 자체 트랜잭션을 열어
+     * 워커·watchdog가 <b>트랜잭션 밖에서 독립 호출</b>하므로 자체 트랜잭션을 열어
      * {@code @Modifying} 환불 UPDATE가 트랜잭션 없이 실행되는 것을 막는다.
      */
     @Transactional

@@ -9,7 +9,7 @@ import com.jjikboka.analysis.GeminiImage;
 import com.jjikboka.app.image.ImageStorageService;
 import com.jjikboka.core.card.CardCreateCommand;
 import com.jjikboka.core.card.CardCreationService;
-import com.jjikboka.core.card.QuotaConsumeService;
+import com.jjikboka.core.card.QuotaService;
 import com.jjikboka.core.stats.ExpService;
 import com.jjikboka.shared.event.AnalyzeEvents;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ class AnalysisWorker {
     private final GeminiAnalysisCache geminiAnalysisCache;
     private final AnalyzeJobService analyzeJobService;
     private final CardCreationService cardCreationService;
-    private final QuotaConsumeService quotaConsumeService;
+    private final QuotaService quotaConsumeService;
     private final ImageStorageService imageStorageService;
     private final ApplicationEventPublisher eventPublisher;
     private final ExpService expService;
@@ -59,7 +59,7 @@ class AnalysisWorker {
     AnalysisWorker(GeminiAnalysisCache geminiAnalysisCache,
                    AnalyzeJobService analyzeJobService,
                    CardCreationService cardCreationService,
-                   QuotaConsumeService quotaConsumeService,
+                   QuotaService quotaConsumeService,
                    ImageStorageService imageStorageService,
                    ApplicationEventPublisher eventPublisher,
                    ExpService expService,
