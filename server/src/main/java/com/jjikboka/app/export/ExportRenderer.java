@@ -1,6 +1,6 @@
 package com.jjikboka.app.export;
 
-import com.jjikboka.core.card.CardSummary;
+import com.jjikboka.card.CardSummary;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package com.jjikboka.app.study;
 
-import com.jjikboka.core.card.ClozeItem;
+import com.jjikboka.card.ClozeItem;
 
 import java.util.List;
 

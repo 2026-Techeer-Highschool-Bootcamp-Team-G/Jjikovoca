@@ -1,4 +1,4 @@
-package com.jjikboka.core.card;
+package com.jjikboka.card;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

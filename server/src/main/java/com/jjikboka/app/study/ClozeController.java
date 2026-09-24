@@ -1,8 +1,8 @@
 package com.jjikboka.app.study;
 
 import com.jjikboka.analysis.GeminiClient;
-import com.jjikboka.core.card.ClozeRegenerated;
-import com.jjikboka.core.card.ClozeService;
+import com.jjikboka.card.ClozeRegenerated;
+import com.jjikboka.card.ClozeService;
 import com.jjikboka.common.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

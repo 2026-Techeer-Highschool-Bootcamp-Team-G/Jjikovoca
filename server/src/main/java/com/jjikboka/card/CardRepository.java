@@ -1,4 +1,4 @@
-package com.jjikboka.core.card;
+package com.jjikboka.card;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

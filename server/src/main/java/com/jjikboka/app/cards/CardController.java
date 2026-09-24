@@ -1,9 +1,9 @@
 package com.jjikboka.app.cards;
 
-import com.jjikboka.core.card.CardCommandService;
-import com.jjikboka.core.card.CardCounts;
-import com.jjikboka.core.card.CardDetail;
-import com.jjikboka.core.card.CardQueryService;
+import com.jjikboka.card.CardCommandService;
+import com.jjikboka.card.CardCounts;
+import com.jjikboka.card.CardDetail;
+import com.jjikboka.card.CardQueryService;
 import com.jjikboka.common.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

@@ -1,7 +1,7 @@
 package com.jjikboka.app.exam;
 
-import com.jjikboka.core.card.CardStatsService;
-import com.jjikboka.core.card.ExamRescheduler;
+import com.jjikboka.card.CardStatsService;
+import com.jjikboka.card.ExamRescheduler;
 import com.jjikboka.exam.ExamFeedService;
 import com.jjikboka.exam.ExamService;
 import com.jjikboka.exam.ExamView;

@@ -1,4 +1,4 @@
-package com.jjikboka.core.card;
+package com.jjikboka.card;
 
 import java.time.LocalDateTime;
 

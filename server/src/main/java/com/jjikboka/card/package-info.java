@@ -3,4 +3,4 @@
  * 시험 태깅(F-29 exam_card) · quota 원자적 차감(NFR-02).
  * 소유 테이블: card · user_quota_daily · exam · exam_card.
  */
-package com.jjikboka.core.card;
+package com.jjikboka.card;

@@ -1,4 +1,4 @@
-package com.jjikboka.core.card;
+package com.jjikboka.card;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,4 +1,4 @@
-package com.jjikboka.core.card;
+package com.jjikboka.card;
 
 /**
  * 원문 보관함 항목 (Notion API-ID 36, core.card 공개 DTO). 크롭 원문 한 장 = 카드 하나.

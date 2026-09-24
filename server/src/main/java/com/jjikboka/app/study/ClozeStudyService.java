@@ -1,7 +1,7 @@
 package com.jjikboka.app.study;
 
-import com.jjikboka.core.card.ClozeAnswerResult;
-import com.jjikboka.core.card.ClozeService;
+import com.jjikboka.card.ClozeAnswerResult;
+import com.jjikboka.card.ClozeService;
 import com.jjikboka.studylog.StudyLogService;
 import com.jjikboka.studylog.StudyRecordCommand;
 import com.jjikboka.studylog.StudyStatsService;
