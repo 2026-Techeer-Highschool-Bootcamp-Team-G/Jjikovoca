@@ -1,4 +1,4 @@
-package com.jjikboka.core.review;
+package com.jjikboka.exam;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

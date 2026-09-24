@@ -1,6 +1,6 @@
 package com.jjikboka.core.card;
 
-import com.jjikboka.core.review.GradeCount;
+import com.jjikboka.studylog.GradeCount;
 
 import java.time.LocalDateTime;
 import java.util.List;

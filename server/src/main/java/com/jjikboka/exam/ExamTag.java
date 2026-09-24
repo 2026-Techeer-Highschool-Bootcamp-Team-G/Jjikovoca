@@ -1,4 +1,4 @@
-package com.jjikboka.core.review;
+package com.jjikboka.exam;
 
 /**
  * 시험 태그 (Notion API-ID 43, core.review 공개 DTO). 카드에 걸린 시험을 id·title로 요약한다 —

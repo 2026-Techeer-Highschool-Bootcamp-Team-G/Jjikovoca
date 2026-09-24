@@ -2,8 +2,8 @@ package com.jjikboka.app.exam;
 
 import com.jjikboka.core.card.CardQueryService;
 import com.jjikboka.core.card.ExamReviewItem;
-import com.jjikboka.core.review.ExamReviewService;
-import com.jjikboka.core.review.ExamTagService;
+import com.jjikboka.exam.ExamReviewService;
+import com.jjikboka.exam.ExamTagService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

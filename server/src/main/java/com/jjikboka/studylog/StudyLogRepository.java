@@ -1,4 +1,4 @@
-package com.jjikboka.core.review;
+package com.jjikboka.studylog;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

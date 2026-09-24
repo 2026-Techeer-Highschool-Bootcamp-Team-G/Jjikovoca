@@ -1,7 +1,7 @@
 package com.jjikboka.core.card;
 
-import com.jjikboka.core.review.GradeCount;
-import com.jjikboka.core.review.StudyStatsService;
+import com.jjikboka.studylog.GradeCount;
+import com.jjikboka.studylog.StudyStatsService;
 import com.jjikboka.common.error.BusinessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;

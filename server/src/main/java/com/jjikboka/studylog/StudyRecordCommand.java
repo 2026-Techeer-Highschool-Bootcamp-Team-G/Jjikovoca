@@ -1,4 +1,4 @@
-package com.jjikboka.core.review;
+package com.jjikboka.studylog;
 
 /**
  * 학습 기록 커맨드 (core.review 공개 입력 DTO, API-11). app이 검증을 마친 학습 결과를 이 커맨드로 넘겨 원장에 남긴다.

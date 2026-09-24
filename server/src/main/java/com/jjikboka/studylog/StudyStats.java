@@ -1,4 +1,4 @@
-package com.jjikboka.core.review;
+package com.jjikboka.studylog;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.jjikboka.core.review;
+package com.jjikboka.exam;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

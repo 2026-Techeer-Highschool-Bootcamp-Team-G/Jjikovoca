@@ -1,4 +1,4 @@
-package com.jjikboka.core.review;
+package com.jjikboka.studylog;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;

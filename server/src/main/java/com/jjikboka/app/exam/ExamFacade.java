@@ -2,9 +2,9 @@ package com.jjikboka.app.exam;
 
 import com.jjikboka.core.card.CardStatsService;
 import com.jjikboka.core.card.ExamRescheduler;
-import com.jjikboka.core.review.ExamFeedService;
-import com.jjikboka.core.review.ExamService;
-import com.jjikboka.core.review.ExamView;
+import com.jjikboka.exam.ExamFeedService;
+import com.jjikboka.exam.ExamService;
+import com.jjikboka.exam.ExamView;
 import com.jjikboka.common.error.BusinessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
