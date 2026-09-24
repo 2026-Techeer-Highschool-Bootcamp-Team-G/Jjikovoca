@@ -4,7 +4,7 @@ import com.jjikboka.core.card.CardQueryService;
 import com.jjikboka.core.card.CardSummary;
 import com.jjikboka.core.card.PremiumService;
 import com.jjikboka.core.card.QuotaService;
-import com.jjikboka.core.export.ExportLogService;
+import com.jjikboka.export.ExportLogService;
 import com.jjikboka.common.error.BusinessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.jjikboka.app.export;
 
-import com.jjikboka.core.export.ExportLogService;
+import com.jjikboka.export.ExportLogService;
 import com.jjikboka.common.error.BusinessException;
 import com.jjikboka.common.response.ApiResponse;
 import org.springframework.core.io.Resource;
