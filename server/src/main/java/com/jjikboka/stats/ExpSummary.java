@@ -1,4 +1,4 @@
-package com.jjikboka.core.stats;
+package com.jjikboka.stats;
 
 /**
  * 경험치 현황 (Notion API-ID 19, core.stats 공개 DTO). 게임형 홈(F-16)의 데이터 소스 —

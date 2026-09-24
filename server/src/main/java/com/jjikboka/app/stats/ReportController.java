@@ -1,7 +1,7 @@
 package com.jjikboka.app.stats;
 
-import com.jjikboka.core.stats.ReportService;
-import com.jjikboka.core.stats.ReportView;
+import com.jjikboka.stats.ReportService;
+import com.jjikboka.stats.ReportView;
 import com.jjikboka.common.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

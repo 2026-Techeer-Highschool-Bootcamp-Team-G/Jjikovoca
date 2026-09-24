@@ -1,8 +1,8 @@
 package com.jjikboka.app.stats;
 
 import com.jjikboka.auth.UserQueryService;
-import com.jjikboka.core.stats.RankEntry;
-import com.jjikboka.core.stats.RankingService;
+import com.jjikboka.stats.RankEntry;
+import com.jjikboka.stats.RankingService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

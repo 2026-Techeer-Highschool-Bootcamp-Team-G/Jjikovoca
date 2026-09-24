@@ -1,4 +1,4 @@
-package com.jjikboka.core.stats;
+package com.jjikboka.stats;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

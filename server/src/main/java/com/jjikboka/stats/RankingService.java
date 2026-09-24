@@ -1,4 +1,4 @@
-package com.jjikboka.core.stats;
+package com.jjikboka.stats;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;

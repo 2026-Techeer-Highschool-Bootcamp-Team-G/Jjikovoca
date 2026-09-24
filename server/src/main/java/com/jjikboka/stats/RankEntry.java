@@ -1,4 +1,4 @@
-package com.jjikboka.core.stats;
+package com.jjikboka.stats;
 
 /**
  * 랭킹 원소 (Notion API-ID 20, core.stats 공개 DTO). userId와 순위 값(주간 획득 또는 레벨)만 담는다 —

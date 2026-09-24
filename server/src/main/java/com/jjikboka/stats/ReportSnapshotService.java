@@ -1,4 +1,4 @@
-package com.jjikboka.core.stats;
+package com.jjikboka.stats;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

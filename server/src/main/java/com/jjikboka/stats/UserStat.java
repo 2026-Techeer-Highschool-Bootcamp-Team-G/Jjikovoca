@@ -1,4 +1,4 @@
-package com.jjikboka.core.stats;
+package com.jjikboka.stats;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
