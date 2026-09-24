@@ -7,19 +7,13 @@ package com.jjikboka.analysis;
 public interface GeminiClient {
 
     /**
-     * 카드 타입(WORD/PROBLEM)에 맞는 분석 콘텐츠를 생성한다. images는 접수 때 저장한 크롭/지문(비었을 수 있음) —
-     * 모의 구현은 무시하고, 실 구현은 비전 입력으로 넣는다.
+     * 영어 단어(WORD) 분석 콘텐츠를 생성한다. images는 접수 때 저장한 크롭/지문(비었을 수 있음) —
+     * 모의 구현은 무시하고, 실 구현은 비전 입력으로 넣는다. type은 호환용 인자로 항상 "WORD"다.
      */
     AnalysisContent generate(String type, java.util.List<GeminiImage> images);
 
     /** 주어진 단어(숙어 포함)를 담은 새 예문을 생성한다(API-16 예문 재생성). 세션용 — 카드 원문은 바꾸지 않는다. */
     String generateExample(String word);
-
-    /**
-     * 주어진 문제 수식의 다른 접근 풀이를 JSON으로 생성한다(API-41). index는 core.card가 붙이므로
-     * {@code {label, steps:[{no,title,question,content}], explanation}} 형태만 반환한다.
-     */
-    String generateSolutionJson(String latex);
 
     /**
      * 단어의 뜻을 기억할 AI 연상 이미지를 생성해 data URL({@code data:{mime};base64,...})로 돌려준다(API-6c, 온디맨드).

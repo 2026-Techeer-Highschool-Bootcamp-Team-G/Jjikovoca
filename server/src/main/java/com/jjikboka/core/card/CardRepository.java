@@ -70,7 +70,7 @@ interface CardRepository extends JpaRepository<Card, Long> {
     /**
      * 오늘의 복습 큐(API-13) — 미졸업 WORD 중 오늘 복습 대상. 이른 순, limit은 Pageable로.
      * "오늘 복습 대상" 정의를 플래시카드 큐(findFlashcardQueue)와 통일한다: WORD만 + 미학습(null) 포함
-     * (방금 만든 오답을 오늘 복습하는 흐름). 수학(PROBLEM)은 별도 큐(findProblemReviewQueue)로 분리.
+     * (방금 만든 오답을 오늘 복습하는 흐름).
      */
     @Query("SELECT c FROM Card c WHERE c.userId = :userId AND c.type = 'WORD' "
             + "AND c.graduatedAt IS NULL AND c.deletedAt IS NULL "
@@ -88,18 +88,6 @@ interface CardRepository extends JpaRepository<Card, Long> {
             + "AND c.graduatedAt IS NULL AND c.deletedAt IS NULL AND c.example IS NOT NULL "
             + "ORDER BY c.createdAt DESC")
     List<Card> findClozeCandidates(@Param("userId") Long userId, Pageable pageable);
-
-    /**
-     * 수학 복습 큐(API-29) — 복습 대상 PROBLEM 카드(미졸업·due). next_review 도래 또는 미학습(null)까지 포함.
-     * soft-delete 제외·최신순, limit은 Pageable로.
-     */
-    @Query("SELECT c FROM Card c WHERE c.userId = :userId AND c.type = 'PROBLEM' "
-            + "AND c.graduatedAt IS NULL AND c.deletedAt IS NULL "
-            + "AND (c.nextReviewAt IS NULL OR c.nextReviewAt <= :now) "
-            + "ORDER BY c.createdAt DESC")
-    List<Card> findMathQueue(@Param("userId") Long userId,
-                             @Param("now") LocalDateTime now,
-                             Pageable pageable);
 
     /**
      * 시험일 역산 재배치 대상(API-33~35) — 미졸업·active 카드. subject가 null이면 전과목, 아니면 해당 과목만.

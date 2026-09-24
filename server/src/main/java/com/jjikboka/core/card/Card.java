@@ -80,33 +80,6 @@ class Card {
     private String mnemonicImagePath;
 
     @Column
-    private String latex;
-
-    @Column
-    private String summary;
-
-    @Column
-    private String hint1;
-
-    @Column
-    private String hint2;
-
-    @Column
-    private String hint3;
-
-    @Column(columnDefinition = "json")   // F-26 풀이 배열 [{index,label,steps:[{no,title,question,content}],explanation}]
-    private String solutions;
-
-    @Column(name = "answer_value")       // F-26 정답(NUMERIC=쉼표 복수) — 판정 전용, 큐/조회 DTO엔 절대 미노출(13 §7)
-    private String answerValue;
-
-    @Column(name = "answer_format")
-    private String answerFormat;
-
-    @Column(columnDefinition = "json")   // F-18 진단 {failedStep,description,suggestedReason}
-    private String diagnosis;
-
-    @Column
     private boolean mock;
 
     @JdbcTypeCode(SqlTypes.TINYINT)   // DB 컬럼이 TINYINT(box 0~4) — int 기본 매핑(INTEGER)과 달라 validate 실패, 명시로 일치
@@ -166,16 +139,7 @@ class Card {
         card.pos = command.pos();
         card.tags = command.tags();
         card.emoji = command.emoji();
-        card.summary = command.summary();
-        card.latex = command.latex();
         card.concept = command.concept();
-        card.hint1 = command.hint1();
-        card.hint2 = command.hint2();
-        card.hint3 = command.hint3();
-        card.answerFormat = command.answerFormat();
-        card.solutions = command.solutionsJson();
-        card.answerValue = command.answerValue();
-        card.diagnosis = command.diagnosisJson();
         card.mock = true;
         card.boxLevel = 0;
         card.fsrsState = "NEW";   // 신규 카드는 FSRS로 스케줄(F-19). 첫 복습에 초기 안정도/난이도가 잡힌다.
@@ -250,53 +214,6 @@ class Card {
     /** AI 연상 이미지(Phase 6c) 저장 키를 붙인다 — 온디맨드 생성 후 1회 캐시. */
     void assignMnemonicImage(String path) {
         this.mnemonicImagePath = path;
-    }
-
-    String getLatex() {
-        return latex;
-    }
-
-    /** 풀이 배열 JSON(원본). 큐/판정 서비스가 파싱해 노출 규칙(단계 content 제거 등)을 적용한다. */
-    String getSolutions() {
-        return solutions;
-    }
-
-    /**
-     * 다른 풀이 생성(API-41) 시 갱신된 풀이 배열 JSON을 저장한다. content 포함(단계 공개 30 열람용) —
-     * @Transactional 안에서 호출되면 JPA 더티체킹으로 UPDATE된다.
-     */
-    void updateSolutions(String solutionsJson) {
-        this.solutions = solutionsJson;
-    }
-
-    /** 진단 JSON(원본). */
-    String getDiagnosis() {
-        return diagnosis;
-    }
-
-    /** <b>정답 판정 전용</b>(NUMERIC/CHOICE). 큐·조회 DTO엔 절대 싣지 않는다 — 판정 응답에서만 공개(13 §7). */
-    String getAnswerValue() {
-        return answerValue;
-    }
-
-    String getAnswerFormat() {
-        return answerFormat;
-    }
-
-    String getSummary() {
-        return summary;
-    }
-
-    String getHint1() {
-        return hint1;
-    }
-
-    String getHint2() {
-        return hint2;
-    }
-
-    String getHint3() {
-        return hint3;
     }
 
     int getBoxLevel() {

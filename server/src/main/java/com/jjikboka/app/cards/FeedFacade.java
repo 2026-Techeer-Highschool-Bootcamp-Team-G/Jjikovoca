@@ -62,7 +62,7 @@ public class FeedFacade {
     /** 검색어 부분일치(대소문자 무시) — 단어·문맥 뜻·개념·요약 중 하나라도 포함하면 매치. */
     private boolean matches(CardSummary card, String needle) {
         return contains(card.word(), needle) || contains(card.contextMeaning(), needle)
-                || contains(card.concept(), needle) || contains(card.summary(), needle);
+                || contains(card.concept(), needle);
     }
 
     private boolean contains(String value, String needle) {

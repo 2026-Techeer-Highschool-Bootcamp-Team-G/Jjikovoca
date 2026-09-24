@@ -21,11 +21,7 @@ class StubExportRenderer implements ExportRenderer {
         int index = 1;
         for (CardSummary card : cards) {
             body.append(index++).append(". ");
-            if ("WORD".equals(card.type())) {
-                body.append(nullToDash(card.word())).append(" — ").append(nullToDash(card.contextMeaning()));
-            } else {
-                body.append(nullToDash(card.concept())).append(" — ").append(nullToDash(card.summary()));
-            }
+            body.append(nullToDash(card.word())).append(" — ").append(nullToDash(card.contextMeaning()));
             body.append('\n');
         }
         return new Rendered(body.toString().getBytes(StandardCharsets.UTF_8), "txt");
