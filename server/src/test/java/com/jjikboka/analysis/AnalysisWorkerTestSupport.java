@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 크래시 재수거·정확히 1회·멱등 재처리를 검증한다(08 §3). watchdog 자동 스윕은 꺼두고(interval을 아주 크게) 테스트가 직접 sweep을 호출한다 —
  * 스케줄러 타이밍에 의존하지 않아 결정적이다. Gemini는 mock, 이미지·내보내기는 temp 디렉토리로 외부 의존을 없앤다.
  */
-@SpringBootTest(classes = com.jjikboka.app.JjikbokaApplication.class,
+@SpringBootTest(classes = com.jjikboka.JjikbokaApplication.class,
         properties = "app.analyze.watchdog.interval-ms=3600000")
 abstract class AnalysisWorkerTestSupport {
 

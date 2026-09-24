@@ -7,29 +7,21 @@ import jakarta.persistence.Entity;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
-import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
 /**
  * 모듈 경계를 빌드에서 강제한다 (13 §2). ci.yml backend-test에 포함 → 위반 시 머지 차단.
  * "규율이 아니라 빌드가 막는다" — 12 §5-2 steiger(프론트 FSD 경계)의 백엔드 대응.
  *
- * allowEmptyShould(true): 스캐폴드 단계엔 대상 클래스(도메인·@Entity)가 아직 없어
- * 규칙 대상 집합이 비는 것이 정상이다. 도메인 이관 후엔 실제 클래스에 규칙이 적용된다.
+ * <p>모듈 간 허용 의존(DAG)·순환 검출은 Spring Modulith verify()가 담당한다(ModularityTest). 여기서는
+ * Modulith가 다루지 않는 보강 규칙만 둔다 — common의 도메인 무의존, @Entity 모듈 밖 비공개.
+ * allowEmptyShould(true): 대상 집합이 비어도 통과(도메인 이관 단계 정합).
  */
 @AnalyzeClasses(packages = "com.jjikboka")
 class ArchitectureTest {
 
     @ArchTest
-    // 상호 독립 모듈만 슬라이스로 검사한다(서로 의존이 없어야 하는 쌍). DAG를 따르는 교차 의존(card→exam 등)의
-    // 전면 강제는 Phase 2h의 Spring Modulith verify()가 담당한다. core는 Phase 2에서 도메인 모듈로 해체되어 제거됐다.
-    static final ArchRule 모듈_상호참조_금지 = slices()
-            .matching("com.jjikboka.(auth|analysis)..")
-            .should().notDependOnEachOther()
-            .allowEmptyShould(true);
-
-    @ArchTest
-    // common(공용 인프라)은 어떤 도메인 모듈도 몰라야 한다. 과거 "..core.." 금지는 org.springframework.core.io까지
-    // 오탐 매칭했고 core 자체가 사라졌으므로, 실제 도메인 모듈을 열거해 정확히 금지한다.
+    // common(공용 인프라)은 어떤 도메인 모듈도 몰라야 한다. 실제 도메인 모듈을 열거해 정확히 금지한다
+    // (와일드카드 "..core.." 류는 org.springframework.core.io 등을 오탐하므로 쓰지 않는다).
     static final ArchRule common은_도메인을_모름 = noClasses()
             .that().resideInAPackage("com.jjikboka.common..")
             .should().dependOnClassesThat()

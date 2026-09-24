@@ -16,7 +16,7 @@ import org.testcontainers.containers.MySQLContainer;
  * <p>Flyway가 컨테이너에 V1~V8을 실행하고 Hibernate는 validate만 한다 — 프로덕션과 같은 스키마 경로(V8 ↔ 엔티티 매핑 일치 검증 포함).
  * 컨테이너는 static 싱글톤(JVM당 1회)이라 이 패키지 테스트들이 공유한다(Ryuk가 JVM 종료 시 정리).
  */
-@SpringBootTest(classes = com.jjikboka.app.JjikbokaApplication.class)
+@SpringBootTest(classes = com.jjikboka.JjikbokaApplication.class)
 abstract class AnalyzeJobTestSupport {
 
     static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8.0")
