@@ -1,6 +1,6 @@
 package com.jjikboka.app.study;
 
-import com.jjikboka.core.card.FlashcardItem;
+import com.jjikboka.card.FlashcardItem;
 
 import java.util.List;
 

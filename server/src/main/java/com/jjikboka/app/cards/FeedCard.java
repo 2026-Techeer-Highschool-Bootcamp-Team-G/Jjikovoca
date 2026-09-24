@@ -1,6 +1,6 @@
 package com.jjikboka.app.cards;
 
-import com.jjikboka.core.card.CardSummary;
+import com.jjikboka.card.CardSummary;
 import com.jjikboka.exam.ExamTag;
 
 import java.time.LocalDateTime;

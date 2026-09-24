@@ -1,6 +1,6 @@
 package com.jjikboka.app.export;
 
-import com.jjikboka.core.card.CardSummary;
+import com.jjikboka.card.CardSummary;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;

@@ -1,6 +1,6 @@
 package com.jjikboka.app.notification;
 
-import com.jjikboka.core.card.CardStatsService;
+import com.jjikboka.card.CardStatsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,6 +1,6 @@
 package com.jjikboka.app.study;
 
-import com.jjikboka.core.card.ReviewQueueItem;
+import com.jjikboka.card.ReviewQueueItem;
 
 import java.util.List;
 

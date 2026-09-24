@@ -1,6 +1,6 @@
 package com.jjikboka.app.study;
 
-import com.jjikboka.core.card.StudyQueueService;
+import com.jjikboka.card.StudyQueueService;
 import com.jjikboka.common.response.ApiResponse;
 import java.util.List;
 import org.springframework.http.ResponseEntity;

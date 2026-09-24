@@ -1,7 +1,7 @@
 package com.jjikboka.app.export;
 
-import com.jjikboka.core.card.CardQueryService;
-import com.jjikboka.core.card.CardSummary;
+import com.jjikboka.card.CardQueryService;
+import com.jjikboka.card.CardSummary;
 import com.jjikboka.subscription.PremiumService;
 import com.jjikboka.quota.QuotaService;
 import com.jjikboka.export.ExportLogService;

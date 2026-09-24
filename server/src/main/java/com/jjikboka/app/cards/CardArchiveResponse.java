@@ -1,6 +1,6 @@
 package com.jjikboka.app.cards;
 
-import com.jjikboka.core.card.ArchiveDay;
+import com.jjikboka.card.ArchiveDay;
 
 import java.util.List;
 

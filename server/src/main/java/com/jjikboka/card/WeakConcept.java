@@ -1,4 +1,4 @@
-package com.jjikboka.core.card;
+package com.jjikboka.card;
 
 /**
  * 약한 개념 (API-17 full, F-10 프리미엄 위젯). card를 concept·subject로 그룹핑해 낸 약점 —

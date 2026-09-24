@@ -1,4 +1,4 @@
-package com.jjikboka.core.card;
+package com.jjikboka.card;
 
 /**
  * 카드 생성 커맨드 (core.card 공개 입력 DTO, API-6 처리). analysis가 만든 콘텐츠를 app이 이 커맨드로 옮겨
