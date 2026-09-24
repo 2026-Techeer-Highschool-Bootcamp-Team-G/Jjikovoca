@@ -1,6 +1,6 @@
 package com.jjikboka.app.premium;
 
-import com.jjikboka.core.card.PremiumActivationService;
+import com.jjikboka.core.card.PremiumService;
 import com.jjikboka.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/premium")
 class PremiumController {
 
-    private final PremiumActivationService premiumActivationService;
+    private final PremiumService premiumActivationService;
 
-    PremiumController(PremiumActivationService premiumActivationService) {
+    PremiumController(PremiumService premiumActivationService) {
         this.premiumActivationService = premiumActivationService;
     }
 

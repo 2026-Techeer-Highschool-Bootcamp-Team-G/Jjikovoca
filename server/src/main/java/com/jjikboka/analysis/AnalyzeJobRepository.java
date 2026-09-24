@@ -11,7 +11,7 @@ import java.util.List;
  * analyze_job 저장소. package-private 봉인(13 §2). 접수 시 PENDING 저장,
  * Phase 2 상태 전이·조회에 더해 P1-6 내구 처리(lease claim·watchdog 재수거)를 담당한다.
  *
- * <p>claim은 QuotaConsumeService.tryIncrement와 같은 <b>조건부 원자 UPDATE</b> 패턴이다 —
+ * <p>claim은 QuotaService.tryIncrement와 같은 <b>조건부 원자 UPDATE</b> 패턴이다 —
  * WHERE의 상태·lease 판정과 전이가 한 행 락 안에서 일어나 @Async·watchdog가 동시에 노려도 1개만 성공한다.
  */
 interface AnalyzeJobRepository extends JpaRepository<AnalyzeJob, Long> {

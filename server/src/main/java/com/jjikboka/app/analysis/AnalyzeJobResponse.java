@@ -1,4 +1,4 @@
-package com.jjikboka.app.cards;
+package com.jjikboka.app.analysis;
 
 import com.jjikboka.core.card.CardSummary;
 import com.fasterxml.jackson.annotation.JsonInclude;

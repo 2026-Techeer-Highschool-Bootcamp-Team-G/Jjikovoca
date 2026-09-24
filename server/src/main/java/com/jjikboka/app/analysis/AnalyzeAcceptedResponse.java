@@ -1,4 +1,4 @@
-package com.jjikboka.app.cards;
+package com.jjikboka.app.analysis;
 
 /**
  * 캡처 분석 접수 응답 (Notion API-ID 6). 비동기 202 — 실제 카드는 워커가 만들고 폴링(39)·SSE(40)로 받는다.

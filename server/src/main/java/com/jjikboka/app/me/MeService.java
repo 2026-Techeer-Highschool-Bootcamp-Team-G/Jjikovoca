@@ -3,8 +3,8 @@ package com.jjikboka.app.me;
 import com.jjikboka.auth.UserProfile;
 import com.jjikboka.auth.UserQueryService;
 import com.jjikboka.core.card.PremiumDetail;
-import com.jjikboka.core.card.PremiumQueryService;
-import com.jjikboka.core.card.QuotaQueryService;
+import com.jjikboka.core.card.PremiumService;
+import com.jjikboka.core.card.QuotaService;
 import com.jjikboka.core.card.QuotaStatus;
 import com.jjikboka.core.stats.ExpService;
 import com.jjikboka.core.stats.ExpSummary;
@@ -22,14 +22,14 @@ class MeService {
     private static final int PREMIUM_AMOUNT = 4900;
 
     private final UserQueryService userQueryService;
-    private final PremiumQueryService premiumQueryService;
-    private final QuotaQueryService quotaQueryService;
+    private final PremiumService premiumQueryService;
+    private final QuotaService quotaQueryService;
     private final ExpService expService;
     private final boolean aiMockMode;
 
     MeService(UserQueryService userQueryService,
-              PremiumQueryService premiumQueryService,
-              QuotaQueryService quotaQueryService,
+              PremiumService premiumQueryService,
+              QuotaService quotaQueryService,
               ExpService expService,
               @Value("${gemini.mock:false}") boolean aiMockMode) {
         this.userQueryService = userQueryService;

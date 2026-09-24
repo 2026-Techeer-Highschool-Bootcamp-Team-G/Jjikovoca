@@ -1,10 +1,9 @@
-package com.jjikboka.app.cards;
+package com.jjikboka.app.analysis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jjikboka.analysis.AnalyzeJobService;
-import com.jjikboka.app.analysis.AnalyzePayload;
 import com.jjikboka.app.image.ImageStorageService;
-import com.jjikboka.core.card.QuotaConsumeService;
+import com.jjikboka.core.card.QuotaService;
 import com.jjikboka.shared.event.AnalyzeEvents;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -23,13 +22,13 @@ import java.util.List;
 @Service
 class AnalyzeService {
 
-    private final QuotaConsumeService quotaConsumeService;
+    private final QuotaService quotaConsumeService;
     private final AnalyzeJobService analyzeJobService;
     private final ImageStorageService imageStorageService;
     private final ApplicationEventPublisher eventPublisher;
     private final ObjectMapper objectMapper;
 
-    AnalyzeService(QuotaConsumeService quotaConsumeService,
+    AnalyzeService(QuotaService quotaConsumeService,
                    AnalyzeJobService analyzeJobService,
                    ImageStorageService imageStorageService,
                    ApplicationEventPublisher eventPublisher,

@@ -18,12 +18,12 @@ import java.util.function.Function;
 public class ClozeService {
 
     private final CardRepository cardRepository;
-    private final PremiumQueryService premiumQueryService;
-    private final QuotaConsumeService quotaConsumeService;
+    private final PremiumService premiumQueryService;
+    private final QuotaService quotaConsumeService;
 
     ClozeService(CardRepository cardRepository,
-                 PremiumQueryService premiumQueryService,
-                 QuotaConsumeService quotaConsumeService) {
+                 PremiumService premiumQueryService,
+                 QuotaService quotaConsumeService) {
         this.cardRepository = cardRepository;
         this.premiumQueryService = premiumQueryService;
         this.quotaConsumeService = quotaConsumeService;

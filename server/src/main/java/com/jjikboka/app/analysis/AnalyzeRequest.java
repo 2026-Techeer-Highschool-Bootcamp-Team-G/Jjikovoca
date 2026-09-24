@@ -1,4 +1,4 @@
-package com.jjikboka.app.cards;
+package com.jjikboka.app.analysis;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.AssertTrue;
