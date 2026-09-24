@@ -14,7 +14,8 @@ public record ExamReviewItem(
 ) {
 
     static ExamReviewItem from(Card card, LocalDateTime now) {
+        // recallProb는 FSRS R(t)이었으나 FSRS 제거(Leitner 단일화)로 항상 null(계약 필드는 하위호환 유지).
         return new ExamReviewItem(card.getId(), card.getSubject(),
-                card.currentRetrievability(now), card.getNextReviewAt());
+                null, card.getNextReviewAt());
     }
 }
