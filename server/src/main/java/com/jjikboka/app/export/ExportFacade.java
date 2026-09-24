@@ -2,8 +2,8 @@ package com.jjikboka.app.export;
 
 import com.jjikboka.core.card.CardQueryService;
 import com.jjikboka.core.card.CardSummary;
-import com.jjikboka.core.card.PremiumService;
-import com.jjikboka.core.card.QuotaService;
+import com.jjikboka.subscription.PremiumService;
+import com.jjikboka.quota.QuotaService;
 import com.jjikboka.export.ExportLogService;
 import com.jjikboka.common.error.BusinessException;
 import org.springframework.http.HttpStatus;

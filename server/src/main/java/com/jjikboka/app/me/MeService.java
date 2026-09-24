@@ -2,10 +2,10 @@ package com.jjikboka.app.me;
 
 import com.jjikboka.auth.UserProfile;
 import com.jjikboka.auth.UserQueryService;
-import com.jjikboka.core.card.PremiumDetail;
-import com.jjikboka.core.card.PremiumService;
-import com.jjikboka.core.card.QuotaService;
-import com.jjikboka.core.card.QuotaStatus;
+import com.jjikboka.subscription.PremiumDetail;
+import com.jjikboka.subscription.PremiumService;
+import com.jjikboka.quota.QuotaService;
+import com.jjikboka.quota.QuotaStatus;
 import com.jjikboka.stats.ExpService;
 import com.jjikboka.stats.ExpSummary;
 import org.springframework.beans.factory.annotation.Value;

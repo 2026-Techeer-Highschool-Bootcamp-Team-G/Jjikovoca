@@ -1,4 +1,4 @@
-package com.jjikboka.core.card;
+package com.jjikboka.subscription;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -1,5 +1,7 @@
 package com.jjikboka.core.card;
 
+import com.jjikboka.subscription.PremiumService;
+
 import com.jjikboka.studylog.GradeCount;
 import com.jjikboka.studylog.StudyStatsService;
 import com.jjikboka.common.error.BusinessException;

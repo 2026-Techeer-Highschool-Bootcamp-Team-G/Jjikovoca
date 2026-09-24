@@ -1,4 +1,4 @@
-package com.jjikboka.core.card;
+package com.jjikboka.quota;
 
 import java.io.Serializable;
 import java.time.LocalDate;
