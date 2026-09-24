@@ -1,4 +1,4 @@
-package com.jjikboka.app.card;
+package com.jjikboka.app.cards;
 
 import com.jjikboka.shared.response.ApiResponse;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.jjikboka.app.card;
+package com.jjikboka.app.cards;
 
 /**
  * 카드 시험 태깅 해제 응답 (Notion API-ID 44). 제외한 카드·시험 id를 돌려준다.
