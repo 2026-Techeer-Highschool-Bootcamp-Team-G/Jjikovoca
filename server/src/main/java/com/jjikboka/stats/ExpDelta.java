@@ -1,4 +1,4 @@
-package com.jjikboka.core.stats;
+package com.jjikboka.stats;
 
 /**
  * 경험치 적립 델타 (API-11 study 응답, core.stats 공개 DTO). 이번 적립분(earned)·누적 exp(total)·레벨업 여부.

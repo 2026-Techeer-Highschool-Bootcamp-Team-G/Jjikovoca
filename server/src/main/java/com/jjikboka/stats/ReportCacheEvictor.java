@@ -1,4 +1,4 @@
-package com.jjikboka.core.stats;
+package com.jjikboka.stats;
 
 import com.jjikboka.common.event.StudyEvents;
 import org.springframework.cache.annotation.CacheEvict;

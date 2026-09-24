@@ -1,7 +1,7 @@
 package com.jjikboka.app.study;
 
 import com.jjikboka.core.card.ClozeAnswerResult;
-import com.jjikboka.core.stats.ClozeExp;
+import com.jjikboka.stats.ClozeExp;
 
 import java.time.LocalDateTime;
 

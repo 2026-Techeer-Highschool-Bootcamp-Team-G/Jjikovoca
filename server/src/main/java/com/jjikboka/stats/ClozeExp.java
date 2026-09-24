@@ -1,4 +1,4 @@
-package com.jjikboka.core.stats;
+package com.jjikboka.stats;
 
 /**
  * 빈칸 퀴즈 경험치 적립 결과 (API-15, core.stats 공개 DTO). 화면의 두 XP 배지를 그리도록 분해해서 준다 —

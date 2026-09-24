@@ -1,4 +1,4 @@
-package com.jjikboka.core.stats;
+package com.jjikboka.stats;
 
 /**
  * 일일 퀘스트 (core.stats 공개 DTO, API-19). 홈 게임상태(F-16)의 "오늘의 목표" 진행도로 쓴다.

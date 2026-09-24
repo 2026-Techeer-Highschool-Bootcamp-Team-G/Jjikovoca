@@ -1,4 +1,4 @@
-package com.jjikboka.core.stats;
+package com.jjikboka.stats;
 
 /**
  * 과목별 학습 비중 (Notion API-ID 17, F-10 도넛). 리포트 과목 도넛의 한 조각 —

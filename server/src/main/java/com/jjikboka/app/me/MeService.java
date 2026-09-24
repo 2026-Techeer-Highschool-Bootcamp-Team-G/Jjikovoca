@@ -6,8 +6,8 @@ import com.jjikboka.core.card.PremiumDetail;
 import com.jjikboka.core.card.PremiumService;
 import com.jjikboka.core.card.QuotaService;
 import com.jjikboka.core.card.QuotaStatus;
-import com.jjikboka.core.stats.ExpService;
-import com.jjikboka.core.stats.ExpSummary;
+import com.jjikboka.stats.ExpService;
+import com.jjikboka.stats.ExpSummary;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

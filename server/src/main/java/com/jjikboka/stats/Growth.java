@@ -1,4 +1,4 @@
-package com.jjikboka.core.stats;
+package com.jjikboka.stats;
 
 /**
  * 성장 지표 (Notion API-ID 17). memorizedDelta는 전월 대비 증감(전월 비교는 후속이라 현재 null),
