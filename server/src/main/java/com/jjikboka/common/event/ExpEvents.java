@@ -1,4 +1,4 @@
-package com.jjikboka.shared.event;
+package com.jjikboka.common.event;
 
 /**
  * 경험치 이벤트 계약 (13 §6). 출석으로 레벨업·연속학습이 일어났음을 알린다 — 지금은 알림 생성 소비자가 쓴다.

@@ -5,7 +5,7 @@ import com.jjikboka.auth.dto.LoginRequest;
 import com.jjikboka.auth.dto.RefreshRequest;
 import com.jjikboka.auth.dto.RegisterRequest;
 import com.jjikboka.auth.dto.TokenResponse;
-import com.jjikboka.shared.error.BusinessException;
+import com.jjikboka.common.error.BusinessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

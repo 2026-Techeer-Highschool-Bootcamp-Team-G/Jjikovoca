@@ -1,6 +1,6 @@
 package com.jjikboka.core.card;
 
-import com.jjikboka.shared.error.BusinessException;
+import com.jjikboka.common.error.BusinessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

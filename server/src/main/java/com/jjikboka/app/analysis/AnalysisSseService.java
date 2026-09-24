@@ -4,7 +4,7 @@ import com.jjikboka.analysis.AnalyzeJobService;
 import com.jjikboka.analysis.AnalyzeJobView;
 import com.jjikboka.core.card.CardQueryService;
 import com.jjikboka.core.card.CardSummary;
-import com.jjikboka.shared.event.AnalyzeEvents;
+import com.jjikboka.common.event.AnalyzeEvents;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;

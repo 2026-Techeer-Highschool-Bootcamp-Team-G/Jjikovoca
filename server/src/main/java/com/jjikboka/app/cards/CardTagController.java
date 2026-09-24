@@ -1,6 +1,6 @@
 package com.jjikboka.app.cards;
 
-import com.jjikboka.shared.response.ApiResponse;
+import com.jjikboka.common.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;

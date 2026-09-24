@@ -4,7 +4,7 @@ import com.jjikboka.analysis.GeminiClient;
 import com.jjikboka.app.image.ImageStorageService;
 import com.jjikboka.core.card.CardMnemonicService;
 import com.jjikboka.core.card.MnemonicTarget;
-import com.jjikboka.shared.error.BusinessException;
+import com.jjikboka.common.error.BusinessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 

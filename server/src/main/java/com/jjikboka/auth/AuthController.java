@@ -6,7 +6,7 @@ import com.jjikboka.auth.dto.LogoutRequest;
 import com.jjikboka.auth.dto.RefreshRequest;
 import com.jjikboka.auth.dto.RegisterRequest;
 import com.jjikboka.auth.dto.TokenResponse;
-import com.jjikboka.shared.response.ApiResponse;
+import com.jjikboka.common.response.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

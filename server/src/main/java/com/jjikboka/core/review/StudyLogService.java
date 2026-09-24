@@ -1,6 +1,6 @@
 package com.jjikboka.core.review;
 
-import com.jjikboka.shared.event.StudyEvents;
+import com.jjikboka.common.event.StudyEvents;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
