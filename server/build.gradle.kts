@@ -14,6 +14,13 @@ java {
 
 repositories { mavenCentral() }
 
+// Spring Modulith — 모듈 경계·허용 의존을 빌드에서 강제(13 §2). Spring Boot 3.3.x ↔ Modulith 1.2.x.
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.modulith:spring-modulith-bom:1.2.4")
+    }
+}
+
 dependencies {
     // 웹·보안·영속 (auth·core 전 도메인 공용)
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -47,8 +54,12 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
     runtimeOnly("com.mysql:mysql-connector-j")
 
+    // 모듈 경계 강제 — 허용 의존(@ApplicationModule)·순환 검출을 런타임/검증에서
+    implementation("org.springframework.modulith:spring-modulith-starter-core")
+
     // 경계 검증 + 통합 테스트 (Testcontainers — H2 금지, 08 §3)
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.modulith:spring-modulith-starter-test")
     testImplementation("com.tngtech.archunit:archunit-junit5:1.3.0")
     testImplementation("org.testcontainers:mysql")
     testImplementation("org.testcontainers:junit-jupiter")
