@@ -9,7 +9,6 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -80,33 +79,6 @@ class Card {
     private String mnemonicImagePath;
 
     @Column
-    private String latex;
-
-    @Column
-    private String summary;
-
-    @Column
-    private String hint1;
-
-    @Column
-    private String hint2;
-
-    @Column
-    private String hint3;
-
-    @Column(columnDefinition = "json")   // F-26 풀이 배열 [{index,label,steps:[{no,title,question,content}],explanation}]
-    private String solutions;
-
-    @Column(name = "answer_value")       // F-26 정답(NUMERIC=쉼표 복수) — 판정 전용, 큐/조회 DTO엔 절대 미노출(13 §7)
-    private String answerValue;
-
-    @Column(name = "answer_format")
-    private String answerFormat;
-
-    @Column(columnDefinition = "json")   // F-18 진단 {failedStep,description,suggestedReason}
-    private String diagnosis;
-
-    @Column
     private boolean mock;
 
     @JdbcTypeCode(SqlTypes.TINYINT)   // DB 컬럼이 TINYINT(box 0~4) — int 기본 매핑(INTEGER)과 달라 validate 실패, 명시로 일치
@@ -121,15 +93,6 @@ class Card {
 
     @Column(name = "graduated_at")
     private LocalDateTime graduatedAt;
-
-    @Column(name = "fsrs_state")
-    private String fsrsState;
-
-    @Column(name = "fsrs_stability")
-    private Double fsrsStability;
-
-    @Column(name = "fsrs_difficulty")
-    private Double fsrsDifficulty;
 
     @Column(name = "last_reviewed_at")
     private LocalDateTime lastReviewedAt;
@@ -166,19 +129,9 @@ class Card {
         card.pos = command.pos();
         card.tags = command.tags();
         card.emoji = command.emoji();
-        card.summary = command.summary();
-        card.latex = command.latex();
         card.concept = command.concept();
-        card.hint1 = command.hint1();
-        card.hint2 = command.hint2();
-        card.hint3 = command.hint3();
-        card.answerFormat = command.answerFormat();
-        card.solutions = command.solutionsJson();
-        card.answerValue = command.answerValue();
-        card.diagnosis = command.diagnosisJson();
         card.mock = true;
-        card.boxLevel = 0;
-        card.fsrsState = "NEW";   // 신규 카드는 FSRS로 스케줄(F-19). 첫 복습에 초기 안정도/난이도가 잡힌다.
+        card.boxLevel = 0;   // 신규 카드는 Leitner box 0에서 시작(복습 전이는 review()가 담당).
         return card;
     }
 
@@ -252,53 +205,6 @@ class Card {
         this.mnemonicImagePath = path;
     }
 
-    String getLatex() {
-        return latex;
-    }
-
-    /** 풀이 배열 JSON(원본). 큐/판정 서비스가 파싱해 노출 규칙(단계 content 제거 등)을 적용한다. */
-    String getSolutions() {
-        return solutions;
-    }
-
-    /**
-     * 다른 풀이 생성(API-41) 시 갱신된 풀이 배열 JSON을 저장한다. content 포함(단계 공개 30 열람용) —
-     * @Transactional 안에서 호출되면 JPA 더티체킹으로 UPDATE된다.
-     */
-    void updateSolutions(String solutionsJson) {
-        this.solutions = solutionsJson;
-    }
-
-    /** 진단 JSON(원본). */
-    String getDiagnosis() {
-        return diagnosis;
-    }
-
-    /** <b>정답 판정 전용</b>(NUMERIC/CHOICE). 큐·조회 DTO엔 절대 싣지 않는다 — 판정 응답에서만 공개(13 §7). */
-    String getAnswerValue() {
-        return answerValue;
-    }
-
-    String getAnswerFormat() {
-        return answerFormat;
-    }
-
-    String getSummary() {
-        return summary;
-    }
-
-    String getHint1() {
-        return hint1;
-    }
-
-    String getHint2() {
-        return hint2;
-    }
-
-    String getHint3() {
-        return hint3;
-    }
-
     int getBoxLevel() {
         return boxLevel;
     }
@@ -321,70 +227,16 @@ class Card {
         return createdAt;
     }
 
-    /** FSRS 졸업 임계 — 다음 복습 간격이 이 일수 이상이면 '외웠다'로 보고 졸업시킨다. */
-    private static final int GRADUATE_INTERVAL_DAYS = 60;
-
     /**
-     * 복습 전이 진입 (API-11·15). fsrs_state가 있으면 FSRS(F-19), 없으면 Lightner로 간다 — 단일 분기.
-     * 결과 문자열(KNOW/CONFUSED/DONT_KNOW)·큐(next_review)·졸업(graduated_at) 계약은 양쪽 동일하다.
+     * 복습 전이 진입 (API-11·15) — Leitner box 단일 경로.
+     * 결과 문자열(KNOW/CONFUSED/DONT_KNOW)·큐(next_review)·졸업(graduated_at) 계약을 지킨다.
      */
     void review(String result, LocalDateTime now) {
-        if (fsrsState == null) {
-            applyLightner(result, now);
-        } else {
-            applyFsrs(result, now);
-        }
-    }
-
-    /**
-     * FSRS 복습 전이 (F-19). 첫 복습(NEW)은 등급으로 초기 안정도/난이도를, 이후는 직전 복습 경과일로 R을 구해 갱신한다.
-     * DONT_KNOW→Again·CONFUSED→Hard·KNOW→Good. 다음 간격이 졸업 임계 이상이면 졸업, Again이면 몰라요 빈도+1.
-     */
-    private void applyFsrs(String result, LocalDateTime now) {
-        int grade = grade(result);
-        FsrsScheduler.FsrsState state;
-        if ("NEW".equals(fsrsState) || fsrsStability == null) {
-            state = FsrsScheduler.initial(grade);
-        } else {
-            long elapsed = lastReviewedAt == null ? 0 : Duration.between(lastReviewedAt, now).toDays();
-            state = FsrsScheduler.next(fsrsStability, fsrsDifficulty, elapsed, grade);
-        }
-        fsrsStability = state.stability();
-        fsrsDifficulty = state.difficulty();
-        fsrsState = "REVIEW";
-        if (grade == 1) {
-            wrongCount += 1;
-        }
-        long interval = FsrsScheduler.intervalDays(fsrsStability);
-        lastReviewedAt = now;
-        nextReviewAt = now.plusDays(interval);
-        if (interval >= GRADUATE_INTERVAL_DAYS) {
-            graduatedAt = now;
-        }
-    }
-
-    /** 결과 문자열 → FSRS 등급(1=Again·2=Hard·3=Good). Easy(4)는 이 앱 UX에 없다. */
-    private static int grade(String result) {
-        return switch (result) {
-            case "DONT_KNOW" -> 1;
-            case "CONFUSED" -> 2;
-            case "KNOW" -> 3;
-            default -> throw new IllegalArgumentException("unknown result: " + result);
-        };
-    }
-
-    /** 현재 시점 회상확률 R(t) — FSRS 카드만(Lightner·미복습은 null). 시험 오늘복습(42) recallProb·추천에 쓴다. */
-    Double currentRetrievability(LocalDateTime now) {
-        if (fsrsStability == null || lastReviewedAt == null) {
-            return null;
-        }
-        long elapsed = Duration.between(lastReviewedAt, now).toDays();
-        return FsrsScheduler.retrievability(fsrsStability, elapsed);
+        applyLightner(result, now);
     }
 
     /**
      * 라이트너 복습 전이 (API-11, 서버 고정). box는 카드가 소유하므로 전이 규칙도 여기 둔다.
-     * fsrs_state IS NULL(기존 카드)일 때의 경로 — 신규 카드는 FSRS로 간다(review 분기).
      *
      * <ul>
      *   <li>KNOW — box+1(최대 4). 다음 복습 간격 1·3·7·30일, box 4 도달 시 졸업</li>

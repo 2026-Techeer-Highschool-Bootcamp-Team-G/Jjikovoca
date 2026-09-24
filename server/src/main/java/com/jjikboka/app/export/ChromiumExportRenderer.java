@@ -109,15 +109,8 @@ class ChromiumExportRenderer implements ExportRenderer {
         StringBuilder rows = new StringBuilder();
         int index = 1;
         for (CardSummary card : cards) {
-            String head;
-            String body;
-            if ("WORD".equals(card.type())) {
-                head = escape(card.word());
-                body = escape(card.contextMeaning());
-            } else {
-                head = escape(card.concept());
-                body = escape(card.summary());
-            }
+            String head = escape(card.word());
+            String body = escape(card.contextMeaning());
             rows.append("<li><span class=\"h\">").append(index++).append(". ").append(head)
                     .append("</span><span class=\"b\">").append(body).append("</span></li>");
         }

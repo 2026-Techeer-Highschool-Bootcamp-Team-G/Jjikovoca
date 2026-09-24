@@ -11,17 +11,13 @@ import java.util.List;
 /**
  * 캡처 분석 접수 요청 (Notion API-ID 6). 검증 실패는 GlobalExceptionHandler가 400 VALIDATION_ERROR로 변환한다.
  *
- * <p>타입별 필수 필드가 갈린다:
- * <ul>
- *   <li>WORD — {@code cropImages}(형광펜 크롭 1~10개, 크롭마다 AI 1회·카드 1개; 차감은 접수 시 1회) + {@code fullImage}(문맥 뜻 판별)</li>
- *   <li>PROBLEM — {@code cropImage}(문제 박스 단일), {@code examId}로 활성 시험 자동 태깅(선택)</li>
- * </ul>
- * 교차 필드 규칙은 @AssertTrue로 표현한다(한쪽 타입 필드만 채워졌는지).
+ * <p>영어 단어(WORD) 전용 — {@code cropImages}(형광펜 크롭 1~10개, 크롭마다 AI 1회·카드 1개; 차감은 접수 시 1회)
+ * + {@code fullImage}(문맥 뜻 판별). {@code examId}로 활성 시험 자동 태깅(선택).
  */
 public record AnalyzeRequest(
 
         @NotBlank
-        @Pattern(regexp = "WORD|PROBLEM", message = "type은 WORD 또는 PROBLEM이어야 합니다.")
+        @Pattern(regexp = "WORD", message = "type은 WORD여야 합니다.")
         String type,
 
         @Size(max = 10, message = "크롭 이미지는 최대 10개까지입니다.")
@@ -33,8 +29,6 @@ public record AnalyzeRequest(
         List<String> words,
 
         String fullImage,
-
-        String cropImage,
 
         Long examId
 ) {
@@ -49,15 +43,5 @@ public record AnalyzeRequest(
         boolean cropsOk = cropImages != null && !cropImages.isEmpty()
                 && cropImages.stream().allMatch(image -> image != null && !image.isBlank());
         return cropsOk && fullImage != null && !fullImage.isBlank();
-    }
-
-    /** PROBLEM이면 cropImage(단일)가 있어야 한다. */
-    @JsonIgnore
-    @AssertTrue(message = "PROBLEM 요청은 cropImage가 필요합니다.")
-    public boolean isProblemFieldsPresent() {
-        if (!"PROBLEM".equals(type)) {
-            return true;
-        }
-        return cropImage != null && !cropImage.isBlank();
     }
 }

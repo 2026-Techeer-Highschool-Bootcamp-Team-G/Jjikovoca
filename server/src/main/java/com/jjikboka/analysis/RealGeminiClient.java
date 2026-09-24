@@ -40,22 +40,6 @@ class RealGeminiClient implements GeminiClient {
             }
             """;
 
-    private static final String PROBLEM_PROMPT = """
-            다음은 수학 문제의 크롭 이미지다. 문제를 분석해 아래 JSON만 출력하라(코드블록·설명 없이).
-            문제는 절대 요약하지 말고 100% 그대로 추출하라 — 발문(문제 문장)·수식·보기·조건을 하나도 빠짐없이 담아라.
-            {
-              "subject": "MATH",
-              "summary": "피드용 짧은 한 줄 요약(한국어)",
-              "latex": "문제 전문 — 발문(문제 문장)과 수식·보기·조건을 모두 요약·생략 없이 그대로. 수식은 LaTeX($...$), 문장은 그대로 자연어로 함께.",
-              "concept": "핵심 개념(한국어)",
-              "hint1": "1단계 힌트", "hint2": "2단계 힌트", "hint3": "3단계 힌트",
-              "answerFormat": "NUMERIC | CHOICE 중 하나 (반드시 이 둘 중 하나. 수식·복수해도 NUMERIC으로)",
-              "solutions": [{"label": "풀이명", "steps": [{"no": 1, "title": "1단계", "question": "질문", "content": "내용"}], "explanation": "사고과정 요약(풀이 흐름을 간결히)"}],
-              "answerValue": "정답 값(문자열)",
-              "diagnosis": {"failedStep": 1, "description": "자주 틀리는 지점", "suggestedReason": "MISTAKE | CONCEPT"}
-            }
-            """;
-
     /**
      * WORD 구조화 출력 스키마(#369). flash-lite가 example·exampleMeaning 등을 생략하지 못하게 required로 강제한다 —
      * responseMimeType만으론 필드 누락을 못 막아 예문/해석이 null로 저장되던 문제를 근본 차단. subject는 fallback(ENGLISH)이라 선택.
@@ -111,23 +95,9 @@ class RealGeminiClient implements GeminiClient {
 
     @Override
     public AnalysisContent generate(String type, List<GeminiImage> images) {
-        boolean problem = "PROBLEM".equals(type);
-        // WORD는 빠른 모델 우선(fast=true) — 단어 분석은 단순해 lite로 지연을 줄인다. PROBLEM은 정확도 위해 기본 체인.
-        // WORD는 responseSchema로 필드 누락(example·exampleMeaning)을 강제 차단(#369). PROBLEM은 중첩 구조라 스키마 미적용.
-        String raw = problem
-                ? geminiApi.generate(PROBLEM_PROMPT, images, true, false)
-                : geminiApi.generate(WORD_PROMPT, images, true, true, WORD_SCHEMA);
+        // WORD 전용 — 빠른 모델 우선(fast=true)에 responseSchema로 필드 누락(example·exampleMeaning)을 강제 차단(#369).
+        String raw = geminiApi.generate(WORD_PROMPT, images, true, true, WORD_SCHEMA);
         JsonNode node = readJson(raw);
-        if (problem) {
-            return new AnalysisContent(
-                    MODEL, str(node, "subject", "MATH"),
-                    null, null, null, null, null,   // WORD·예문뜻 미해당(PROBLEM)
-                    null, null, null, null,   // WORD enrichment 미해당(PROBLEM)
-                    str(node, "summary", null), str(node, "latex", null), str(node, "concept", null),
-                    str(node, "hint1", null), str(node, "hint2", null), str(node, "hint3", null),
-                    answerFormat(node),
-                    jsonString(node, "solutions"), str(node, "answerValue", null), jsonString(node, "diagnosis"));
-        }
         String word = str(node, "word", null);
         String example = str(node, "example", null);
         String exampleMeaning = str(node, "exampleMeaning", null);
@@ -143,7 +113,7 @@ class RealGeminiClient implements GeminiClient {
                 word, str(node, "contextMeaning", null),
                 str(node, "dictMeaning", null), example, exampleMeaning,
                 str(node, "pronunciation", null), str(node, "pos", null), strList(node, "tags"), str(node, "emoji", null),
-                null, null, null, null, null, null, null, null, null, null);
+                null);   // concept 미채움
     }
 
     /**
@@ -170,14 +140,6 @@ class RealGeminiClient implements GeminiClient {
         String prompt = "영어 단어 또는 숙어 '" + word + "'를 자연스럽게 포함한 새 영어 예문 한 문장만 출력하라. "
                 + "다른 말·따옴표 없이 예문 문장만.";
         return geminiApi.generate(prompt, List.of(), false).strip();
-    }
-
-    @Override
-    public String generateSolutionJson(String latex) {
-        String prompt = "다음 수식의 문제에 대해 기존과 다른 접근의 풀이를 아래 JSON만으로 출력하라(코드블록·설명 없이). "
-                + "{\"label\": \"풀이명\", \"steps\": [{\"no\": 1, \"title\": \"1단계\", \"question\": \"질문\", \"content\": \"내용\"}], "
-                + "\"explanation\": \"해설\"}\n수식: " + latex;
-        return geminiApi.generate(prompt, List.of(), true).strip();
     }
 
     @Override
@@ -209,11 +171,6 @@ class RealGeminiClient implements GeminiClient {
         return node.hasNonNull(field) ? node.get(field).asText() : fallback;
     }
 
-    /** answerFormat을 DB 허용값(NUMERIC·CHOICE)으로 정규화 — 모델이 벗어난 값(EXPRESSION 등)을 내도 카드 저장이 깨지지 않게. */
-    private static String answerFormat(JsonNode node) {
-        return "CHOICE".equals(str(node, "answerFormat", null)) ? "CHOICE" : "NUMERIC";
-    }
-
     /** JSON 배열 필드를 문자열 리스트로 — 없거나 배열이 아니면 null(카드 tags 미설정). */
     private static List<String> strList(JsonNode node, String field) {
         if (!node.hasNonNull(field) || !node.get(field).isArray()) {
@@ -222,16 +179,5 @@ class RealGeminiClient implements GeminiClient {
         List<String> list = new java.util.ArrayList<>();
         node.get(field).forEach(element -> list.add(element.asText()));
         return list;
-    }
-
-    private String jsonString(JsonNode node, String field) {
-        if (!node.hasNonNull(field)) {
-            return null;
-        }
-        try {
-            return objectMapper.writeValueAsString(node.get(field));
-        } catch (JsonProcessingException e) {
-            return null;
-        }
     }
 }

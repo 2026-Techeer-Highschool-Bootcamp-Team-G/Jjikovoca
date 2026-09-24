@@ -24,8 +24,9 @@ public record FlashcardItem(
 ) {
 
     static FlashcardItem from(Card card, LocalDateTime now) {
+        // recallProb는 FSRS 회상확률이었으나 FSRS 제거(Leitner 단일화)로 항상 null(계약 필드는 하위호환 유지).
         return new FlashcardItem(card.getId(), card.getWord(), card.getContextMeaning(),
-                card.getExample(), card.getExampleMeaning(), card.getBoxLevel(), card.currentRetrievability(now),
+                card.getExample(), card.getExampleMeaning(), card.getBoxLevel(), null,
                 card.getPronunciation(), card.getPos(), card.getTags(), card.getEmoji(),
                 card.getMnemonicImagePath());
     }

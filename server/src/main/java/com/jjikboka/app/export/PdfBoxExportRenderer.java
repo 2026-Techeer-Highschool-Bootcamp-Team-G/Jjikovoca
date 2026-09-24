@@ -67,9 +67,8 @@ class PdfBoxExportRenderer implements ExportRenderer {
         layout.space(LINE_GAP);
         int index = 1;
         for (CardSummary card : cards) {
-            boolean word = "WORD".equals(card.type());
-            String head = word ? card.word() : card.concept();
-            String body = word ? card.contextMeaning() : card.summary();
+            String head = card.word();
+            String body = card.contextMeaning();
             layout.paragraph(HEAD_SIZE, index++ + ". " + nn(head));
             layout.paragraph(BODY_SIZE, "    " + nn(body));
             layout.space(LINE_GAP);

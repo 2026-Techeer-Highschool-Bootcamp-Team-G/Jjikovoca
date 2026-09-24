@@ -19,7 +19,6 @@ public record FeedCard(
         String example,
         String exampleMeaning,
         String concept,
-        String summary,
         int boxLevel,
         boolean graduated,
         LocalDateTime createdAt,
@@ -35,7 +34,7 @@ public record FeedCard(
 
     static FeedCard of(CardSummary card, List<ExamTag> exams) {
         return new FeedCard(card.id(), card.type(), card.subject(), card.word(), card.contextMeaning(),
-                card.example(), card.exampleMeaning(), card.concept(), card.summary(),
+                card.example(), card.exampleMeaning(), card.concept(),
                 card.boxLevel(), card.graduated(), card.createdAt(),
                 card.pronunciation(), card.pos(), card.tags(), card.emoji(),
                 card.knowCount(), card.dontKnowCount(), card.confusedCount(),

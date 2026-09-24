@@ -111,7 +111,7 @@ class AnalysisWorker {
         }
 
         try {
-            emitStages(jobId, payload.type());
+            emitStages(jobId);
             String model = isMultiWord(payload) ? analyzeWordsPerCrop(claim, payload) : analyzeSingle(claim, payload);
             analyzeJobService.markDone(jobId);
             eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeCompleted(jobId, model));
@@ -244,16 +244,11 @@ class AnalysisWorker {
     }
 
     /**
-     * 진행 단계를 SSE(API-40)용으로 발행한다. WORD는 문맥 분석만, PROBLEM은 힌트·사고단계·진단까지 이어진다.
+     * 진행 단계를 SSE(API-40)용으로 발행한다. 영어 단어 분석은 문맥 분석 단계만 있다.
      * mock은 즉시 끝나 단계가 순식간에 지나갈 수 있다 — 구독이 늦으면 폴링/즉시 done으로 메운다.
      */
-    private void emitStages(Long jobId, String type) {
+    private void emitStages(Long jobId) {
         eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeProgressed(jobId, "analyzing"));
-        if ("PROBLEM".equals(type)) {
-            eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeProgressed(jobId, "hintGenerating"));
-            eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeProgressed(jobId, "stepChaining"));
-            eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeProgressed(jobId, "diagnosing"));
-        }
     }
 
     /**
@@ -290,9 +285,6 @@ class AnalysisWorker {
         return new CardCreateCommand(
                 claim.userId(), claim.jobId(), type, content.subject(), imagePath,
                 content.word(), content.contextMeaning(), content.dictMeaning(), content.example(), content.exampleMeaning(),
-                content.pronunciation(), content.pos(), content.tags(), content.emoji(),
-                content.summary(), content.latex(), content.concept(),
-                content.hint1(), content.hint2(), content.hint3(), content.answerFormat(),
-                content.solutionsJson(), content.answerValue(), content.diagnosisJson());
+                content.pronunciation(), content.pos(), content.tags(), content.emoji(), content.concept());
     }
 }

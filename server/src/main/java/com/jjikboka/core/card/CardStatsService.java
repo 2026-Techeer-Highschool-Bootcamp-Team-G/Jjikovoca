@@ -4,11 +4,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 월간 카드 집계 (core.card 공개 진입점, API-17). card에서 뽑는 리포트 통계 — 새 카드·졸업 수·약한 개념.
@@ -35,44 +32,28 @@ public class CardStatsService {
         return cardRepository.countGraduated(userId, start, end);
     }
 
-    /** 오늘 복습 대기 수(API-17 todayDue) — FSRS next_review_at 도래·미졸업 카드. 복습 큐 dueCount와 동일 값. */
+    /** 오늘 복습 대기 수(API-17 todayDue) — next_review_at 도래·미졸업 카드. 복습 큐 dueCount와 동일 값. */
     @Transactional(readOnly = true)
     public long reviewDue(Long userId, LocalDateTime now) {
         return cardRepository.countReviewDue(userId, now);
     }
 
-    /** 평균 회상확률(API-6b 추천) — 활성 FSRS 카드의 now 시점 R 평균(0~1, 소수 2자리). 대상 카드 없으면 null. */
+    /**
+     * 평균 회상확률(API-6b 추천). FSRS 제거(영어 전용, Leitner box 단일화)로 회상확률(R) 지표는 산출하지 않는다 —
+     * 하위호환을 위해 항상 null을 돌려준다(호출부가 null이면 미표시).
+     */
     @Transactional(readOnly = true)
     public Double averageRecall(Long userId, LocalDateTime now) {
-        List<Double> recalls = cardRepository.findActiveFsrsCards(userId).stream()
-                .map(card -> card.currentRetrievability(now))
-                .filter(Objects::nonNull)
-                .toList();
-        if (recalls.isEmpty()) {
-            return null;
-        }
-        double avg = recalls.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-        return BigDecimal.valueOf(avg).setScale(2, RoundingMode.HALF_UP).doubleValue();
+        return null;
     }
 
     /**
-     * 특정 카드 집합의 평균 회상확률 — 시험범위 기억률용(시험에 태깅된 카드들의 now 시점 R 평균, 0~1, 소수 2자리).
-     * cardIds가 비었거나 FSRS R을 가진 카드가 없으면 null(미학습·미태깅 시험은 값 없음).
+     * 특정 카드 집합의 평균 회상확률(시험범위 기억률). FSRS 제거로 회상확률(R) 지표는 산출하지 않는다 —
+     * 하위호환을 위해 항상 null을 돌려준다.
      */
     @Transactional(readOnly = true)
     public Double averageRecallOf(Long userId, java.util.Collection<Long> cardIds, LocalDateTime now) {
-        if (cardIds == null || cardIds.isEmpty()) {
-            return null;
-        }
-        List<Double> recalls = cardRepository.findOwnedByIds(userId, cardIds).stream()
-                .map(card -> card.currentRetrievability(now))
-                .filter(Objects::nonNull)
-                .toList();
-        if (recalls.isEmpty()) {
-            return null;
-        }
-        double avg = recalls.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-        return BigDecimal.valueOf(avg).setScale(2, RoundingMode.HALF_UP).doubleValue();
+        return null;
     }
 
     /** 약한 개념(API-17 full) — concept·subject 그룹의 wrong_count 합 상위 N개(내림차순). GROUP BY가 중복을 이미 제거. */

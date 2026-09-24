@@ -45,8 +45,8 @@ class AnalyzeService {
     AnalyzeAcceptedResponse submit(Long userId, AnalyzeRequest request) {
         quotaConsumeService.consume(userId);
         List<String> cropImageRefs = saveCrops(request);
-        // WORD만 단어 힌트를 흘려보낸다(cropImages 순서=cropImageRefs 순서라 인덱스 정렬 유지). PROBLEM은 미해당.
-        List<String> words = "WORD".equals(request.type()) ? request.words() : null;
+        // 단어 힌트를 흘려보낸다(cropImages 순서=cropImageRefs 순서라 인덱스 정렬 유지).
+        List<String> words = request.words();
         String fullImageRef = (request.fullImage() == null || request.fullImage().isBlank())
                 ? null : imageStorageService.save(request.fullImage());
 
@@ -68,11 +68,8 @@ class AnalyzeService {
         }
     }
 
-    /** WORD는 cropImages(다중, 첫 개가 대표), PROBLEM은 cropImage(단일)를 저장한다. 검증은 이미 통과한 상태다. */
+    /** cropImages(다중, 첫 개가 대표)를 저장한다. 검증은 이미 통과한 상태다. */
     private List<String> saveCrops(AnalyzeRequest request) {
-        if ("PROBLEM".equals(request.type())) {
-            return List.of(imageStorageService.save(request.cropImage()));
-        }
         return request.cropImages().stream().map(imageStorageService::save).toList();
     }
 }

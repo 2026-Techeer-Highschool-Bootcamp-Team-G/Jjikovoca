@@ -34,7 +34,8 @@ public class StudyStatsService {
     public StudyStats getStudyStats(Long userId, LocalDateTime start, LocalDateTime end) {
         long studyCount = studyLogRepository.countInPeriod(userId, start, end);
         Double accuracyWord = accuracy(studyLogRepository.accuracyByType(userId, "WORD", start, end));
-        Double accuracyProblem = accuracy(studyLogRepository.accuracyByType(userId, "PROBLEM", start, end));
+        // 수학(PROBLEM) 제거 후 문제 정확도는 항상 null(영어 전용, 리포트 지표 필드는 하위호환 유지).
+        Double accuracyProblem = null;
         return new StudyStats(studyCount, accuracyWord, accuracyProblem,
                 toReasonMap(studyLogRepository.reasonBreakdown(userId, start, end)),
                 toGrass(studyLogRepository.grassCounts(userId, start, end)));
