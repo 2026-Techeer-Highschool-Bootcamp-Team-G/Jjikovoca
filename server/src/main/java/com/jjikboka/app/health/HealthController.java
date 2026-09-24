@@ -1,6 +1,6 @@
 package com.jjikboka.app.health;
 
-import com.jjikboka.shared.response.ApiResponse;
+import com.jjikboka.common.response.ApiResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

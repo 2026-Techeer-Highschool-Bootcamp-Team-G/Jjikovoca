@@ -1,6 +1,6 @@
 package com.jjikboka.core.stats;
 
-import com.jjikboka.shared.event.StudyEvents;
+import com.jjikboka.common.event.StudyEvents;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;

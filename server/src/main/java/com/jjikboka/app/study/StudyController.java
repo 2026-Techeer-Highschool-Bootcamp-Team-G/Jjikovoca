@@ -1,7 +1,7 @@
 package com.jjikboka.app.study;
 
 import com.jjikboka.core.card.StudyQueueService;
-import com.jjikboka.shared.response.ApiResponse;
+import com.jjikboka.common.response.ApiResponse;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

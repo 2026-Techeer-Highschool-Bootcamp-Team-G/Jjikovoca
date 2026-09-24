@@ -11,7 +11,7 @@ import com.jjikboka.core.card.CardCreateCommand;
 import com.jjikboka.core.card.CardCreationService;
 import com.jjikboka.core.card.QuotaService;
 import com.jjikboka.core.stats.ExpService;
-import com.jjikboka.shared.event.AnalyzeEvents;
+import com.jjikboka.common.event.AnalyzeEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;

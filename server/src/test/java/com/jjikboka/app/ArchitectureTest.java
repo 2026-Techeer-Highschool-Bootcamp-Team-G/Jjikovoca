@@ -26,8 +26,8 @@ class ArchitectureTest {
             .allowEmptyShould(true);
 
     @ArchTest
-    static final ArchRule shared는_도메인을_모름 = noClasses()
-            .that().resideInAPackage("..shared..")
+    static final ArchRule common은_도메인을_모름 = noClasses()
+            .that().resideInAPackage("..common..")
             .should().dependOnClassesThat()
             .resideInAnyPackage("..auth..", "..core..", "..analysis..")
             .allowEmptyShould(true);

@@ -1,8 +1,8 @@
 package com.jjikboka.app.export;
 
 import com.jjikboka.core.export.ExportLogService;
-import com.jjikboka.shared.error.BusinessException;
-import com.jjikboka.shared.response.ApiResponse;
+import com.jjikboka.common.error.BusinessException;
+import com.jjikboka.common.response.ApiResponse;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

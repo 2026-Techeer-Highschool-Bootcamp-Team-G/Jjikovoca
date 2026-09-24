@@ -1,6 +1,6 @@
 package com.jjikboka.auth;
 
-import com.jjikboka.shared.error.BusinessException;
+import com.jjikboka.common.error.BusinessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 

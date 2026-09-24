@@ -1,4 +1,4 @@
-package com.jjikboka.shared.event;
+package com.jjikboka.common.event;
 
 /**
  * 학습 원장 이벤트 계약 (13 §6). study_log INSERT 같은 학습 활동이 일어났음을 알린다 —

@@ -1,6 +1,6 @@
 package com.jjikboka.app.notification;
 
-import com.jjikboka.shared.event.ExpEvents;
+import com.jjikboka.common.event.ExpEvents;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;

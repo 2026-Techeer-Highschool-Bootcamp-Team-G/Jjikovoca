@@ -1,6 +1,6 @@
 package com.jjikboka.app.analysis;
 
-import com.jjikboka.shared.response.ApiResponse;
+import com.jjikboka.common.response.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

@@ -1,4 +1,4 @@
-package com.jjikboka.shared.error;
+package com.jjikboka.common.error;
 
 import org.springframework.http.HttpStatus;
 

@@ -1,4 +1,4 @@
-package com.jjikboka.shared.event;
+package com.jjikboka.common.event;
 
 /**
  * 모듈 간 인프로세스 이벤트 계약 (13 §6).

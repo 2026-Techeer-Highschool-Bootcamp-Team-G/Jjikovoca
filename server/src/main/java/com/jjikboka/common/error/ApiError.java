@@ -1,4 +1,4 @@
-package com.jjikboka.shared.error;
+package com.jjikboka.common.error;
 
 /**
  * 공통 에러 응답 규약 (04 §0 · §2-4).
