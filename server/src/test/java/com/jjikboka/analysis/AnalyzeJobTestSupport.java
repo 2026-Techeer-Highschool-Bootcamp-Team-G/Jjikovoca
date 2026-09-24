@@ -46,6 +46,9 @@ abstract class AnalyzeJobTestSupport {
     /** 테스트 간 격리 — 공유 컨테이너라 이전 테스트가 남긴 analyze_job 행이 claim·조회에 끼어들지 않게 매 테스트 전에 비운다. */
     @BeforeEach
     void cleanAnalyzeJob() {
+        // 테스트 JVM을 UTC로 고정한다(컨텍스트 기동이 기본 tz를 OS값으로 되돌리므로 매 테스트 직전에 재설정) —
+        // UTC인 MySQL 세션과 정렬해 JDBC의 DATE tz 변환으로 "오늘" 기준 로직이 어긋나는 것을 막는다.
+        java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("UTC"));
         jdbcTemplate.update("DELETE FROM analyze_job");
     }
 }
