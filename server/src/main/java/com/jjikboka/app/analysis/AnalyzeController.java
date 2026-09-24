@@ -1,6 +1,5 @@
-package com.jjikboka.app.cards;
+package com.jjikboka.app.analysis;
 
-import com.jjikboka.app.analysis.AnalysisSseService;
 import com.jjikboka.shared.response.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

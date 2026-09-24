@@ -1,8 +1,7 @@
-package com.jjikboka.app.cards;
+package com.jjikboka.app.analysis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jjikboka.analysis.AnalyzeJobService;
-import com.jjikboka.app.analysis.AnalyzePayload;
 import com.jjikboka.app.image.ImageStorageService;
 import com.jjikboka.core.card.QuotaService;
 import com.jjikboka.shared.event.AnalyzeEvents;

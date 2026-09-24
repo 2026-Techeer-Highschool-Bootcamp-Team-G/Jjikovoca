@@ -1,4 +1,4 @@
-package com.jjikboka.app.cards;
+package com.jjikboka.app.analysis;
 
 import com.jjikboka.analysis.AnalyzeJobService;
 import com.jjikboka.analysis.AnalyzeJobView;
