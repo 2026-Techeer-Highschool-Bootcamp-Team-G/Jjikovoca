@@ -1,6 +1,7 @@
 package com.jjikboka.app.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,6 +57,13 @@ abstract class IntegrationTestSupport {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    // 테스트 JVM을 UTC로 고정한다(컨텍스트 기동이 기본 tz를 OS값으로 되돌리므로 매 테스트 직전에 재설정) —
+    // UTC인 MySQL 세션과 정렬해 JDBC의 DATE tz 변환으로 "오늘"(quota_date 등) 기준 로직이 어긋나는 것을 막는다.
+    @BeforeEach
+    void pinUtcTimezone() {
+        java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("UTC"));
     }
 
     @Autowired
