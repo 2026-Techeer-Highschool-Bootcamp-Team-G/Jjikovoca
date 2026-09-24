@@ -1,4 +1,4 @@
-package com.jjikboka.core.review;
+package com.jjikboka.studylog;
 
 /**
  * 카드별 등급 카운트 (단어장 분류·칩, API-7, core.review 공개 DTO). study_log의 판정 결과를 카드 단위로 센 값 —

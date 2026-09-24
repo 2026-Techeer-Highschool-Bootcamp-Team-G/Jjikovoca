@@ -2,7 +2,7 @@ package com.jjikboka.stats;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jjikboka.core.review.StudyStats;
+import com.jjikboka.studylog.StudyStats;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,4 +1,4 @@
-package com.jjikboka.core.review;
+package com.jjikboka.exam;
 
 import com.jjikboka.common.error.BusinessException;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,6 @@
 package com.jjikboka.app.exam;
 
-import com.jjikboka.core.review.ExamView;
+import com.jjikboka.exam.ExamView;
 
 import java.time.LocalDate;
 

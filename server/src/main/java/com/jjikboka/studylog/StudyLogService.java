@@ -1,4 +1,4 @@
-package com.jjikboka.core.review;
+package com.jjikboka.studylog;
 
 import com.jjikboka.common.event.StudyEvents;
 import org.springframework.context.ApplicationEventPublisher;

@@ -1,6 +1,6 @@
 package com.jjikboka.app.cards;
 
-import com.jjikboka.core.review.ExamTag;
+import com.jjikboka.exam.ExamTag;
 
 import java.util.List;
 

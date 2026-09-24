@@ -1,6 +1,6 @@
 package com.jjikboka.stats;
 
-import com.jjikboka.core.review.Rhythm;
+import com.jjikboka.studylog.Rhythm;
 
 import java.util.List;
 

@@ -2,9 +2,9 @@ package com.jjikboka.stats;
 
 import com.jjikboka.core.card.CardStatsService;
 import com.jjikboka.core.card.PremiumService;
-import com.jjikboka.core.review.StudyStats;
-import com.jjikboka.core.review.StudyStatsService;
-import com.jjikboka.core.review.SubjectMinutes;
+import com.jjikboka.studylog.StudyStats;
+import com.jjikboka.studylog.StudyStatsService;
+import com.jjikboka.studylog.SubjectMinutes;
 import com.jjikboka.common.error.BusinessException;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;

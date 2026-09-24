@@ -1,4 +1,4 @@
-package com.jjikboka.core.review;
+package com.jjikboka.exam;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
