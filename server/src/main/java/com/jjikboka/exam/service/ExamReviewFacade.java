@@ -1,9 +1,11 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.service;
+
+import com.jjikboka.exam.dto.ExamReviewResponse;
+import com.jjikboka.exam.dto.TagRecentRequest;
+import com.jjikboka.exam.dto.TagRecentResponse;
 
 import com.jjikboka.card.CardQueryService;
 import com.jjikboka.card.ExamReviewItem;
-import com.jjikboka.exam.ExamReviewService;
-import com.jjikboka.exam.ExamTagService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

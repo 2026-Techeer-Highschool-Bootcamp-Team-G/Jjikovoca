@@ -1,4 +1,4 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.dto;
 
 /**
  * 넛지 일괄 태깅 응답 (Notion API-ID 45). 시험 id와 태깅한 카드 수를 돌려준다.

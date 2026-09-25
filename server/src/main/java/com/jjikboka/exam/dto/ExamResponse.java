@@ -1,6 +1,5 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.dto;
 
-import com.jjikboka.exam.ExamView;
 
 import java.time.LocalDate;
 
@@ -16,7 +15,7 @@ public record ExamResponse(
         int rescheduledCount
 ) {
 
-    static ExamResponse of(ExamView view, int rescheduledCount) {
+    public static ExamResponse of(ExamView view, int rescheduledCount) {
         return new ExamResponse(view.id(), view.title(), view.subject(), view.examDate(), view.dday(), rescheduledCount);
     }
 }

@@ -1,4 +1,8 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.repository;
+
+import com.jjikboka.exam.entity.Exam;
+import com.jjikboka.exam.entity.ExamCard;
+import com.jjikboka.exam.entity.ExamCardId;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,7 +13,7 @@ import java.util.List;
 /**
  * exam_card 저장소. package-private 봉인(13 §2). 태깅은 멱등이라 존재 확인 후 저장, 해제는 존재 시 삭제한다.
  */
-interface ExamCardRepository extends JpaRepository<ExamCard, ExamCardId> {
+public interface ExamCardRepository extends JpaRepository<ExamCard, ExamCardId> {
 
     boolean existsByExamIdAndCardId(Long examId, Long cardId);
 

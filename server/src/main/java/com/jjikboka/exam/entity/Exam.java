@@ -1,4 +1,4 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,7 +15,7 @@ import java.time.LocalDate;
  */
 @Entity
 @Table(name = "exam")
-class Exam {
+public class Exam {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +36,7 @@ class Exam {
     protected Exam() {
     }
 
-    static Exam create(Long userId, String title, String subject, LocalDate examDate) {
+    public static Exam create(Long userId, String title, String subject, LocalDate examDate) {
         Exam exam = new Exam();
         exam.userId = userId;
         exam.title = title;
@@ -46,7 +46,7 @@ class Exam {
     }
 
     /** 부분 수정(API-34) — null인 필드는 그대로 둔다. */
-    void update(String title, String subject, LocalDate examDate) {
+    public void update(String title, String subject, LocalDate examDate) {
         if (title != null) {
             this.title = title;
         }
@@ -58,23 +58,23 @@ class Exam {
         }
     }
 
-    Long getId() {
+    public Long getId() {
         return id;
     }
 
-    Long getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    String getTitle() {
+    public String getTitle() {
         return title;
     }
 
-    String getSubject() {
+    public String getSubject() {
         return subject;
     }
 
-    LocalDate getExamDate() {
+    public LocalDate getExamDate() {
         return examDate;
     }
 }

@@ -1,4 +1,10 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.service;
+
+import com.jjikboka.exam.dto.ExamTag;
+import com.jjikboka.exam.entity.Exam;
+import com.jjikboka.exam.entity.ExamCard;
+import com.jjikboka.exam.repository.ExamCardRepository;
+import com.jjikboka.exam.repository.ExamRepository;
 
 import com.jjikboka.common.error.BusinessException;
 import org.springframework.http.HttpStatus;

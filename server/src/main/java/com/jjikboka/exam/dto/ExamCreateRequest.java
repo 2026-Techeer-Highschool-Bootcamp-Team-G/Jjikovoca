@@ -1,4 +1,4 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.dto;
 
 /**
  * 시험 등록 요청 (Notion API-ID 33). title·examDate는 필수, subject는 선택(null=전과목).

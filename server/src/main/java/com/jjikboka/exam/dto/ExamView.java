@@ -1,4 +1,6 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.dto;
+
+import com.jjikboka.exam.entity.Exam;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -19,7 +21,7 @@ public record ExamView(
         Double memoryRate
 ) {
 
-    static ExamView from(Exam exam) {
+    public static ExamView from(Exam exam) {
         long dday = ChronoUnit.DAYS.between(LocalDate.now(), exam.getExamDate());
         return new ExamView(exam.getId(), exam.getTitle(), exam.getSubject(), exam.getExamDate(), dday, null);
     }
