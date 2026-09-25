@@ -1,6 +1,7 @@
-package com.jjikboka.subscription;
+package com.jjikboka.subscription.controller;
 
-import com.jjikboka.subscription.PremiumService;
+import com.jjikboka.subscription.service.PremiumService;
+import com.jjikboka.subscription.dto.PremiumResponse;
 import com.jjikboka.common.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
