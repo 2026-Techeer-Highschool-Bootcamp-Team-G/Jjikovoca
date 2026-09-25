@@ -1,4 +1,4 @@
-package com.jjikboka.quota;
+package com.jjikboka.quota.entity;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * user_quota_daily 복합 PK (user_id + quota_date). 날짜별 행 분리로 자정 리셋 로직이 사라진다(03).
  */
-class UserQuotaDailyId implements Serializable {
+public class UserQuotaDailyId implements Serializable {
 
     private Long userId;
     private LocalDate quotaDate;
