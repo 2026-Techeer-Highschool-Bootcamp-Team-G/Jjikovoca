@@ -1,6 +1,8 @@
-package com.jjikboka.notification;
+package com.jjikboka.notification.controller;
 
 import com.jjikboka.common.response.ApiResponse;
+import com.jjikboka.notification.dto.NotificationResponse;
+import com.jjikboka.notification.service.NotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;

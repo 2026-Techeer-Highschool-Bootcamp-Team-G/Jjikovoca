@@ -1,4 +1,4 @@
-package com.jjikboka.notification;
+package com.jjikboka.notification.service;
 
 import com.jjikboka.common.event.ExpEvents;
 import org.springframework.stereotype.Component;

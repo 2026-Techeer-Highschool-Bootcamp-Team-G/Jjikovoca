@@ -1,4 +1,4 @@
-package com.jjikboka.notification;
+package com.jjikboka.notification.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "notification")
-class Notification {
+public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,31 +47,31 @@ class Notification {
         this.read = false;
     }
 
-    static Notification of(Long userId, String type, String message) {
+    public static Notification of(Long userId, String type, String message) {
         return new Notification(userId, type, message);
     }
 
-    void markRead() {
+    public void markRead() {
         this.read = true;
     }
 
-    Long getId() {
+    public Long getId() {
         return id;
     }
 
-    String getType() {
+    public String getType() {
         return type;
     }
 
-    String getMessage() {
+    public String getMessage() {
         return message;
     }
 
-    boolean isRead() {
+    public boolean isRead() {
         return read;
     }
 
-    LocalDateTime getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 }

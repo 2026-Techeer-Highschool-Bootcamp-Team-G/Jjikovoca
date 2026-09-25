@@ -1,6 +1,9 @@
-package com.jjikboka.notification;
+package com.jjikboka.notification.service;
 
 import com.jjikboka.card.CardStatsService;
+import com.jjikboka.notification.dto.NotificationResponse;
+import com.jjikboka.notification.entity.Notification;
+import com.jjikboka.notification.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
