@@ -1,4 +1,4 @@
-package com.jjikboka.export;
+package com.jjikboka.export.service;
 
 import com.jjikboka.card.CardSummary;
 import org.apache.pdfbox.pdmodel.PDDocument;
