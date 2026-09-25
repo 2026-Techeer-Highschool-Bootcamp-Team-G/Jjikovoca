@@ -1,4 +1,6 @@
-package com.jjikboka.auth;
+package com.jjikboka.auth.controller;
+
+import com.jjikboka.auth.service.AuthService;
 
 import com.jjikboka.auth.dto.AuthResponse;
 import com.jjikboka.auth.dto.LoginRequest;

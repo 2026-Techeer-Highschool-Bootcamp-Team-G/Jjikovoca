@@ -1,4 +1,4 @@
-package com.jjikboka.auth;
+package com.jjikboka.auth.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -16,7 +16,7 @@ import java.util.UUID;
  * 통과 후 SecurityContext로 넘어가는 것은 userId뿐 — 하류 도메인은 출처를 모른다.
  */
 @Component
-class JwtProvider {
+public class JwtProvider {
 
     private final SecretKey key;
     private final long accessExpMs;
@@ -30,22 +30,22 @@ class JwtProvider {
         this.refreshExpMs = refreshExpMs;
     }
 
-    String createAccessToken(Long userId) {
+    public String createAccessToken(Long userId) {
         return build(userId, accessExpMs);
     }
 
-    String createRefreshToken(Long userId) {
+    public String createRefreshToken(Long userId) {
         return build(userId, refreshExpMs);
     }
 
     /** 서명·만료 검증 후 userId 추출. 유효하지 않으면 JwtException 계열을 던진다. */
-    Long parseUserId(String token) {
+    public Long parseUserId(String token) {
         Claims claims = Jwts.parser().verifyWith(key).build()
                 .parseSignedClaims(token).getPayload();
         return Long.valueOf(claims.getSubject());
     }
 
-    long refreshExpMs() {
+    public long refreshExpMs() {
         return refreshExpMs;
     }
 

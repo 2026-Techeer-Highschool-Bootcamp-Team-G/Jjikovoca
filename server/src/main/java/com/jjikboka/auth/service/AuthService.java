@@ -1,4 +1,9 @@
-package com.jjikboka.auth;
+package com.jjikboka.auth.service;
+
+import com.jjikboka.auth.entity.AppUser;
+import com.jjikboka.auth.entity.RefreshToken;
+import com.jjikboka.auth.repository.AppUserRepository;
+import com.jjikboka.auth.repository.RefreshTokenRepository;
 
 import com.jjikboka.auth.dto.AuthResponse;
 import com.jjikboka.auth.dto.LoginRequest;
@@ -23,7 +28,7 @@ import java.util.HexFormat;
  * refresh는 평문이 아니라 SHA-256 해시로 저장해 재발급·재사용 탐지에 쓴다.
  */
 @Service
-class AuthService {
+public class AuthService {
 
     private final AppUserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -41,7 +46,7 @@ class AuthService {
     }
 
     @Transactional
-    AuthResponse register(RegisterRequest request) {
+    public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new BusinessException(HttpStatus.CONFLICT, "DUPLICATE_EMAIL", "이미 가입된 이메일입니다.");
         }
@@ -53,7 +58,7 @@ class AuthService {
     }
 
     @Transactional
-    TokenResponse refresh(RefreshRequest request) {
+    public TokenResponse refresh(RefreshRequest request) {
         Long userId;
         try {
             // JWT 서명·만료 검증 (형식·서명·기간이 깨지면 예외)
@@ -76,7 +81,7 @@ class AuthService {
     }
 
     @Transactional
-    AuthResponse login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
         // 조회 실패·비밀번호 불일치를 구분하지 않는다 — 계정 존재 여부 노출 방지(Notion API-ID 2)
         AppUser user = userRepository.findByEmail(request.email())
                 .filter(u -> passwordEncoder.matches(request.password(), u.getPasswordHash()))
@@ -90,13 +95,13 @@ class AuthService {
      * 정지형 JWT라 기존 access token은 만료까지 유효하나 refresh가 막혀 세션 연장은 불가. 멱등(이미 없으면 no-op).
      */
     @Transactional
-    void deleteAccount(Long userId) {
+    public void deleteAccount(Long userId) {
         userRepository.findById(userId).ifPresent(user -> user.softDelete(LocalDateTime.now()));
         refreshTokenRepository.deleteByUserId(userId);
     }
 
     @Transactional
-    void logout(Long userId, String refreshToken) {
+    public void logout(Long userId, String refreshToken) {
         // 멱등: 이 userId의 refresh면 폐기, 없거나 이미 폐기됐어도 성공(재요청도 200 — Notion API-ID 38)
         refreshTokenRepository.findByTokenHash(sha256(refreshToken))
                 .filter(token -> token.getUserId().equals(userId))

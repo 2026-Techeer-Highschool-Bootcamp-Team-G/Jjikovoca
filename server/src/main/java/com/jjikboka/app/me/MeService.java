@@ -1,7 +1,7 @@
 package com.jjikboka.app.me;
 
-import com.jjikboka.auth.UserProfile;
-import com.jjikboka.auth.UserQueryService;
+import com.jjikboka.auth.dto.UserProfile;
+import com.jjikboka.auth.service.UserQueryService;
 import com.jjikboka.subscription.dto.PremiumDetail;
 import com.jjikboka.subscription.service.PremiumService;
 import com.jjikboka.quota.service.QuotaService;
