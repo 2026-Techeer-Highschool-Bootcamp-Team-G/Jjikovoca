@@ -1,7 +1,7 @@
 package com.jjikboka.app.study;
 
 import com.jjikboka.card.dto.CardReviewState;
-import com.jjikboka.stats.ExpDelta;
+import com.jjikboka.stats.dto.ExpDelta;
 
 import java.time.LocalDateTime;
 

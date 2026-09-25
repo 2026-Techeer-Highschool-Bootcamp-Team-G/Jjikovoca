@@ -10,7 +10,7 @@ import com.jjikboka.common.image.ImageStorageService;
 import com.jjikboka.card.dto.CardCreateCommand;
 import com.jjikboka.card.service.CardCreationService;
 import com.jjikboka.quota.service.QuotaService;
-import com.jjikboka.stats.ExpService;
+import com.jjikboka.stats.service.ExpService;
 import com.jjikboka.common.event.AnalyzeEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
