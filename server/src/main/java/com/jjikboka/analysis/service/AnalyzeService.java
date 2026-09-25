@@ -1,7 +1,10 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.service;
+
+import com.jjikboka.analysis.dto.AnalyzeAcceptedResponse;
+import com.jjikboka.analysis.dto.AnalyzePayload;
+import com.jjikboka.analysis.dto.AnalyzeRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jjikboka.analysis.AnalyzeJobService;
 import com.jjikboka.common.image.ImageStorageService;
 import com.jjikboka.quota.service.QuotaService;
 import com.jjikboka.common.event.AnalyzeEvents;
@@ -20,7 +23,7 @@ import java.util.List;
  * {@code AnalyzeRequested}는 정상 흐름을 앞당기는 빠른 경로 트리거일 뿐이다(AFTER_COMMIT 소비).
  */
 @Service
-class AnalyzeService {
+public class AnalyzeService {
 
     private final QuotaService quotaConsumeService;
     private final AnalyzeJobService analyzeJobService;
@@ -41,7 +44,7 @@ class AnalyzeService {
     }
 
     @Transactional
-    AnalyzeAcceptedResponse submit(Long userId, AnalyzeRequest request) {
+    public AnalyzeAcceptedResponse submit(Long userId, AnalyzeRequest request) {
         quotaConsumeService.consume(userId);
         List<String> cropImageRefs = saveCrops(request);
         // 단어 힌트를 흘려보낸다(cropImages 순서=cropImageRefs 순서라 인덱스 정렬 유지).

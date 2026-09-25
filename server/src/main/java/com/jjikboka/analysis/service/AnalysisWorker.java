@@ -1,11 +1,11 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.service;
+
+import com.jjikboka.analysis.dto.AnalysisContent;
+import com.jjikboka.analysis.dto.AnalyzeJobClaim;
+import com.jjikboka.analysis.dto.AnalyzePayload;
+import com.jjikboka.analysis.dto.GeminiImage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jjikboka.analysis.AnalysisContent;
-import com.jjikboka.analysis.AnalyzeJobClaim;
-import com.jjikboka.analysis.AnalyzeJobService;
-import com.jjikboka.analysis.GeminiAnalysisCache;
-import com.jjikboka.analysis.GeminiImage;
 import com.jjikboka.common.image.ImageStorageService;
 import com.jjikboka.card.CardCreateCommand;
 import com.jjikboka.card.CardCreationService;
@@ -39,7 +39,7 @@ import java.util.concurrent.Executor;
  * 실패는 attempts가 상한 미만이면 사유만 남기고(재수거 대기), 상한에 이르면 FAILED + <b>quota 환불</b>(사가 보상, 13 §6)한다.
  */
 @Component
-class AnalysisWorker {
+public class AnalysisWorker {
 
     private static final Logger log = LoggerFactory.getLogger(AnalysisWorker.class);
 
@@ -82,7 +82,7 @@ class AnalysisWorker {
      */
     @Async("analysisExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    void onAnalyzeRequested(AnalyzeEvents.AnalyzeRequested event) {
+    public void onAnalyzeRequested(AnalyzeEvents.AnalyzeRequested event) {
         processClaimable(event.jobId());
     }
 
@@ -91,7 +91,7 @@ class AnalysisWorker {
      * 조용히 반환한다. attempts가 상한을 넘긴 claim은 처리하지 않고 FAILED 확정 + 환불한다.
      * 처리 실패는 상한 미만이면 사유만 남겨 재수거를 기다리고, 상한에 이르면 즉시 FAILED + 환불한다(무한 재시도 방지).
      */
-    void processClaimable(Long jobId) {
+    public void processClaimable(Long jobId) {
         Optional<AnalyzeJobClaim> claimed = analyzeJobService.claim(jobId);
         if (claimed.isEmpty()) {
             return;   // 경합 패배(이미 처리 중) 또는 종결 상태 — 재수거 대상 아님

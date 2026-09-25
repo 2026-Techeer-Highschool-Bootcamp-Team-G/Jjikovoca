@@ -1,7 +1,7 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.service;
 
-import com.jjikboka.analysis.AnalyzeJobService;
-import com.jjikboka.analysis.AnalyzeJobView;
+import com.jjikboka.analysis.dto.AnalyzeJobView;
+
 import com.jjikboka.card.CardQueryService;
 import com.jjikboka.card.CardSummary;
 import com.jjikboka.common.event.AnalyzeEvents;
@@ -62,13 +62,13 @@ public class AnalysisSseService {
     }
 
     @EventListener
-    void onProgressed(AnalyzeEvents.AnalyzeProgressed event) {
+    public void onProgressed(AnalyzeEvents.AnalyzeProgressed event) {
         String stage = event.stage();
         registry.push(event.jobId(), stage, Map.of("step", STEP_LABELS.getOrDefault(stage, stage)));
     }
 
     @EventListener
-    void onCompleted(AnalyzeEvents.AnalyzeCompleted event) {
+    public void onCompleted(AnalyzeEvents.AnalyzeCompleted event) {
         Long jobId = event.jobId();
         Long userId = registry.ownerOf(jobId);
         if (userId == null) {
@@ -78,7 +78,7 @@ public class AnalysisSseService {
     }
 
     @EventListener
-    void onFailed(AnalyzeEvents.AnalyzeFailed event) {
+    public void onFailed(AnalyzeEvents.AnalyzeFailed event) {
         registry.pushAndComplete(event.jobId(), "error", Map.of("error", FAIL_MESSAGE));
     }
 

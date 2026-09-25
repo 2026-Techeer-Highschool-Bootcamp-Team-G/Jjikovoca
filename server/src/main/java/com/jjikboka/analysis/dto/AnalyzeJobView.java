@@ -1,4 +1,4 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.dto;
 
 /**
  * 분석 작업 조회 결과 (analysis 공개 DTO, API-39 폴링). 소유자 검증을 통과한 job의 상태를 담아 app에 넘긴다.

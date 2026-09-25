@@ -1,6 +1,6 @@
 package com.jjikboka.app.study;
 
-import com.jjikboka.analysis.GeminiClient;
+import com.jjikboka.analysis.service.GeminiClient;
 import com.jjikboka.card.ClozeRegenerated;
 import com.jjikboka.card.ClozeService;
 import com.jjikboka.common.response.ApiResponse;

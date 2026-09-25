@@ -1,4 +1,6 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.repository;
+
+import com.jjikboka.analysis.entity.AnalyzeJob;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -14,7 +16,7 @@ import java.util.List;
  * <p>claim은 QuotaService.tryIncrement와 같은 <b>조건부 원자 UPDATE</b> 패턴이다 —
  * WHERE의 상태·lease 판정과 전이가 한 행 락 안에서 일어나 @Async·watchdog가 동시에 노려도 1개만 성공한다.
  */
-interface AnalyzeJobRepository extends JpaRepository<AnalyzeJob, Long> {
+public interface AnalyzeJobRepository extends JpaRepository<AnalyzeJob, Long> {
 
     /**
      * lease 기반 claim (조건부 원자 UPDATE). claimable = PENDING 또는 lease 만료 RUNNING일 때만

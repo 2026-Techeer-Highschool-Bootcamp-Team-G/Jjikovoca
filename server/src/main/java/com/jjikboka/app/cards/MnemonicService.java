@@ -1,6 +1,6 @@
 package com.jjikboka.app.cards;
 
-import com.jjikboka.analysis.GeminiClient;
+import com.jjikboka.analysis.service.GeminiClient;
 import com.jjikboka.common.image.ImageStorageService;
 import com.jjikboka.card.CardMnemonicService;
 import com.jjikboka.card.MnemonicTarget;

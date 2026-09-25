@@ -1,4 +1,7 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.service;
+
+import com.jjikboka.analysis.dto.AnalysisContent;
+import com.jjikboka.analysis.dto.GeminiImage;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -12,7 +15,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConditionalOnProperty(prefix = "gemini", name = "mock", havingValue = "true", matchIfMissing = true)
-class MockGeminiClient implements GeminiClient {
+public class MockGeminiClient implements GeminiClient {
 
     private static final String MODEL = "mock";
 

@@ -1,4 +1,4 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.dto;
 
 /**
  * Gemini 비전 입력 이미지 (API-6). 접수 때 저장한 크롭/지문을 워커가 로드해 이 형태로 넘긴다.

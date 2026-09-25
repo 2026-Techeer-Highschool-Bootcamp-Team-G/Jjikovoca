@@ -1,4 +1,4 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.service;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -11,12 +11,12 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 @Configuration
 @EnableConfigurationProperties(GeminiProperties.class)
-class GeminiConfig {
+public class GeminiConfig {
 
     private static final int MAX_RESPONSE_BYTES = 8 * 1024 * 1024;
 
     @Bean
-    WebClient geminiWebClient(GeminiProperties properties) {
+    public WebClient geminiWebClient(GeminiProperties properties) {
         return WebClient.builder()
                 .baseUrl(properties.getBaseUrl())
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(MAX_RESPONSE_BYTES))

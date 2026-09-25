@@ -1,4 +1,4 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.dto;
 
 import com.jjikboka.card.CardSummary;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -18,15 +18,15 @@ public record AnalyzeJobResponse(
         String error
 ) {
 
-    static AnalyzeJobResponse inProgress(String status) {
+    public static AnalyzeJobResponse inProgress(String status) {
         return new AnalyzeJobResponse(status, null, null, null);
     }
 
-    static AnalyzeJobResponse completed(List<CardSummary> cards, String model) {
+    public static AnalyzeJobResponse completed(List<CardSummary> cards, String model) {
         return new AnalyzeJobResponse("COMPLETED", cards, model, null);
     }
 
-    static AnalyzeJobResponse failed(String error) {
+    public static AnalyzeJobResponse failed(String error) {
         return new AnalyzeJobResponse("FAILED", null, null, error);
     }
 }

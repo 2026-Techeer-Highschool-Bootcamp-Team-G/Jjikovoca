@@ -1,4 +1,4 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "analyze_job")
-class AnalyzeJob {
+public class AnalyzeJob {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,7 +58,7 @@ class AnalyzeJob {
      * 접수 시점의 job — 상태는 PENDING, 재구성 payload를 함께 싣는다(이벤트 유실 대비).
      * 실제 분석은 Phase 2 워커·watchdog가 claim해 이어받는다.
      */
-    static AnalyzeJob pending(Long userId, String payloadJson) {
+    public static AnalyzeJob pending(Long userId, String payloadJson) {
         AnalyzeJob job = new AnalyzeJob();
         job.userId = userId;
         job.status = "PENDING";
@@ -67,50 +67,50 @@ class AnalyzeJob {
     }
 
     /** 워커가 처리를 시작할 때. PENDING→RUNNING. */
-    void markRunning() {
+    public void markRunning() {
         this.status = "RUNNING";
     }
 
     /** 카드 생성까지 끝났을 때. →DONE(폴링 응답에선 COMPLETED로 매핑). */
-    void markDone() {
+    public void markDone() {
         this.status = "DONE";
     }
 
     /** 폴백 소진 등 최종 실패. →FAILED. quota 환불은 app 워커가 별도로 수행한다(13 §6). */
-    void markFailed() {
+    public void markFailed() {
         this.status = "FAILED";
     }
 
     /** 마지막 실패 사유를 남긴다(관측·디버깅) — 상태 전이와 무관하게 last_error만 갱신한다. */
-    void recordError(String error) {
+    public void recordError(String error) {
         this.lastError = error;
     }
 
-    Long getId() {
+    public Long getId() {
         return id;
     }
 
-    Long getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    String getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    String getPayloadJson() {
+    public String getPayloadJson() {
         return payloadJson;
     }
 
-    LocalDateTime getLeaseUntil() {
+    public LocalDateTime getLeaseUntil() {
         return leaseUntil;
     }
 
-    int getAttempts() {
+    public int getAttempts() {
         return attempts;
     }
 
-    String getLastError() {
+    public String getLastError() {
         return lastError;
     }
 }

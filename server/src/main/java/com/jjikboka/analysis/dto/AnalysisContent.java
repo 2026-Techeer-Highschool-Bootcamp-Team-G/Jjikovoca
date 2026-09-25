@@ -1,4 +1,4 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.dto;
 
 /**
  * 분석 산출 콘텐츠 (analysis 공개 DTO, API-6 처리). Gemini(또는 모의)가 채운 단어 카드 필드를 담아 app에 넘긴다.

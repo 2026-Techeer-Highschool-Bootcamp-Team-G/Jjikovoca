@@ -1,6 +1,7 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.service;
 
-import com.jjikboka.analysis.GeminiImage;
+import com.jjikboka.analysis.dto.GeminiImage;
+
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
@@ -16,12 +17,12 @@ import java.io.IOException;
  *
  * <p>못 읽거나(디코드 실패) 이미 상한 이하면 원본을 그대로 돌려준다 — 다운스케일 실패가 분석을 막지 않는다(안전 폴백).
  */
-final class VisionImageScaler {
+public final class VisionImageScaler {
 
     private VisionImageScaler() {
     }
 
-    static GeminiImage downscale(GeminiImage image, int maxDimension) {
+    public static GeminiImage downscale(GeminiImage image, int maxDimension) {
         if (image == null) {
             return null;
         }

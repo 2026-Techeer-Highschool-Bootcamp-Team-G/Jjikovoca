@@ -1,4 +1,4 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.dto;
 
 /**
  * claim 성공한 job의 처리 컨텍스트 (analysis 공개 DTO, P1-6). app 워커가 이 값으로 payload를 복원해
