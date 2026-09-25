@@ -1,6 +1,5 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.service;
 
-import com.jjikboka.analysis.AnalyzeJobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,7 +16,7 @@ import java.util.List;
  * 조회 시점과 처리 시점 사이의 경합(빠른 경로가 이미 집어감)도 claim 원자성이 흡수한다.
  */
 @Component
-class AnalyzeJobWatchdog {
+public class AnalyzeJobWatchdog {
 
     private static final Logger log = LoggerFactory.getLogger(AnalyzeJobWatchdog.class);
 
@@ -36,7 +35,7 @@ class AnalyzeJobWatchdog {
      */
     @Scheduled(fixedDelayString = "${app.analyze.watchdog.interval-ms:30000}",
             initialDelayString = "${app.analyze.watchdog.interval-ms:30000}")
-    void sweep() {
+    public void sweep() {
         List<Long> claimable = analyzeJobService.findClaimableIds();
         if (claimable.isEmpty()) {
             return;

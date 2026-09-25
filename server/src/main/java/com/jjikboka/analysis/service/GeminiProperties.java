@@ -1,4 +1,4 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.service;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

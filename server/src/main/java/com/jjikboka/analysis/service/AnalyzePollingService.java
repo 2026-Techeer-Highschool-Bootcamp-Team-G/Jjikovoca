@@ -1,7 +1,8 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.service;
 
-import com.jjikboka.analysis.AnalyzeJobService;
-import com.jjikboka.analysis.AnalyzeJobView;
+import com.jjikboka.analysis.dto.AnalyzeJobResponse;
+import com.jjikboka.analysis.dto.AnalyzeJobView;
+
 import com.jjikboka.card.CardQueryService;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Service;
  * <p>모의 단계 단순화: model은 "mock" 고정, 실패 사유는 공통 메시지 — 실 전환 시 job에 model·error를 영속해 대체.
  */
 @Service
-class AnalyzePollingService {
+public class AnalyzePollingService {
 
     private static final String MOCK_MODEL = "mock";
     private static final String FAIL_MESSAGE = "AI 분석에 실패했어요. 잠시 후 다시 시도해 주세요.";
@@ -25,7 +26,7 @@ class AnalyzePollingService {
         this.cardQueryService = cardQueryService;
     }
 
-    AnalyzeJobResponse poll(Long userId, Long jobId) {
+    public AnalyzeJobResponse poll(Long userId, Long jobId) {
         AnalyzeJobView view = analyzeJobService.view(jobId, userId);   // 404 JOB_NOT_FOUND · 403
         return switch (view.status()) {
             case "DONE" -> AnalyzeJobResponse.completed(cardQueryService.getCardsByJob(userId, jobId), MOCK_MODEL);

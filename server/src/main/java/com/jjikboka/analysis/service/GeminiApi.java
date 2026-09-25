@@ -1,4 +1,6 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.service;
+
+import com.jjikboka.analysis.dto.GeminiImage;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +26,7 @@ import java.util.Map;
  * base64 인코딩은 여기서 한다(비전 입력 inline_data.data). 실 호출 슬라이스 밖으로 노출하지 않으려 package-private.
  */
 @Component
-class GeminiApi {
+public class GeminiApi {
 
     private static final Logger log = LoggerFactory.getLogger(GeminiApi.class);
 
@@ -42,7 +44,7 @@ class GeminiApi {
      * 프롬프트(+비전 이미지)를 보내고 응답 텍스트를 돌려준다. jsonOutput이면 responseMimeType을 application/json으로 강제해
      * 모델이 순수 JSON만 내도록 한다. 모델 폴백을 모두 소진하면 마지막 오류를 담아 예외를 던진다.
      */
-    String generate(String prompt, List<GeminiImage> images, boolean jsonOutput) {
+    public String generate(String prompt, List<GeminiImage> images, boolean jsonOutput) {
         return generate(prompt, images, jsonOutput, false);
     }
 
@@ -50,7 +52,7 @@ class GeminiApi {
      * fast=true면 WORD 전용 체인(wordModels — flash-lite 우선)으로 빠르게, 아니면 기본 체인(models — flash 우선)으로 정확히.
      * 단어 분석은 단순해 lite로도 충분하므로 지연을 줄이고, 실패 시 flash로 폴백한다.
      */
-    String generate(String prompt, List<GeminiImage> images, boolean jsonOutput, boolean fast) {
+    public String generate(String prompt, List<GeminiImage> images, boolean jsonOutput, boolean fast) {
         return generate(prompt, images, jsonOutput, fast, null);
     }
 
@@ -58,7 +60,7 @@ class GeminiApi {
      * responseSchema가 있으면 <b>구조화 출력</b>으로 강제한다 — 모델(특히 flash-lite)이 필드를 생략하지 못하게 스키마의
      * required를 지킨 JSON만 내도록 한다(WORD 분석의 example·exampleMeaning 누락 방지, #369). null이면 스키마 미지정.
      */
-    String generate(String prompt, List<GeminiImage> images, boolean jsonOutput, boolean fast,
+    public String generate(String prompt, List<GeminiImage> images, boolean jsonOutput, boolean fast,
                     Map<String, Object> responseSchema) {
         List<String> models = fast ? properties.getWordModels() : properties.getModels();
         Map<String, Object> body = buildBody(prompt, images, jsonOutput, responseSchema);
@@ -79,7 +81,7 @@ class GeminiApi {
      * 이미지 모델(Phase 6c)로 이미지를 생성해 data URL({@code data:{mime};base64,...})로 돌려준다.
      * responseModalities에 IMAGE를 요청하고, 응답 parts에서 inline_data(mime+base64)를 뽑는다. 실패면 예외(→ 호출부 처리).
      */
-    String generateImageDataUrl(String prompt) {
+    public String generateImageDataUrl(String prompt) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))));
         body.put("generationConfig", Map.of("responseModalities", List.of("TEXT", "IMAGE")));

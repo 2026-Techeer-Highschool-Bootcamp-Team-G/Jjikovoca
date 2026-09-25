@@ -1,4 +1,7 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.service;
+
+import com.jjikboka.analysis.dto.AnalysisContent;
+import com.jjikboka.analysis.dto.GeminiImage;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;

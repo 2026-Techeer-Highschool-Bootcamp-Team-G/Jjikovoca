@@ -1,4 +1,9 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.service;
+
+import com.jjikboka.analysis.dto.AnalyzeJobClaim;
+import com.jjikboka.analysis.dto.AnalyzeJobView;
+import com.jjikboka.analysis.entity.AnalyzeJob;
+import com.jjikboka.analysis.repository.AnalyzeJobRepository;
 
 import com.jjikboka.common.error.BusinessException;
 import org.springframework.http.HttpStatus;

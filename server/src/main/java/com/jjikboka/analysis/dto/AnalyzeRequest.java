@@ -1,4 +1,4 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.AssertTrue;

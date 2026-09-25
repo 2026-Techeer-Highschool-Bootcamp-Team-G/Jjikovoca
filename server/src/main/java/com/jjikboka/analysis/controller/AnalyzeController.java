@@ -1,4 +1,11 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.controller;
+
+import com.jjikboka.analysis.dto.AnalyzeAcceptedResponse;
+import com.jjikboka.analysis.dto.AnalyzeJobResponse;
+import com.jjikboka.analysis.dto.AnalyzeRequest;
+import com.jjikboka.analysis.service.AnalysisSseService;
+import com.jjikboka.analysis.service.AnalyzePollingService;
+import com.jjikboka.analysis.service.AnalyzeService;
 
 import com.jjikboka.common.response.ApiResponse;
 import jakarta.validation.Valid;

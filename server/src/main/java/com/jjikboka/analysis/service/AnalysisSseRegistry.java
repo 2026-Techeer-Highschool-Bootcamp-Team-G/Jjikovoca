@@ -1,4 +1,4 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * done 이벤트의 카드 조회에 재사용한다. 멀티 레플리카 팬아웃(Redis pub/sub)은 후속(15 §3-1).
  */
 @Component
-class AnalysisSseRegistry {
+public class AnalysisSseRegistry {
 
     private static final Logger log = LoggerFactory.getLogger(AnalysisSseRegistry.class);
 
@@ -29,7 +29,7 @@ class AnalysisSseRegistry {
     }
 
     /** 구독 등록. emitter가 끝나면(완료/타임아웃/에러) 스스로 빠지도록 콜백을 건다. */
-    void register(Long jobId, Long userId, SseEmitter emitter) {
+    public void register(Long jobId, Long userId, SseEmitter emitter) {
         Channel channel = channels.computeIfAbsent(jobId,
                 key -> new Channel(userId, ConcurrentHashMap.newKeySet()));
         channel.emitters().add(emitter);
@@ -39,13 +39,13 @@ class AnalysisSseRegistry {
     }
 
     /** 이 job의 소유자 userId(없으면 null) — done 카드 조회에 쓴다. */
-    Long ownerOf(Long jobId) {
+    public Long ownerOf(Long jobId) {
         Channel channel = channels.get(jobId);
         return channel == null ? null : channel.userId();
     }
 
     /** 진행 단계 이벤트 전송. 전송 실패한 emitter는 정리한다. */
-    void push(Long jobId, String eventName, Object data) {
+    public void push(Long jobId, String eventName, Object data) {
         Channel channel = channels.get(jobId);
         if (channel == null) {
             return;
@@ -56,7 +56,7 @@ class AnalysisSseRegistry {
     }
 
     /** 종료 이벤트를 보내고 해당 job의 모든 emitter를 닫는다(done/error 공통). */
-    void pushAndComplete(Long jobId, String eventName, Object data) {
+    public void pushAndComplete(Long jobId, String eventName, Object data) {
         Channel channel = channels.remove(jobId);
         if (channel == null) {
             return;

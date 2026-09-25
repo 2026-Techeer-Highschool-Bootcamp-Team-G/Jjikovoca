@@ -1,5 +1,7 @@
 package com.jjikboka.analysis;
 
+import com.jjikboka.analysis.service.AnalyzeJobWatchdog;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

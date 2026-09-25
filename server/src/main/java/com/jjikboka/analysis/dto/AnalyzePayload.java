@@ -1,4 +1,4 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.dto;
 
 import java.util.List;
 

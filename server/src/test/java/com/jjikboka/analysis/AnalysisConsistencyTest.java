@@ -1,5 +1,7 @@
 package com.jjikboka.analysis;
 
+import com.jjikboka.analysis.service.AnalysisWorker;
+
 import com.jjikboka.quota.service.QuotaService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

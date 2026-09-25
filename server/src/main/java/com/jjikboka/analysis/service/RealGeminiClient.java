@@ -1,4 +1,7 @@
-package com.jjikboka.analysis;
+package com.jjikboka.analysis.service;
+
+import com.jjikboka.analysis.dto.AnalysisContent;
+import com.jjikboka.analysis.dto.GeminiImage;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,7 +22,7 @@ import java.util.Map;
  */
 @Component
 @ConditionalOnProperty(prefix = "gemini", name = "mock", havingValue = "false")
-class RealGeminiClient implements GeminiClient {
+public class RealGeminiClient implements GeminiClient {
 
     private static final String MODEL = "gemini";
 
