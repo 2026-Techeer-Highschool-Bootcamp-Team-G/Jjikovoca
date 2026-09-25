@@ -1,4 +1,4 @@
-package com.jjikboka.export;
+package com.jjikboka.export.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.PathResource;
@@ -20,7 +20,7 @@ import java.util.stream.Stream;
  * <p>다운로드 시점엔 확장자를 모르므로 {@code export-{id}.*}를 glob으로 찾아 해석한다(export_log에 확장자 컬럼을 두지 않는다).
  */
 @Component
-class ExportStorage {
+public class ExportStorage {
 
     private final Path baseDir;
 
@@ -29,7 +29,7 @@ class ExportStorage {
     }
 
     /** 내보내기 바이트를 확장자와 함께 저장한다(디렉토리는 없으면 생성). */
-    void write(Long exportId, byte[] content, String extension) {
+    public void write(Long exportId, byte[] content, String extension) {
         try {
             Files.createDirectories(baseDir);
             Files.write(baseDir.resolve("export-" + exportId + "." + extension), content);
@@ -39,12 +39,12 @@ class ExportStorage {
     }
 
     /** 다운로드용 리소스. 없거나 읽을 수 없으면(만료) 빈 Optional(→ 404). */
-    Optional<Resource> load(Long exportId) {
+    public Optional<Resource> load(Long exportId) {
         return find(exportId).map(PathResource::new);
     }
 
     /** 다운로드 파일명(Content-Disposition) — 저장된 실제 확장자를 반영. 없으면 기본 확장자로 둔다. */
-    String filename(Long exportId) {
+    public String filename(Long exportId) {
         String ext = find(exportId)
                 .map(path -> path.getFileName().toString())
                 .map(name -> name.substring(name.lastIndexOf('.') + 1))

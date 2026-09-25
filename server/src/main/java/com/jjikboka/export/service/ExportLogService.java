@@ -1,4 +1,7 @@
-package com.jjikboka.export;
+package com.jjikboka.export.service;
+
+import com.jjikboka.export.entity.ExportLog;
+import com.jjikboka.export.repository.ExportLogRepository;
 
 import com.jjikboka.common.error.BusinessException;
 import org.springframework.http.HttpStatus;

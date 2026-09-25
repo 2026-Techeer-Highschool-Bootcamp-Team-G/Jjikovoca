@@ -1,4 +1,4 @@
-package com.jjikboka.export;
+package com.jjikboka.export.dto;
 
 import java.util.List;
 

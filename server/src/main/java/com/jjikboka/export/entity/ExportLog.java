@@ -1,4 +1,4 @@
-package com.jjikboka.export;
+package com.jjikboka.export.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "export_log")
-class ExportLog {
+public class ExportLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +36,7 @@ class ExportLog {
     protected ExportLog() {
     }
 
-    static ExportLog of(Long userId, String type, int cardCount) {
+    public static ExportLog of(Long userId, String type, int cardCount) {
         ExportLog log = new ExportLog();
         log.userId = userId;
         log.type = type;
@@ -44,11 +44,11 @@ class ExportLog {
         return log;
     }
 
-    Long getId() {
+    public Long getId() {
         return id;
     }
 
-    Long getUserId() {
+    public Long getUserId() {
         return userId;
     }
 }
