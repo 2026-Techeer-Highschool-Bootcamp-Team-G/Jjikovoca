@@ -22,27 +22,27 @@ class MeService {
     private static final int PREMIUM_AMOUNT = 4900;
 
     private final UserQueryService userQueryService;
-    private final PremiumService premiumQueryService;
-    private final QuotaService quotaQueryService;
+    private final PremiumService premiumService;
+    private final QuotaService quotaService;
     private final ExpService expService;
     private final boolean aiMockMode;
 
     MeService(UserQueryService userQueryService,
-              PremiumService premiumQueryService,
-              QuotaService quotaQueryService,
+              PremiumService premiumService,
+              QuotaService quotaService,
               ExpService expService,
               @Value("${gemini.mock:false}") boolean aiMockMode) {
         this.userQueryService = userQueryService;
-        this.premiumQueryService = premiumQueryService;
-        this.quotaQueryService = quotaQueryService;
+        this.premiumService = premiumService;
+        this.quotaService = quotaService;
         this.expService = expService;
         this.aiMockMode = aiMockMode;
     }
 
     MeResponse getMe(Long userId) {
         UserProfile profile = userQueryService.getProfile(userId);
-        PremiumDetail premium = premiumQueryService.premiumDetail(userId);
-        QuotaStatus quota = quotaQueryService.getToday(userId);
+        PremiumDetail premium = premiumService.premiumDetail(userId);
+        QuotaStatus quota = quotaService.getToday(userId);
         ExpSummary exp = expService.getSummary(userId);
         Integer amount = premium.premium() ? PREMIUM_AMOUNT : null;
         return new MeResponse(

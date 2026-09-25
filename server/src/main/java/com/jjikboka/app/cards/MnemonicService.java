@@ -3,7 +3,7 @@ package com.jjikboka.app.cards;
 import com.jjikboka.analysis.service.GeminiClient;
 import com.jjikboka.common.image.ImageStorageService;
 import com.jjikboka.card.service.CardMnemonicService;
-import com.jjikboka.card.dto.MnemonicTarget;
+import com.jjikboka.card.dto.MnemonicImagePrompt;
 import com.jjikboka.common.error.BusinessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class MnemonicService {
 
     /** 온디맨드 — 이미 있으면 캐시된 키를 그대로, 없으면 생성·저장 후 키를 돌려준다. */
     public String generateOrGet(Long userId, Long cardId) {
-        MnemonicTarget target = cardMnemonicService.getTarget(userId, cardId);   // 소유 검증 + 기존 키
+        MnemonicImagePrompt target = cardMnemonicService.getTarget(userId, cardId);   // 소유 검증 + 기존 키
         if (target.existingPath() != null) {
             return target.existingPath();                                        // 캐시 히트 — 재생성 안 함(비용 절감)
         }

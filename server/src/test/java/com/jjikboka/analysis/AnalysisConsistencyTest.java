@@ -21,7 +21,7 @@ class AnalysisConsistencyTest extends AnalysisWorkerTestSupport {
     private AnalysisWorker analysisWorker;
 
     @Autowired
-    private QuotaService quotaConsumeService;
+    private QuotaService quotaService;
 
     @Autowired
     private TransactionTemplate txTemplate;
@@ -78,7 +78,7 @@ class AnalysisConsistencyTest extends AnalysisWorkerTestSupport {
     void attempts_상한을_넘긴_claim은_처리없이_FAILED가_되고_quota를_환불한다() {
         long userId = insertUser();
         // 이 사용자로 분석 1회 접수(차감)했다고 가정 — 최종 실패 시 이 차감이 되돌아와야 한다.
-        txTemplate.executeWithoutResult(s -> quotaConsumeService.consume(userId));
+        txTemplate.executeWithoutResult(s -> quotaService.consume(userId));
         assertThat(usedCount(userId)).isEqualTo(1);
 
         // attempts가 이미 상한(3)이라 이번 claim은 4가 되어 처리 없이 최종 실패로 간다.

@@ -1,6 +1,6 @@
 package com.jjikboka.app.study;
 
-import com.jjikboka.card.dto.CardReviewState;
+import com.jjikboka.card.dto.PostReviewCardState;
 import com.jjikboka.stats.dto.ExpDelta;
 
 import java.time.LocalDateTime;
@@ -17,7 +17,7 @@ public record StudyResultResponse(
         ExpDelta exp
 ) {
 
-    static StudyResultResponse of(CardReviewState state, ExpDelta exp) {
+    static StudyResultResponse of(PostReviewCardState state, ExpDelta exp) {
         return new StudyResultResponse(state.cardId(), state.boxLevel(), state.nextReviewAt(), state.graduated(), exp);
     }
 }

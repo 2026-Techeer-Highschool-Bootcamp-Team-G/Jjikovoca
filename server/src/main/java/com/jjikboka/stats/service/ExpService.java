@@ -4,7 +4,7 @@ import com.jjikboka.stats.dto.AttendResult;
 import com.jjikboka.stats.dto.ClozeExp;
 import com.jjikboka.stats.dto.ExpDelta;
 import com.jjikboka.stats.dto.ExpSummary;
-import com.jjikboka.stats.dto.Quest;
+import com.jjikboka.stats.dto.DailyStudyGoal;
 import com.jjikboka.stats.entity.ExpLog;
 import com.jjikboka.stats.entity.UserStat;
 import com.jjikboka.stats.repository.ExpLogRepository;
@@ -152,7 +152,7 @@ public class ExpService {
         long completedToday = studyStatsService.studyCount(userId, dayStart, dayStart.plusDays(1));
         long reviewDue = cardStatsService.reviewDue(userId, now);
         long target = completedToday + reviewDue;
-        Quest quest = new Quest("오늘의 복습", (int) completedToday, (int) target, target > 0 && reviewDue == 0);
+        DailyStudyGoal quest = new DailyStudyGoal("오늘의 복습", (int) completedToday, (int) target, target > 0 && reviewDue == 0);
 
         return new ExpSummary(stat.getLevel(), stat.getExp(), stat.nextLevelExp(),
                 todayEarned, DAILY_CAP, stat.getStreakDays(), quest);

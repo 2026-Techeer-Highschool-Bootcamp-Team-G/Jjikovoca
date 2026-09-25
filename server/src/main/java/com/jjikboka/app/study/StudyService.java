@@ -1,7 +1,7 @@
 package com.jjikboka.app.study;
 
 import com.jjikboka.card.service.CardReviewService;
-import com.jjikboka.card.dto.CardReviewState;
+import com.jjikboka.card.dto.PostReviewCardState;
 import com.jjikboka.studylog.service.StudyLogService;
 import com.jjikboka.studylog.dto.StudyRecordCommand;
 import com.jjikboka.stats.dto.ExpDelta;
@@ -39,7 +39,7 @@ public class StudyService {
     @Transactional
     public StudyResultResponse record(Long userId, Long cardId, StudyRecordRequest request) {
         validate(request);
-        CardReviewState state = cardReviewService.applyResult(userId, cardId, request.result());  // 404 · 403 + 전이
+        PostReviewCardState state = cardReviewService.applyResult(userId, cardId, request.result());  // 404 · 403 + 전이
         studyLogService.record(new StudyRecordCommand(
                 userId, cardId, request.activity(), request.result(), request.reasonTag(),
                 request.durationMs(), request.detail() == null ? null : request.detail().toString()));

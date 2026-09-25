@@ -1,6 +1,6 @@
 package com.jjikboka.card.service;
 
-import com.jjikboka.card.dto.MnemonicTarget;
+import com.jjikboka.card.dto.MnemonicImagePrompt;
 import com.jjikboka.card.entity.Card;
 import com.jjikboka.card.repository.CardRepository;
 
@@ -26,9 +26,9 @@ public class CardMnemonicService {
 
     /** 소유 검증 후 기존 키·프롬프트 재료를 돌려준다. 404 NOT_FOUND · 403 FORBIDDEN. */
     @Transactional(readOnly = true)
-    public MnemonicTarget getTarget(Long userId, Long cardId) {
+    public MnemonicImagePrompt getTarget(Long userId, Long cardId) {
         Card card = owned(userId, cardId);
-        return new MnemonicTarget(card.getMnemonicImagePath(), card.getWord(), card.getContextMeaning());
+        return new MnemonicImagePrompt(card.getMnemonicImagePath(), card.getWord(), card.getContextMeaning());
     }
 
     /** 생성된 이미지 키를 카드에 캐시한다(더티 체킹). 소유 검증 재확인. */

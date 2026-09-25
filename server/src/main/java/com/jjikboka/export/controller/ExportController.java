@@ -49,7 +49,7 @@ class ExportController {
     ResponseEntity<Resource> download(
             @AuthenticationPrincipal Long userId,
             @PathVariable Long id) {
-        exportLogService.verifyOwned(userId, id);   // 404 EXPORT_NOT_FOUND(없음/타인)
+        exportLogService.requireOwned(userId, id);   // 404 EXPORT_NOT_FOUND(없음/타인)
         Resource file = exportStorage.load(id)
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "EXPORT_NOT_FOUND",
                         "파일이 만료되었거나 존재하지 않습니다."));
