@@ -1,6 +1,6 @@
 package com.jjikboka.stats;
 
-import com.jjikboka.auth.UserQueryService;
+import com.jjikboka.auth.service.UserQueryService;
 import com.jjikboka.stats.RankEntry;
 import com.jjikboka.stats.RankingService;
 import org.springframework.stereotype.Service;

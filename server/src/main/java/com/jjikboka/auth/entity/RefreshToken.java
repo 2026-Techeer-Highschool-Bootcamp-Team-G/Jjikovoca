@@ -1,4 +1,4 @@
-package com.jjikboka.auth;
+package com.jjikboka.auth.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "refresh_token")
-class RefreshToken {
+public class RefreshToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,15 +43,15 @@ class RefreshToken {
         this.expiresAt = expiresAt;
     }
 
-    static RefreshToken issue(Long userId, String tokenHash, LocalDateTime expiresAt) {
+    public static RefreshToken issue(Long userId, String tokenHash, LocalDateTime expiresAt) {
         return new RefreshToken(userId, tokenHash, expiresAt);
     }
 
-    Long getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    LocalDateTime getExpiresAt() {
+    public LocalDateTime getExpiresAt() {
         return expiresAt;
     }
 }

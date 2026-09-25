@@ -1,4 +1,8 @@
-package com.jjikboka.auth;
+package com.jjikboka.auth.service;
+
+import com.jjikboka.auth.dto.UserProfile;
+import com.jjikboka.auth.entity.AppUser;
+import com.jjikboka.auth.repository.AppUserRepository;
 
 import com.jjikboka.common.error.BusinessException;
 import org.springframework.http.HttpStatus;

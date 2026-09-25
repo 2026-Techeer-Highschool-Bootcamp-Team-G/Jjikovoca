@@ -1,4 +1,4 @@
-package com.jjikboka.auth;
+package com.jjikboka.auth.service;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

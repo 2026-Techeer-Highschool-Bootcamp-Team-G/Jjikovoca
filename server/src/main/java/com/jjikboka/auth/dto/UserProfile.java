@@ -1,4 +1,4 @@
-package com.jjikboka.auth;
+package com.jjikboka.auth.dto;
 
 /**
  * auth 도메인이 밖으로 노출하는 사용자 프로필 (엔티티 AppUser는 비공개, 이 DTO로만 나간다).
