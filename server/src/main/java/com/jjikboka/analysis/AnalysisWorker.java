@@ -9,7 +9,7 @@ import com.jjikboka.analysis.GeminiImage;
 import com.jjikboka.common.image.ImageStorageService;
 import com.jjikboka.card.CardCreateCommand;
 import com.jjikboka.card.CardCreationService;
-import com.jjikboka.quota.QuotaService;
+import com.jjikboka.quota.service.QuotaService;
 import com.jjikboka.stats.ExpService;
 import com.jjikboka.common.event.AnalyzeEvents;
 import org.slf4j.Logger;

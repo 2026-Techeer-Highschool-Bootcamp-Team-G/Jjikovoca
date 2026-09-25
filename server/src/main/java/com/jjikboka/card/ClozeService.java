@@ -1,6 +1,6 @@
 package com.jjikboka.card;
 
-import com.jjikboka.quota.QuotaService;
+import com.jjikboka.quota.service.QuotaService;
 import com.jjikboka.subscription.service.PremiumService;
 
 import com.jjikboka.common.error.BusinessException;

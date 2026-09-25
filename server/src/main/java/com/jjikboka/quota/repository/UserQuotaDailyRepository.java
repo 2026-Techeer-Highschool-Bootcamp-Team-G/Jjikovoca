@@ -1,5 +1,7 @@
-package com.jjikboka.quota;
+package com.jjikboka.quota.repository;
 
+import com.jjikboka.quota.entity.UserQuotaDaily;
+import com.jjikboka.quota.entity.UserQuotaDailyId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,7 +14,7 @@ import java.util.Optional;
  * user_quota_daily 저장소. package-private 봉인(13 §2).
  * 차감은 DB 행 락에 기대는 조건부 UPDATE로 원자화한다(NFR-02) — 동시 요청도 한도를 넘기지 못한다.
  */
-interface UserQuotaDailyRepository extends JpaRepository<UserQuotaDaily, UserQuotaDailyId> {
+public interface UserQuotaDailyRepository extends JpaRepository<UserQuotaDaily, UserQuotaDailyId> {
 
     Optional<UserQuotaDaily> findByUserIdAndQuotaDate(Long userId, LocalDate quotaDate);
 

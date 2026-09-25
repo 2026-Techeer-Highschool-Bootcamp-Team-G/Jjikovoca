@@ -3,7 +3,7 @@ package com.jjikboka.analysis;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jjikboka.analysis.AnalyzeJobService;
 import com.jjikboka.common.image.ImageStorageService;
-import com.jjikboka.quota.QuotaService;
+import com.jjikboka.quota.service.QuotaService;
 import com.jjikboka.common.event.AnalyzeEvents;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;

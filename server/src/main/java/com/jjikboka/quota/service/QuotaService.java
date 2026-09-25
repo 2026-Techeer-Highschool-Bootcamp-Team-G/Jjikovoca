@@ -1,5 +1,8 @@
-package com.jjikboka.quota;
+package com.jjikboka.quota.service;
 
+import com.jjikboka.quota.dto.QuotaStatus;
+import com.jjikboka.quota.entity.UserQuotaDaily;
+import com.jjikboka.quota.repository.UserQuotaDailyRepository;
 import com.jjikboka.subscription.service.PremiumService;
 
 import com.jjikboka.common.error.BusinessException;

@@ -1,4 +1,4 @@
-package com.jjikboka.quota;
+package com.jjikboka.quota.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "user_quota_daily")
 @IdClass(UserQuotaDailyId.class)
-class UserQuotaDaily {
+public class UserQuotaDaily {
 
     @Id
     @Column(name = "user_id")
@@ -35,7 +35,7 @@ class UserQuotaDaily {
     protected UserQuotaDaily() {
     }
 
-    int getUsedCount() {
+    public int getUsedCount() {
         return usedCount;
     }
 }
