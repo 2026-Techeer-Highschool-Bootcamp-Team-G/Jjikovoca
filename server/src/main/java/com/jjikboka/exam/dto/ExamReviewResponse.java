@@ -1,4 +1,4 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.dto;
 
 import com.jjikboka.card.ExamReviewItem;
 
@@ -10,7 +10,7 @@ import java.util.List;
  */
 public record ExamReviewResponse(Long examId, int dueCount, List<ExamReviewItem> cards) {
 
-    static ExamReviewResponse of(Long examId, List<ExamReviewItem> cards) {
+    public static ExamReviewResponse of(Long examId, List<ExamReviewItem> cards) {
         return new ExamReviewResponse(examId, cards.size(), cards);
     }
 }

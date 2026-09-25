@@ -1,4 +1,4 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.dto;
 
 /**
  * 시험 수정 요청 (Notion API-ID 34). 변경할 필드만 보낸다 — null은 그대로 둔다.

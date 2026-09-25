@@ -1,4 +1,6 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.dto;
+
+import com.jjikboka.exam.entity.Exam;
 
 /**
  * 시험 태그 (Notion API-ID 43, core.review 공개 DTO). 카드에 걸린 시험을 id·title로 요약한다 —
@@ -6,7 +8,7 @@ package com.jjikboka.exam;
  */
 public record ExamTag(Long id, String title) {
 
-    static ExamTag from(Exam exam) {
+    public static ExamTag from(Exam exam) {
         return new ExamTag(exam.getId(), exam.getTitle());
     }
 }

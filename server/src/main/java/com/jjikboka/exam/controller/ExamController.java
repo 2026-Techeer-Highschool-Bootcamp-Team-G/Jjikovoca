@@ -1,4 +1,15 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.controller;
+
+import com.jjikboka.exam.dto.ExamCreateRequest;
+import com.jjikboka.exam.dto.ExamDeleteResponse;
+import com.jjikboka.exam.dto.ExamListResponse;
+import com.jjikboka.exam.dto.ExamResponse;
+import com.jjikboka.exam.dto.ExamReviewResponse;
+import com.jjikboka.exam.dto.ExamUpdateRequest;
+import com.jjikboka.exam.dto.TagRecentRequest;
+import com.jjikboka.exam.dto.TagRecentResponse;
+import com.jjikboka.exam.service.ExamFacade;
+import com.jjikboka.exam.service.ExamReviewFacade;
 
 import com.jjikboka.common.response.ApiResponse;
 import org.springframework.http.ResponseEntity;

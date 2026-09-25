@@ -1,8 +1,8 @@
 package com.jjikboka.app.cards;
 
 import com.jjikboka.card.CardQueryService;
-import com.jjikboka.exam.ExamTag;
-import com.jjikboka.exam.ExamTagService;
+import com.jjikboka.exam.dto.ExamTag;
+import com.jjikboka.exam.service.ExamTagService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

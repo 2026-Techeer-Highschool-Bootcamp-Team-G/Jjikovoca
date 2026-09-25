@@ -1,4 +1,8 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.service;
+
+import com.jjikboka.exam.dto.ExamTag;
+import com.jjikboka.exam.entity.Exam;
+import com.jjikboka.exam.repository.ExamCardRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,6 +1,5 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.dto;
 
-import com.jjikboka.exam.ExamView;
 
 import java.util.List;
 

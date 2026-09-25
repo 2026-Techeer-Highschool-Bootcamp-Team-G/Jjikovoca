@@ -1,4 +1,4 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.entity;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -7,7 +7,7 @@ import java.util.Objects;
  * exam_card 복합 식별자 (03 exam_card PK: exam_id + card_id). {@link ExamCard}의 @IdClass.
  * 한 카드가 여러 시험에, 한 시험이 여러 카드에 걸리는 다대다를 이 쌍으로 표현한다(F-29).
  */
-class ExamCardId implements Serializable {
+public class ExamCardId implements Serializable {
 
     private Long examId;
     private Long cardId;

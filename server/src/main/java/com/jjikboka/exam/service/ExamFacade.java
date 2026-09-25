@@ -1,10 +1,14 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.service;
+
+import com.jjikboka.exam.dto.ExamCreateRequest;
+import com.jjikboka.exam.dto.ExamDeleteResponse;
+import com.jjikboka.exam.dto.ExamListResponse;
+import com.jjikboka.exam.dto.ExamResponse;
+import com.jjikboka.exam.dto.ExamUpdateRequest;
+import com.jjikboka.exam.dto.ExamView;
 
 import com.jjikboka.card.CardStatsService;
 import com.jjikboka.card.ExamRescheduler;
-import com.jjikboka.exam.ExamFeedService;
-import com.jjikboka.exam.ExamService;
-import com.jjikboka.exam.ExamView;
 import com.jjikboka.common.error.BusinessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.jjikboka.exam;
+package com.jjikboka.exam.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "exam_card")
 @IdClass(ExamCardId.class)
-class ExamCard {
+public class ExamCard {
 
     @Id
     @Column(name = "exam_id")
@@ -36,7 +36,7 @@ class ExamCard {
     }
 
     /** 수동 태깅(API-43·45) — source=MANUAL. */
-    static ExamCard manual(Long examId, Long cardId) {
+    public static ExamCard manual(Long examId, Long cardId) {
         ExamCard mapping = new ExamCard();
         mapping.examId = examId;
         mapping.cardId = cardId;
