@@ -25,18 +25,18 @@ import java.util.List;
 @Service
 public class AnalyzeService {
 
-    private final QuotaService quotaConsumeService;
+    private final QuotaService quotaService;
     private final AnalyzeJobService analyzeJobService;
     private final ImageStorageService imageStorageService;
     private final ApplicationEventPublisher eventPublisher;
     private final ObjectMapper objectMapper;
 
-    AnalyzeService(QuotaService quotaConsumeService,
+    AnalyzeService(QuotaService quotaService,
                    AnalyzeJobService analyzeJobService,
                    ImageStorageService imageStorageService,
                    ApplicationEventPublisher eventPublisher,
                    ObjectMapper objectMapper) {
-        this.quotaConsumeService = quotaConsumeService;
+        this.quotaService = quotaService;
         this.analyzeJobService = analyzeJobService;
         this.imageStorageService = imageStorageService;
         this.eventPublisher = eventPublisher;
@@ -45,7 +45,7 @@ public class AnalyzeService {
 
     @Transactional
     public AnalyzeAcceptedResponse submit(Long userId, AnalyzeRequest request) {
-        quotaConsumeService.consume(userId);
+        quotaService.consume(userId);
         List<String> cropImageRefs = saveCrops(request);
         // 단어 힌트를 흘려보낸다(cropImages 순서=cropImageRefs 순서라 인덱스 정렬 유지).
         List<String> words = request.words();

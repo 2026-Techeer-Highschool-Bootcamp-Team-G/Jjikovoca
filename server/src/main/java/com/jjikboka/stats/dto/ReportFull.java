@@ -1,6 +1,6 @@
 package com.jjikboka.stats.dto;
 
-import com.jjikboka.card.dto.WeakConcept;
+import com.jjikboka.card.dto.WeakConceptDiagnosis;
 
 import java.util.List;
 import java.util.Map;
@@ -11,8 +11,8 @@ import java.util.Map;
  */
 public record ReportFull(
         Map<String, Long> reasonBreakdown,
-        List<WeakConcept> weakConcepts,
-        Growth growth,
+        List<WeakConceptDiagnosis> weakConcepts,
+        MonthlyGrowthMetric growth,
         long graduatedThisMonth
 ) {
 }

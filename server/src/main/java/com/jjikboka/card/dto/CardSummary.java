@@ -2,7 +2,7 @@ package com.jjikboka.card.dto;
 
 import com.jjikboka.card.entity.Card;
 
-import com.jjikboka.studylog.dto.GradeCount;
+import com.jjikboka.studylog.dto.GradeDistribution;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,12 +41,12 @@ public record CardSummary(
 
     /** 등급 카운트 없이(0/0/0) — 카운트가 불필요한 경로(내보내기·직접선택·시험복습 등)용. */
     public static CardSummary from(Card card) {
-        return from(card, GradeCount.ZERO);
+        return from(card, GradeDistribution.ZERO);
     }
 
     /** 등급 카운트를 함께 실어(단어장 피드) — grade가 null이면 0으로 처리한다. */
-    public static CardSummary from(Card card, GradeCount grade) {
-        GradeCount g = grade == null ? GradeCount.ZERO : grade;
+    public static CardSummary from(Card card, GradeDistribution grade) {
+        GradeDistribution g = grade == null ? GradeDistribution.ZERO : grade;
         return new CardSummary(
                 card.getId(),
                 card.getType(),

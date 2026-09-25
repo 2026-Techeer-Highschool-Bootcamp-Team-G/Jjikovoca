@@ -29,7 +29,7 @@ public class ExportLogService {
 
     /** 다운로드 소유자 검증(API-26). 없거나 남의 것이면 404 EXPORT_NOT_FOUND(존재 여부를 감춰 열람 방지). */
     @Transactional(readOnly = true)
-    public void verifyOwned(Long userId, Long exportId) {
+    public void requireOwned(Long userId, Long exportId) {
         ExportLog log = exportLogRepository.findById(exportId)
                 .orElseThrow(() -> notFound());
         if (!log.getUserId().equals(userId)) {

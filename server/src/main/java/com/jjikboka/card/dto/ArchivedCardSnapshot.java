@@ -6,14 +6,14 @@ import com.jjikboka.card.entity.Card;
  * 원문 보관함 항목 (Notion API-ID 36, core.card 공개 DTO). 크롭 원문 한 장 = 카드 하나.
  * imageUrl은 지금은 card.image_path 그대로 — 소유자 검증 후 presigned 발급은 이미지 저장소 확정 후(API-10) 적용.
  */
-public record ArchiveItem(
+public record ArchivedCardSnapshot(
         Long cardId,
         String type,
         String subject,
         String imageUrl
 ) {
 
-    public static ArchiveItem from(Card card) {
-        return new ArchiveItem(card.getId(), card.getType(), card.getSubject(), card.getImagePath());
+    public static ArchivedCardSnapshot from(Card card) {
+        return new ArchivedCardSnapshot(card.getId(), card.getType(), card.getSubject(), card.getImagePath());
     }
 }

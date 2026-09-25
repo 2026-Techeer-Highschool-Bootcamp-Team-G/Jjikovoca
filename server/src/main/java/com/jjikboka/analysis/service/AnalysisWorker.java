@@ -49,7 +49,7 @@ public class AnalysisWorker {
     private final GeminiAnalysisCache geminiAnalysisCache;
     private final AnalyzeJobService analyzeJobService;
     private final CardCreationService cardCreationService;
-    private final QuotaService quotaConsumeService;
+    private final QuotaService quotaService;
     private final ImageStorageService imageStorageService;
     private final ApplicationEventPublisher eventPublisher;
     private final ExpService expService;
@@ -59,7 +59,7 @@ public class AnalysisWorker {
     AnalysisWorker(GeminiAnalysisCache geminiAnalysisCache,
                    AnalyzeJobService analyzeJobService,
                    CardCreationService cardCreationService,
-                   QuotaService quotaConsumeService,
+                   QuotaService quotaService,
                    ImageStorageService imageStorageService,
                    ApplicationEventPublisher eventPublisher,
                    ExpService expService,
@@ -68,7 +68,7 @@ public class AnalysisWorker {
         this.geminiAnalysisCache = geminiAnalysisCache;
         this.analyzeJobService = analyzeJobService;
         this.cardCreationService = cardCreationService;
-        this.quotaConsumeService = quotaConsumeService;
+        this.quotaService = quotaService;
         this.imageStorageService = imageStorageService;
         this.eventPublisher = eventPublisher;
         this.expService = expService;
@@ -131,7 +131,7 @@ public class AnalysisWorker {
     /** 최종 실패 확정 — FAILED + 사유 기록 후 quota 환불(멱등) + AnalyzeFailed 알림. */
     private void failAndRefund(AnalyzeJobClaim claim, String reason) {
         analyzeJobService.markFailedExhausted(claim.jobId(), reason);
-        quotaConsumeService.refund(claim.userId());
+        quotaService.refund(claim.userId());
         eventPublisher.publishEvent(new AnalyzeEvents.AnalyzeFailed(claim.jobId(), reason));
     }
 

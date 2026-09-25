@@ -1,7 +1,7 @@
 package com.jjikboka.card.service;
 
 import com.jjikboka.card.dto.ArchiveDay;
-import com.jjikboka.card.dto.ArchiveItem;
+import com.jjikboka.card.dto.ArchivedCardSnapshot;
 import com.jjikboka.card.dto.CardCounts;
 import com.jjikboka.card.dto.CardDetail;
 import com.jjikboka.card.dto.CardSummary;
@@ -11,7 +11,7 @@ import com.jjikboka.card.repository.CardRepository;
 
 import com.jjikboka.subscription.service.PremiumService;
 
-import com.jjikboka.studylog.dto.GradeCount;
+import com.jjikboka.studylog.dto.GradeDistribution;
 import com.jjikboka.studylog.service.StudyStatsService;
 import com.jjikboka.common.error.BusinessException;
 import org.springframework.data.domain.PageRequest;
@@ -41,13 +41,13 @@ public class CardQueryService {
     private static final DateTimeFormatter MONTH_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM");
 
     private final CardRepository cardRepository;
-    private final PremiumService premiumQueryService;
+    private final PremiumService premiumService;
     private final StudyStatsService studyStatsService;
 
-    CardQueryService(CardRepository cardRepository, PremiumService premiumQueryService,
+    CardQueryService(CardRepository cardRepository, PremiumService premiumService,
                      StudyStatsService studyStatsService) {
         this.cardRepository = cardRepository;
-        this.premiumQueryService = premiumQueryService;
+        this.premiumService = premiumService;
         this.studyStatsService = studyStatsService;
     }
 
@@ -57,9 +57,9 @@ public class CardQueryService {
         List<Card> cards = (subject == null || SUBJECT_ALL.equals(subject))
                 ? cardRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId)
                 : cardRepository.findByUserIdAndSubjectAndDeletedAtIsNullOrderByCreatedAtDesc(userId, subject);
-        Map<Long, GradeCount> grades = studyStatsService.gradeCounts(userId);
+        Map<Long, GradeDistribution> grades = studyStatsService.gradeCounts(userId);
         return cards.stream()
-                .map(card -> CardSummary.from(card, grades.getOrDefault(card.getId(), GradeCount.ZERO)))
+                .map(card -> CardSummary.from(card, grades.getOrDefault(card.getId(), GradeDistribution.ZERO)))
                 .toList();
     }
 
@@ -70,9 +70,9 @@ public class CardQueryService {
     @Transactional(readOnly = true)
     public CardCounts getCounts(Long userId) {
         long total = cardRepository.countByUserIdAndDeletedAtIsNull(userId);
-        Map<Long, GradeCount> grades = studyStatsService.gradeCounts(userId);
-        long graduated = grades.values().stream().filter(GradeCount::graduated).count();
-        long weak = grades.values().stream().filter(GradeCount::weak).count();
+        Map<Long, GradeDistribution> grades = studyStatsService.gradeCounts(userId);
+        long graduated = grades.values().stream().filter(GradeDistribution::graduated).count();
+        long weak = grades.values().stream().filter(GradeDistribution::weak).count();
         long reviewDue = total - graduated;   // 졸업완료 아님 = 복습대기
         return new CardCounts(total, graduated, reviewDue, weak);
     }
@@ -103,7 +103,7 @@ public class CardQueryService {
      * app이 exam_card 태깅(core.review) 전에 카드 쪽 소유를 확인하는 진입점 — 카드 엔티티 경계를 지킨다(13 §2).
      */
     @Transactional(readOnly = true)
-    public void verifyOwned(Long userId, Long cardId) {
+    public void requireOwned(Long userId, Long cardId) {
         Card card = cardRepository.findByIdAndDeletedAtIsNull(cardId)
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "NOT_FOUND", "대상을 찾을 수 없습니다."));
         if (!card.getUserId().equals(userId)) {
@@ -139,7 +139,7 @@ public class CardQueryService {
         if (!card.getUserId().equals(userId)) {
             throw new BusinessException(HttpStatus.FORBIDDEN, "FORBIDDEN", "접근 권한이 없습니다.");
         }
-        return CardDetail.from(card, premiumQueryService.isPremium(userId));
+        return CardDetail.from(card, premiumService.isPremium(userId));
     }
 
     /**
@@ -152,11 +152,11 @@ public class CardQueryService {
         LocalDateTime start = target.atDay(1).atStartOfDay();
         LocalDateTime end = target.plusMonths(1).atDay(1).atStartOfDay();
 
-        Map<LocalDate, List<ArchiveItem>> byDay = cardRepository.findArchive(userId, start, end).stream()
+        Map<LocalDate, List<ArchivedCardSnapshot>> byDay = cardRepository.findArchive(userId, start, end).stream()
                 .collect(Collectors.groupingBy(
                         card -> card.getCreatedAt().toLocalDate(),
                         LinkedHashMap::new,
-                        Collectors.mapping(ArchiveItem::from, Collectors.toList())));
+                        Collectors.mapping(ArchivedCardSnapshot::from, Collectors.toList())));
 
         return byDay.entrySet().stream()
                 .map(entry -> new ArchiveDay(entry.getKey(), entry.getValue()))

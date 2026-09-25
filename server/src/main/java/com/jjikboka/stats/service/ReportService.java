@@ -2,7 +2,7 @@ package com.jjikboka.stats.service;
 
 import com.jjikboka.stats.dto.Accuracy;
 import com.jjikboka.stats.dto.GrassDay;
-import com.jjikboka.stats.dto.Growth;
+import com.jjikboka.stats.dto.MonthlyGrowthMetric;
 import com.jjikboka.stats.dto.ReportBasic;
 import com.jjikboka.stats.dto.ReportFull;
 import com.jjikboka.stats.dto.ReportView;
@@ -41,16 +41,16 @@ public class ReportService {
 
     private final StudyStatsService studyStatsService;
     private final CardStatsService cardStatsService;
-    private final PremiumService premiumQueryService;
+    private final PremiumService premiumService;
     private final ReportSnapshotService reportSnapshotService;
 
     ReportService(StudyStatsService studyStatsService,
                   CardStatsService cardStatsService,
-                  PremiumService premiumQueryService,
+                  PremiumService premiumService,
                   ReportSnapshotService reportSnapshotService) {
         this.studyStatsService = studyStatsService;
         this.cardStatsService = cardStatsService;
-        this.premiumQueryService = premiumQueryService;
+        this.premiumService = premiumService;
         this.reportSnapshotService = reportSnapshotService;
     }
 
@@ -82,7 +82,7 @@ public class ReportService {
                 .map(point -> new GrassDay(point.date(), point.count(), point.minutes(), GrassDay.levelOf(point.count())))
                 .toList();
 
-        ReportFull full = premiumQueryService.isPremium(userId) ? buildFull(userId, start, end, stats) : null;
+        ReportFull full = premiumService.isPremium(userId) ? buildFull(userId, start, end, stats) : null;
 
         // 완료된 과거 월이면 스냅샷을 durable하게 남긴다(멱등 upsert, 별도 트랜잭션). 현재/미래 월은 아직 진행 중이라 제외.
         if (target.isBefore(YearMonth.now())) {
@@ -108,7 +108,7 @@ public class ReportService {
 
     private ReportFull buildFull(Long userId, LocalDateTime start, LocalDateTime end, StudyStats stats) {
         long graduated = cardStatsService.graduated(userId, start, end);
-        Growth growth = new Growth(null, "이번 달 " + graduated + "개를 외웠어요");
+        MonthlyGrowthMetric growth = new MonthlyGrowthMetric(null, "이번 달 " + graduated + "개를 외웠어요");
         return new ReportFull(stats.reasonBreakdown(), cardStatsService.weakConcepts(userId), growth, graduated);
     }
 

@@ -1,6 +1,6 @@
 package com.jjikboka.card.service;
 
-import com.jjikboka.card.dto.CardReviewState;
+import com.jjikboka.card.dto.PostReviewCardState;
 import com.jjikboka.card.dto.ClozeAnswerResult;
 import com.jjikboka.card.dto.ClozeItem;
 import com.jjikboka.card.dto.ClozeRegenerated;
@@ -28,15 +28,15 @@ import java.util.function.Function;
 public class ClozeService {
 
     private final CardRepository cardRepository;
-    private final PremiumService premiumQueryService;
-    private final QuotaService quotaConsumeService;
+    private final PremiumService premiumService;
+    private final QuotaService quotaService;
 
     ClozeService(CardRepository cardRepository,
-                 PremiumService premiumQueryService,
-                 QuotaService quotaConsumeService) {
+                 PremiumService premiumService,
+                 QuotaService quotaService) {
         this.cardRepository = cardRepository;
-        this.premiumQueryService = premiumQueryService;
-        this.quotaConsumeService = quotaConsumeService;
+        this.premiumService = premiumService;
+        this.quotaService = quotaService;
     }
 
     /**
@@ -77,7 +77,7 @@ public class ClozeService {
         boolean correct = ClozeMaker.judge(card.getWord(), guess);
         card.review(correct ? "KNOW" : "DONT_KNOW", LocalDateTime.now());
         return new ClozeAnswerResult(correct, card.getWord(),
-                card.getContextMeaning(), card.getExampleMeaning(), CardReviewState.from(card));
+                card.getContextMeaning(), card.getExampleMeaning(), PostReviewCardState.from(card));
     }
 
     /**
@@ -94,10 +94,10 @@ public class ClozeService {
         if (!card.getUserId().equals(userId)) {
             throw new BusinessException(HttpStatus.FORBIDDEN, "FORBIDDEN", "접근 권한이 없습니다.");
         }
-        if (!premiumQueryService.isPremium(userId)) {
+        if (!premiumService.isPremium(userId)) {
             throw new BusinessException(HttpStatus.FORBIDDEN, "PREMIUM_REQUIRED", "프리미엄 전용 기능입니다.");
         }
-        quotaConsumeService.consume(userId);   // 429 QUOTA_EXCEEDED
+        quotaService.consume(userId);   // 429 QUOTA_EXCEEDED
 
         String newExample = exampleGenerator.apply(card.getWord());
         ClozeMaker.Cloze cloze = ClozeMaker.make(card.getWord(), newExample, card.getContextMeaning());

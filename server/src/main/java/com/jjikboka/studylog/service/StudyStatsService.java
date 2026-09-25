@@ -1,7 +1,7 @@
 package com.jjikboka.studylog.service;
 
-import com.jjikboka.studylog.dto.GradeCount;
-import com.jjikboka.studylog.dto.Rhythm;
+import com.jjikboka.studylog.dto.GradeDistribution;
+import com.jjikboka.studylog.dto.DailyStudyPattern;
 import com.jjikboka.studylog.dto.StudyStats;
 import com.jjikboka.studylog.dto.SubjectMinutes;
 import com.jjikboka.studylog.repository.StudyLogRepository;
@@ -55,10 +55,10 @@ public class StudyStatsService {
 
     /**
      * 카드별 등급 카운트(단어장 분류·칩, API-7) — 사용자의 모든 study_log를 카드 단위로 접어 알아요·몰라요·헷갈려요 수를 낸다.
-     * 학습 이력이 없는 카드는 맵에 없다(호출부가 {@link GradeCount#ZERO}로 기본 처리). 결과 문자열(KNOW/DONT_KNOW/CONFUSED)만 집계.
+     * 학습 이력이 없는 카드는 맵에 없다(호출부가 {@link GradeDistribution#ZERO}로 기본 처리). 결과 문자열(KNOW/DONT_KNOW/CONFUSED)만 집계.
      */
     @Transactional(readOnly = true)
-    public Map<Long, GradeCount> gradeCounts(Long userId) {
+    public Map<Long, GradeDistribution> gradeCounts(Long userId) {
         Map<Long, int[]> tally = new HashMap<>();   // cardId → [know, dontKnow, confused]
         for (Object[] row : studyLogRepository.gradeCountsByCard(userId)) {
             Long cardId = (Long) row[0];
@@ -72,8 +72,8 @@ public class StudyStatsService {
                 default -> { /* 그 외 결과는 등급 분류에 무관 */ }
             }
         }
-        Map<Long, GradeCount> counts = new HashMap<>();
-        tally.forEach((cardId, g) -> counts.put(cardId, new GradeCount(g[0], g[1], g[2])));
+        Map<Long, GradeDistribution> counts = new HashMap<>();
+        tally.forEach((cardId, g) -> counts.put(cardId, new GradeDistribution(g[0], g[1], g[2])));
         return counts;
     }
 
@@ -122,7 +122,7 @@ public class StudyStatsService {
      * 오늘 학습이 없으면 (0, 0.0).
      */
     @Transactional(readOnly = true)
-    public Rhythm todayRhythm(Long userId, LocalDateTime start, LocalDateTime end) {
+    public DailyStudyPattern todayRhythm(Long userId, LocalDateTime start, LocalDateTime end) {
         List<Object[]> rows = studyLogRepository.sessionLogs(userId, start, end);
         long totalMs = 0;
         int sessions = 0;
@@ -138,7 +138,7 @@ public class StudyStatsService {
         int todayStudyMinutes = (int) (totalMs / 60000);
         double avgSessionMinutes = sessions == 0 ? 0.0
                 : BigDecimal.valueOf((totalMs / 60000.0) / sessions).setScale(1, RoundingMode.HALF_UP).doubleValue();
-        return new Rhythm(todayStudyMinutes, avgSessionMinutes);
+        return new DailyStudyPattern(todayStudyMinutes, avgSessionMinutes);
     }
 
     /** [KNOW 수, 전체 수] → 정확도. 집계라 항상 1행이지만 방어적으로 빈 결과면 null. 전체 0 또는 KNOW=null(대상 없음)이면 null. */

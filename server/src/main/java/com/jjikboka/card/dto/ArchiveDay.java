@@ -9,6 +9,6 @@ import java.util.List;
  */
 public record ArchiveDay(
         LocalDate date,
-        List<ArchiveItem> items
+        List<ArchivedCardSnapshot> items
 ) {
 }

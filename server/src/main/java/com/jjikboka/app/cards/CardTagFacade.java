@@ -25,7 +25,7 @@ public class CardTagFacade {
 
     @Transactional
     public CardTagResponse tag(Long userId, Long cardId, List<Long> examIds) {
-        cardQueryService.verifyOwned(userId, cardId);   // 404 · 403 (카드 쪽)
+        cardQueryService.requireOwned(userId, cardId);   // 404 · 403 (카드 쪽)
         List<Long> targets = examIds == null ? List.of() : examIds;
         List<ExamTag> exams = examTagService.tag(userId, cardId, targets);   // 시험 소유검증 + 멱등 태깅
         return new CardTagResponse(cardId, exams);
@@ -33,7 +33,7 @@ public class CardTagFacade {
 
     @Transactional
     public CardUntagResponse untag(Long userId, Long cardId, Long examId) {
-        cardQueryService.verifyOwned(userId, cardId);   // 404 · 403 (카드 쪽)
+        cardQueryService.requireOwned(userId, cardId);   // 404 · 403 (카드 쪽)
         examTagService.untag(userId, cardId, examId);   // 시험 소유검증 + 멱등 삭제
         return new CardUntagResponse(cardId, examId);
     }

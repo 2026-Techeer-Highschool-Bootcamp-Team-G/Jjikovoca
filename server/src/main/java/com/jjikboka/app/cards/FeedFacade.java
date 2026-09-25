@@ -55,7 +55,7 @@ public class FeedFacade {
         boolean hasNext = to < cards.size();
 
         Map<Long, List<ExamTag>> examsByCard = examFeedService.examsFor(pageCards.stream().map(CardSummary::id).toList());
-        List<FeedCard> feed = pageCards.stream().map(card -> FeedCard.of(card, examsByCard.get(card.id()))).toList();
+        List<CardFeedItem> feed = pageCards.stream().map(card -> CardFeedItem.of(card, examsByCard.get(card.id()))).toList();
         return new CardFeedResponse(feed, total, hasNext);
     }
 

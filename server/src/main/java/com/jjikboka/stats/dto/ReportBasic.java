@@ -1,6 +1,6 @@
 package com.jjikboka.stats.dto;
 
-import com.jjikboka.studylog.dto.Rhythm;
+import com.jjikboka.studylog.dto.DailyStudyPattern;
 
 import java.util.List;
 
@@ -10,5 +10,5 @@ import java.util.List;
  * rhythm·todayDue는 기간과 무관한 "오늘" 값(홈 위젯 F-10) — 오늘 학습 분·세션 평균과 복습 대기 카드 수.
  */
 public record ReportBasic(long newCards, long studyCount, Accuracy accuracy,
-                          List<SubjectStat> subjectBreakdown, Rhythm rhythm, long todayDue) {
+                          List<SubjectStat> subjectBreakdown, DailyStudyPattern rhythm, long todayDue) {
 }

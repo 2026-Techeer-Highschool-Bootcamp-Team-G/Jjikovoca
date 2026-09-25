@@ -11,6 +11,6 @@ public record ExpSummary(
         int todayEarned,
         int dailyCap,
         int streakDays,
-        Quest quest
+        DailyStudyGoal quest
 ) {
 }

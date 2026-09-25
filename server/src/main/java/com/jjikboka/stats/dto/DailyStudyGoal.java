@@ -5,5 +5,5 @@ package com.jjikboka.stats.dto;
  * 지금은 일일 학습 목표(오늘 XP 획득) — progress=오늘 획득 XP, target=일일 한도, completed=목표 달성.
  * 복습 개수 기반 퀘스트는 exp+card 조합이라 app-facade 후속.
  */
-public record Quest(String label, int progress, int target, boolean completed) {
+public record DailyStudyGoal(String label, int progress, int target, boolean completed) {
 }

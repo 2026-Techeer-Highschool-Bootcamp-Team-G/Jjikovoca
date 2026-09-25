@@ -1,6 +1,6 @@
 package com.jjikboka.card.service;
 
-import com.jjikboka.card.dto.WeakConcept;
+import com.jjikboka.card.dto.WeakConceptDiagnosis;
 import com.jjikboka.card.repository.CardRepository;
 
 import org.springframework.data.domain.PageRequest;
@@ -61,9 +61,9 @@ public class CardStatsService {
 
     /** 약한 개념(API-17 full) — concept·subject 그룹의 wrong_count 합 상위 N개(내림차순). GROUP BY가 중복을 이미 제거. */
     @Transactional(readOnly = true)
-    public List<WeakConcept> weakConcepts(Long userId) {
+    public List<WeakConceptDiagnosis> weakConcepts(Long userId) {
         return cardRepository.findWeakConceptStats(userId, PageRequest.of(0, WEAK_CONCEPT_LIMIT)).stream()
-                .map(row -> new WeakConcept((String) row[0], (String) row[1], ((Number) row[2]).longValue()))
+                .map(row -> new WeakConceptDiagnosis((String) row[0], (String) row[1], ((Number) row[2]).longValue()))
                 .toList();
     }
 }

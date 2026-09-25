@@ -26,21 +26,21 @@ public class ExportFacade {
 
     private static final int EXPIRES_IN = 3600;
 
-    private final PremiumService premiumQueryService;
-    private final QuotaService quotaConsumeService;
+    private final PremiumService premiumService;
+    private final QuotaService quotaService;
     private final CardQueryService cardQueryService;
     private final ExportLogService exportLogService;
     private final ExportRenderer exportRenderer;
     private final ExportStorage exportStorage;
 
-    ExportFacade(PremiumService premiumQueryService,
-                 QuotaService quotaConsumeService,
+    ExportFacade(PremiumService premiumService,
+                 QuotaService quotaService,
                  CardQueryService cardQueryService,
                  ExportLogService exportLogService,
                  ExportRenderer exportRenderer,
                  ExportStorage exportStorage) {
-        this.premiumQueryService = premiumQueryService;
-        this.quotaConsumeService = quotaConsumeService;
+        this.premiumService = premiumService;
+        this.quotaService = quotaService;
         this.cardQueryService = cardQueryService;
         this.exportLogService = exportLogService;
         this.exportRenderer = exportRenderer;
@@ -49,10 +49,10 @@ public class ExportFacade {
 
     @Transactional
     public ExportCreateResponse create(Long userId, ExportRequest request) {
-        if (!premiumQueryService.isPremium(userId)) {
+        if (!premiumService.isPremium(userId)) {
             throw new BusinessException(HttpStatus.FORBIDDEN, "PREMIUM_REQUIRED", "프리미엄 전용 기능입니다.");
         }
-        quotaConsumeService.consume(userId);   // 429 QUOTA_EXCEEDED
+        quotaService.consume(userId);   // 429 QUOTA_EXCEEDED
 
         List<CardSummary> cards = cardQueryService.getSummaries(userId, request.cardIds());
         Long exportId = exportLogService.record(userId, request.type(), cards.size());

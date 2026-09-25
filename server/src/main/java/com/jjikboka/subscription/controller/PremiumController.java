@@ -18,15 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/premium")
 class PremiumController {
 
-    private final PremiumService premiumActivationService;
+    private final PremiumService premiumService;
 
-    PremiumController(PremiumService premiumActivationService) {
-        this.premiumActivationService = premiumActivationService;
+    PremiumController(PremiumService premiumService) {
+        this.premiumService = premiumService;
     }
 
     @PostMapping("/activate")
     ResponseEntity<ApiResponse<PremiumResponse>> activate(@AuthenticationPrincipal Long userId) {
-        boolean premium = premiumActivationService.activate(userId);
+        boolean premium = premiumService.activate(userId);
         return ResponseEntity.ok(ApiResponse.ok(
                 new PremiumResponse(premium), "프리미엄이 활성화되었습니다."));
     }
@@ -34,7 +34,7 @@ class PremiumController {
     /** 프리미엄 해지 (멱등) — 활성 구독을 해지해 premium=false로 만든다. */
     @DeleteMapping
     ResponseEntity<ApiResponse<PremiumResponse>> cancel(@AuthenticationPrincipal Long userId) {
-        boolean premium = premiumActivationService.cancel(userId);
+        boolean premium = premiumService.cancel(userId);
         return ResponseEntity.ok(ApiResponse.ok(
                 new PremiumResponse(premium), "프리미엄이 해지되었습니다."));
     }
