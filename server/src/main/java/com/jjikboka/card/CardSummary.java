@@ -1,6 +1,6 @@
 package com.jjikboka.card;
 
-import com.jjikboka.studylog.GradeCount;
+import com.jjikboka.studylog.dto.GradeCount;
 
 import java.time.LocalDateTime;
 import java.util.List;

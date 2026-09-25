@@ -2,9 +2,9 @@ package com.jjikboka.app.study;
 
 import com.jjikboka.card.ClozeAnswerResult;
 import com.jjikboka.card.ClozeService;
-import com.jjikboka.studylog.StudyLogService;
-import com.jjikboka.studylog.StudyRecordCommand;
-import com.jjikboka.studylog.StudyStatsService;
+import com.jjikboka.studylog.service.StudyLogService;
+import com.jjikboka.studylog.dto.StudyRecordCommand;
+import com.jjikboka.studylog.service.StudyStatsService;
 import com.jjikboka.stats.ClozeExp;
 import com.jjikboka.stats.ExpService;
 import com.jjikboka.common.error.BusinessException;

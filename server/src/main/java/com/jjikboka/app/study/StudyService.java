@@ -2,8 +2,8 @@ package com.jjikboka.app.study;
 
 import com.jjikboka.card.CardReviewService;
 import com.jjikboka.card.CardReviewState;
-import com.jjikboka.studylog.StudyLogService;
-import com.jjikboka.studylog.StudyRecordCommand;
+import com.jjikboka.studylog.service.StudyLogService;
+import com.jjikboka.studylog.dto.StudyRecordCommand;
 import com.jjikboka.stats.ExpDelta;
 import com.jjikboka.stats.ExpService;
 import com.jjikboka.common.error.BusinessException;
