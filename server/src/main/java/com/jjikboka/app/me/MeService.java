@@ -6,8 +6,8 @@ import com.jjikboka.subscription.dto.PremiumDetail;
 import com.jjikboka.subscription.service.PremiumService;
 import com.jjikboka.quota.service.QuotaService;
 import com.jjikboka.quota.dto.QuotaStatus;
-import com.jjikboka.stats.ExpService;
-import com.jjikboka.stats.ExpSummary;
+import com.jjikboka.stats.service.ExpService;
+import com.jjikboka.stats.dto.ExpSummary;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

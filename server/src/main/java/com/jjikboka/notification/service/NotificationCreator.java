@@ -7,7 +7,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * 발생형 알림 생성 (13 §6, Phase 4). 경험치 이벤트를 받아 notification 행을 만든다 —
- * 커밋 이후(AFTER_COMMIT)에만 생성해, 출석이 롤백되면 알림도 남지 않게 한다({@link com.jjikboka.stats.ReportCacheEvictor}와 같은 패턴).
+ * 커밋 이후(AFTER_COMMIT)에만 생성해, 출석이 롤백되면 알림도 남지 않게 한다({@link com.jjikboka.stats.service.ReportCacheEvictor}와 같은 패턴).
  * 리스너는 원 트랜잭션 밖에서 돌고, 생성은 {@link NotificationService#create}의 새 트랜잭션에서 처리된다.
  */
 @Component
