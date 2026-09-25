@@ -1,4 +1,7 @@
-package com.jjikboka.card;
+package com.jjikboka.card.service;
+
+import com.jjikboka.card.dto.WeakConcept;
+import com.jjikboka.card.repository.CardRepository;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;

@@ -4,8 +4,8 @@ import com.jjikboka.exam.dto.ExamReviewResponse;
 import com.jjikboka.exam.dto.TagRecentRequest;
 import com.jjikboka.exam.dto.TagRecentResponse;
 
-import com.jjikboka.card.CardQueryService;
-import com.jjikboka.card.ExamReviewItem;
+import com.jjikboka.card.service.CardQueryService;
+import com.jjikboka.card.dto.ExamReviewItem;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

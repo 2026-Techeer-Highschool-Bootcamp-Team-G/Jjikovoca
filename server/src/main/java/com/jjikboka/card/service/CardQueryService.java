@@ -1,4 +1,13 @@
-package com.jjikboka.card;
+package com.jjikboka.card.service;
+
+import com.jjikboka.card.dto.ArchiveDay;
+import com.jjikboka.card.dto.ArchiveItem;
+import com.jjikboka.card.dto.CardCounts;
+import com.jjikboka.card.dto.CardDetail;
+import com.jjikboka.card.dto.CardSummary;
+import com.jjikboka.card.dto.ExamReviewItem;
+import com.jjikboka.card.entity.Card;
+import com.jjikboka.card.repository.CardRepository;
 
 import com.jjikboka.subscription.service.PremiumService;
 

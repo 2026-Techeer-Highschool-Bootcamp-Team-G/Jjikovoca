@@ -1,4 +1,6 @@
-package com.jjikboka.card;
+package com.jjikboka.card.entity;
+
+import com.jjikboka.card.dto.CardCreateCommand;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,7 +24,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "card")
-class Card {
+public class Card {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -113,7 +115,7 @@ class Card {
      * 분석 산출로 새 오답 카드를 만든다 (API-6 처리). mock=true·boxLevel=0로 시작하고 analyze_job_id로 job에 잇는다.
      * 실 Gemini 전환 시 mock만 false가 되고 필드 출처가 바뀔 뿐, 이 팩토리 계약은 그대로다.
      */
-    static Card fromAnalysis(CardCreateCommand command) {
+    public static Card fromAnalysis(CardCreateCommand command) {
         Card card = new Card();
         card.userId = command.userId();
         card.analyzeJobId = command.analyzeJobId();
@@ -135,95 +137,95 @@ class Card {
         return card;
     }
 
-    Long getId() {
+    public Long getId() {
         return id;
     }
 
     /** 소유자 검증(NFR-04)에 쓴다 — 조회 DTO엔 싣지 않는다. */
-    Long getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    String getType() {
+    public String getType() {
         return type;
     }
 
-    String getSubject() {
+    public String getSubject() {
         return subject;
     }
 
-    String getConcept() {
+    public String getConcept() {
         return concept;
     }
 
-    String getImagePath() {
+    public String getImagePath() {
         return imagePath;
     }
 
-    String getWord() {
+    public String getWord() {
         return word;
     }
 
-    String getContextMeaning() {
+    public String getContextMeaning() {
         return contextMeaning;
     }
 
-    String getDictMeaning() {
+    public String getDictMeaning() {
         return dictMeaning;
     }
 
-    String getExample() {
+    public String getExample() {
         return example;
     }
 
-    String getExampleMeaning() {
+    public String getExampleMeaning() {
         return exampleMeaning;
     }
 
-    String getPronunciation() {
+    public String getPronunciation() {
         return pronunciation;
     }
 
-    String getPos() {
+    public String getPos() {
         return pos;
     }
 
-    List<String> getTags() {
+    public List<String> getTags() {
         return tags;
     }
 
-    String getEmoji() {
+    public String getEmoji() {
         return emoji;
     }
 
-    String getMnemonicImagePath() {
+    public String getMnemonicImagePath() {
         return mnemonicImagePath;
     }
 
     /** AI 연상 이미지(Phase 6c) 저장 키를 붙인다 — 온디맨드 생성 후 1회 캐시. */
-    void assignMnemonicImage(String path) {
+    public void assignMnemonicImage(String path) {
         this.mnemonicImagePath = path;
     }
 
-    int getBoxLevel() {
+    public int getBoxLevel() {
         return boxLevel;
     }
 
     /** 졸업 여부는 graduated_at 존재로 판정한다(피드 graduated 플래그). */
-    boolean isGraduated() {
+    public boolean isGraduated() {
         return graduatedAt != null;
     }
 
-    LocalDateTime getNextReviewAt() {
+    public LocalDateTime getNextReviewAt() {
         return nextReviewAt;
     }
 
     /** 시험일 역산 재배치(API-33~35)로 다음 복습 시각을 옮긴다 — @Transactional 안에서 JPA 더티체킹으로 UPDATE된다. */
-    void scheduleReviewAt(LocalDateTime nextReviewAt) {
+    public void scheduleReviewAt(LocalDateTime nextReviewAt) {
         this.nextReviewAt = nextReviewAt;
     }
 
-    LocalDateTime getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
@@ -231,7 +233,7 @@ class Card {
      * 복습 전이 진입 (API-11·15) — Leitner box 단일 경로.
      * 결과 문자열(KNOW/CONFUSED/DONT_KNOW)·큐(next_review)·졸업(graduated_at) 계약을 지킨다.
      */
-    void review(String result, LocalDateTime now) {
+    public void review(String result, LocalDateTime now) {
         applyLightner(result, now);
     }
 
@@ -244,7 +246,7 @@ class Card {
      *   <li>DONT_KNOW — box 0, +1일, 몰라요 빈도(wrong_count)+1</li>
      * </ul>
      */
-    void applyLightner(String result, LocalDateTime now) {
+    public void applyLightner(String result, LocalDateTime now) {
         switch (result) {
             case "KNOW" -> {
                 boxLevel = Math.min(boxLevel + 1, 4);
@@ -277,7 +279,7 @@ class Card {
      * soft delete — deleted_at만 찍고 행은 남긴다(학습 이력·통계 근거 보존, ERD v1.1).
      * @Transactional 안에서 호출되면 JPA 더티체킹으로 UPDATE된다.
      */
-    void softDelete(LocalDateTime now) {
+    public void softDelete(LocalDateTime now) {
         this.deletedAt = now;
     }
 }

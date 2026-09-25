@@ -3,7 +3,7 @@ package com.jjikboka.analysis.service;
 import com.jjikboka.analysis.dto.AnalyzeJobResponse;
 import com.jjikboka.analysis.dto.AnalyzeJobView;
 
-import com.jjikboka.card.CardQueryService;
+import com.jjikboka.card.service.CardQueryService;
 import org.springframework.stereotype.Service;
 
 /**

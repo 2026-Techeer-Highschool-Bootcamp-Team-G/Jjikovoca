@@ -1,6 +1,6 @@
 package com.jjikboka.app.study;
 
-import com.jjikboka.card.CardStatsService;
+import com.jjikboka.card.service.CardStatsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

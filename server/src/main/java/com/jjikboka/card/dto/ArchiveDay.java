@@ -1,4 +1,4 @@
-package com.jjikboka.card;
+package com.jjikboka.card.dto;
 
 import java.time.LocalDate;
 import java.util.List;

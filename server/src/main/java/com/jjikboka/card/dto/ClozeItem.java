@@ -1,4 +1,7 @@
-package com.jjikboka.card;
+package com.jjikboka.card.dto;
+
+import com.jjikboka.card.entity.Card;
+import com.jjikboka.card.service.ClozeMaker;
 
 import java.util.List;
 
@@ -17,7 +20,7 @@ public record ClozeItem(
         List<String> hints
 ) {
 
-    static ClozeItem from(Card card) {
+    public static ClozeItem from(Card card) {
         ClozeMaker.Cloze cloze = ClozeMaker.make(card.getWord(), card.getExample(), card.getContextMeaning());
         return new ClozeItem(card.getId(), cloze.clozeText(), card.getContextMeaning(),
                 card.getExampleMeaning(), cloze.hints());

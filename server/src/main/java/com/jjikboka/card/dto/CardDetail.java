@@ -1,4 +1,6 @@
-package com.jjikboka.card;
+package com.jjikboka.card.dto;
+
+import com.jjikboka.card.entity.Card;
 
 import java.util.List;
 
@@ -27,7 +29,7 @@ public record CardDetail(
 ) {
 
     /** premium은 호환용 인자(과거 힌트 게이팅 잔재) — 현재 단어 카드는 게이팅이 없다. */
-    static CardDetail from(Card card, boolean premium) {
+    public static CardDetail from(Card card, boolean premium) {
         return new CardDetail(
                 card.getId(),
                 card.getType(),

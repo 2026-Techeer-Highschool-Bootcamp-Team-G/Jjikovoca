@@ -1,6 +1,6 @@
 package com.jjikboka.notification.service;
 
-import com.jjikboka.card.CardStatsService;
+import com.jjikboka.card.service.CardStatsService;
 import com.jjikboka.notification.dto.NotificationResponse;
 import com.jjikboka.notification.entity.Notification;
 import com.jjikboka.notification.repository.NotificationRepository;

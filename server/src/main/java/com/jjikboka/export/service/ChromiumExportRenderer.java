@@ -1,6 +1,6 @@
 package com.jjikboka.export.service;
 
-import com.jjikboka.card.CardSummary;
+import com.jjikboka.card.dto.CardSummary;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;

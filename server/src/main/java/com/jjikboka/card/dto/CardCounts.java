@@ -1,4 +1,4 @@
-package com.jjikboka.card;
+package com.jjikboka.card.dto;
 
 /**
  * 카드 상태 카운트 (core.card 공개 DTO, API-7 단어장 칩). 단어장 필터 배지 숫자 — 모두 study_log 누적 등급 기준(제품 정의).

@@ -1,4 +1,8 @@
-package com.jjikboka.card;
+package com.jjikboka.card.service;
+
+import com.jjikboka.card.dto.CardCreateCommand;
+import com.jjikboka.card.entity.Card;
+import com.jjikboka.card.repository.CardRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

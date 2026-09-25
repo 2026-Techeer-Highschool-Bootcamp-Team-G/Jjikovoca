@@ -1,6 +1,6 @@
 package com.jjikboka.analysis.dto;
 
-import com.jjikboka.card.CardSummary;
+import com.jjikboka.card.dto.CardSummary;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.List;

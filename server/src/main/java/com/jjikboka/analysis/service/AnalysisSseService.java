@@ -2,8 +2,8 @@ package com.jjikboka.analysis.service;
 
 import com.jjikboka.analysis.dto.AnalyzeJobView;
 
-import com.jjikboka.card.CardQueryService;
-import com.jjikboka.card.CardSummary;
+import com.jjikboka.card.service.CardQueryService;
+import com.jjikboka.card.dto.CardSummary;
 import com.jjikboka.common.event.AnalyzeEvents;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.jjikboka.stats;
 
-import com.jjikboka.card.CardStatsService;
+import com.jjikboka.card.service.CardStatsService;
 import com.jjikboka.studylog.service.StudyStatsService;
 import com.jjikboka.common.event.ExpEvents;
 import org.springframework.context.ApplicationEventPublisher;

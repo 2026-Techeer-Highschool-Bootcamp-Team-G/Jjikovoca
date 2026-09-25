@@ -1,4 +1,7 @@
-package com.jjikboka.card;
+package com.jjikboka.card.service;
+
+import com.jjikboka.card.entity.Card;
+import com.jjikboka.card.repository.CardRepository;
 
 import com.jjikboka.common.error.BusinessException;
 import org.springframework.http.HttpStatus;
