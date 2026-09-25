@@ -1,4 +1,4 @@
-package com.jjikboka.studylog;
+package com.jjikboka.studylog.dto;
 
 /**
  * 오늘의 학습 리듬 (API-17 basic, F-10 위젯). study_log 원장에서 오늘 하루치를 뽑은 값 —

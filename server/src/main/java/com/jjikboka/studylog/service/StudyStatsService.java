@@ -1,4 +1,10 @@
-package com.jjikboka.studylog;
+package com.jjikboka.studylog.service;
+
+import com.jjikboka.studylog.dto.GradeCount;
+import com.jjikboka.studylog.dto.Rhythm;
+import com.jjikboka.studylog.dto.StudyStats;
+import com.jjikboka.studylog.dto.SubjectMinutes;
+import com.jjikboka.studylog.repository.StudyLogRepository;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;

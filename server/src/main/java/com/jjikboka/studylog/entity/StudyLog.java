@@ -1,5 +1,6 @@
-package com.jjikboka.studylog;
+package com.jjikboka.studylog.entity;
 
+import com.jjikboka.studylog.dto.StudyRecordCommand;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "study_log")
-class StudyLog {
+public class StudyLog {
 
     /** 문항당 학습 시간 상한(ms) — 문항을 켜둔 채 방치해 durationMs가 비정상적으로 커지는 이상치를 5분으로 캡한다(리포트 minutes 방어). */
     private static final int MAX_DURATION_MS = 300_000;
@@ -53,7 +54,7 @@ class StudyLog {
     }
 
     /** 새 학습 이력 한 줄. detail은 F-26 MATH_REVIEW 등에서 오는 JSON 문자열(없으면 null). */
-    static StudyLog of(StudyRecordCommand command) {
+    public static StudyLog of(StudyRecordCommand command) {
         StudyLog log = new StudyLog();
         log.userId = command.userId();
         log.cardId = command.cardId();

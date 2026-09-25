@@ -1,6 +1,7 @@
-package com.jjikboka.studylog;
+package com.jjikboka.studylog.repository;
 
 import org.springframework.data.domain.Pageable;
+import com.jjikboka.studylog.entity.StudyLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +13,7 @@ import java.util.List;
  * study_log 저장소. package-private 봉인(13 §2). INSERT-only 원장이라 저장과 <b>집계 조회</b>만 쓴다 —
  * 월간 리포트(API-17)용 집계는 여기서(원장 소유), 조합·프리미엄 게이팅은 core.stats가 한다.
  */
-interface StudyLogRepository extends JpaRepository<StudyLog, Long> {
+public interface StudyLogRepository extends JpaRepository<StudyLog, Long> {
 
     /** 기간 내 학습 기록 수(studyCount). */
     @Query("SELECT COUNT(s) FROM StudyLog s WHERE s.userId = :userId AND s.createdAt >= :start AND s.createdAt < :end")

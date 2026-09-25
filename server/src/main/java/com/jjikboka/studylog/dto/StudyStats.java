@@ -1,4 +1,4 @@
-package com.jjikboka.studylog;
+package com.jjikboka.studylog.dto;
 
 import java.time.LocalDate;
 import java.util.List;
