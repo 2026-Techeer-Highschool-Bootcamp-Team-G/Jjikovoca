@@ -1,4 +1,4 @@
-package com.jjikboka.notification;
+package com.jjikboka.notification.dto;
 
 import java.time.LocalDateTime;
 
