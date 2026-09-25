@@ -1,6 +1,6 @@
 package com.jjikboka.exam.dto;
 
-import com.jjikboka.card.ExamReviewItem;
+import com.jjikboka.card.dto.ExamReviewItem;
 
 import java.util.List;
 

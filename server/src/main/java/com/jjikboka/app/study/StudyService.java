@@ -1,7 +1,7 @@
 package com.jjikboka.app.study;
 
-import com.jjikboka.card.CardReviewService;
-import com.jjikboka.card.CardReviewState;
+import com.jjikboka.card.service.CardReviewService;
+import com.jjikboka.card.dto.CardReviewState;
 import com.jjikboka.studylog.service.StudyLogService;
 import com.jjikboka.studylog.dto.StudyRecordCommand;
 import com.jjikboka.stats.ExpDelta;

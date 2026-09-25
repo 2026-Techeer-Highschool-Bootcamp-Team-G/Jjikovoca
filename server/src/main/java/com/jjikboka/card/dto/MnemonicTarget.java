@@ -1,4 +1,4 @@
-package com.jjikboka.card;
+package com.jjikboka.card.dto;
 
 /**
  * 연상 이미지 생성 대상 (API-6c, core.card 공개 DTO). existingPath=이미 생성된 키(있으면 캐시 반환),

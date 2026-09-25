@@ -3,8 +3,8 @@ package com.jjikboka.export.service;
 import com.jjikboka.export.dto.ExportCreateResponse;
 import com.jjikboka.export.dto.ExportRequest;
 
-import com.jjikboka.card.CardQueryService;
-import com.jjikboka.card.CardSummary;
+import com.jjikboka.card.service.CardQueryService;
+import com.jjikboka.card.dto.CardSummary;
 import com.jjikboka.subscription.service.PremiumService;
 import com.jjikboka.quota.service.QuotaService;
 import com.jjikboka.common.error.BusinessException;

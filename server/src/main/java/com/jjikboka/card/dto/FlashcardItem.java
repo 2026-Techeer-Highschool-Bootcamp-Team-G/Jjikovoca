@@ -1,4 +1,6 @@
-package com.jjikboka.card;
+package com.jjikboka.card.dto;
+
+import com.jjikboka.card.entity.Card;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +25,7 @@ public record FlashcardItem(
         String mnemonicImagePath
 ) {
 
-    static FlashcardItem from(Card card, LocalDateTime now) {
+    public static FlashcardItem from(Card card, LocalDateTime now) {
         // recallProb는 FSRS 회상확률이었으나 FSRS 제거(Leitner 단일화)로 항상 null(계약 필드는 하위호환 유지).
         return new FlashcardItem(card.getId(), card.getWord(), card.getContextMeaning(),
                 card.getExample(), card.getExampleMeaning(), card.getBoxLevel(), null,

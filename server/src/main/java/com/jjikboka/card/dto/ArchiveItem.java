@@ -1,4 +1,6 @@
-package com.jjikboka.card;
+package com.jjikboka.card.dto;
+
+import com.jjikboka.card.entity.Card;
 
 /**
  * 원문 보관함 항목 (Notion API-ID 36, core.card 공개 DTO). 크롭 원문 한 장 = 카드 하나.
@@ -11,7 +13,7 @@ public record ArchiveItem(
         String imageUrl
 ) {
 
-    static ArchiveItem from(Card card) {
+    public static ArchiveItem from(Card card) {
         return new ArchiveItem(card.getId(), card.getType(), card.getSubject(), card.getImagePath());
     }
 }

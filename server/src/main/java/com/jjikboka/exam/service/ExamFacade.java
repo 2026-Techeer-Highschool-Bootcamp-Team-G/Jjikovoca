@@ -7,8 +7,8 @@ import com.jjikboka.exam.dto.ExamResponse;
 import com.jjikboka.exam.dto.ExamUpdateRequest;
 import com.jjikboka.exam.dto.ExamView;
 
-import com.jjikboka.card.CardStatsService;
-import com.jjikboka.card.ExamRescheduler;
+import com.jjikboka.card.service.CardStatsService;
+import com.jjikboka.card.service.ExamRescheduler;
 import com.jjikboka.common.error.BusinessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

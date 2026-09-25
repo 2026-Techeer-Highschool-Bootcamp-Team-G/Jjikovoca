@@ -1,4 +1,6 @@
-package com.jjikboka.card;
+package com.jjikboka.card.dto;
+
+import com.jjikboka.card.entity.Card;
 
 import java.time.LocalDateTime;
 
@@ -13,7 +15,7 @@ public record ReviewQueueItem(
         LocalDateTime nextReviewAt
 ) {
 
-    static ReviewQueueItem from(Card card) {
+    public static ReviewQueueItem from(Card card) {
         return new ReviewQueueItem(card.getId(), card.getWord(), card.getBoxLevel(), card.getNextReviewAt());
     }
 }

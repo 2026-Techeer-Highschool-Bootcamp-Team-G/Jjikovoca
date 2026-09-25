@@ -1,6 +1,6 @@
 package com.jjikboka.export.service;
 
-import com.jjikboka.card.CardSummary;
+import com.jjikboka.card.dto.CardSummary;
 
 import java.util.List;
 

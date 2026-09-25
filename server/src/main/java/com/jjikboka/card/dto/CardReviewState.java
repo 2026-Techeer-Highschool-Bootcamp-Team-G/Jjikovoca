@@ -1,4 +1,6 @@
-package com.jjikboka.card;
+package com.jjikboka.card.dto;
+
+import com.jjikboka.card.entity.Card;
 
 import java.time.LocalDateTime;
 
@@ -13,7 +15,7 @@ public record CardReviewState(
         boolean graduated
 ) {
 
-    static CardReviewState from(Card card) {
+    public static CardReviewState from(Card card) {
         return new CardReviewState(card.getId(), card.getBoxLevel(), card.getNextReviewAt(), card.isGraduated());
     }
 }

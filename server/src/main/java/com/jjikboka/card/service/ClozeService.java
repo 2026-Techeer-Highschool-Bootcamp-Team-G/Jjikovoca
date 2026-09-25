@@ -1,4 +1,11 @@
-package com.jjikboka.card;
+package com.jjikboka.card.service;
+
+import com.jjikboka.card.dto.CardReviewState;
+import com.jjikboka.card.dto.ClozeAnswerResult;
+import com.jjikboka.card.dto.ClozeItem;
+import com.jjikboka.card.dto.ClozeRegenerated;
+import com.jjikboka.card.entity.Card;
+import com.jjikboka.card.repository.CardRepository;
 
 import com.jjikboka.quota.service.QuotaService;
 import com.jjikboka.subscription.service.PremiumService;

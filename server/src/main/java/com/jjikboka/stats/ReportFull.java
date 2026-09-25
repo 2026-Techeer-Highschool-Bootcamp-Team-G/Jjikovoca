@@ -1,6 +1,6 @@
 package com.jjikboka.stats;
 
-import com.jjikboka.card.WeakConcept;
+import com.jjikboka.card.dto.WeakConcept;
 
 import java.util.List;
 import java.util.Map;

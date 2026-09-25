@@ -1,4 +1,6 @@
-package com.jjikboka.card;
+package com.jjikboka.card.dto;
+
+import com.jjikboka.card.entity.Card;
 
 import java.time.LocalDateTime;
 
@@ -13,7 +15,7 @@ public record ExamReviewItem(
         LocalDateTime nextReviewAt
 ) {
 
-    static ExamReviewItem from(Card card, LocalDateTime now) {
+    public static ExamReviewItem from(Card card, LocalDateTime now) {
         // recallProb는 FSRS R(t)이었으나 FSRS 제거(Leitner 단일화)로 항상 null(계약 필드는 하위호환 유지).
         return new ExamReviewItem(card.getId(), card.getSubject(),
                 null, card.getNextReviewAt());

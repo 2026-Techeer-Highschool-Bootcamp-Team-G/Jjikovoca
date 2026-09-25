@@ -7,8 +7,8 @@ import com.jjikboka.analysis.dto.GeminiImage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jjikboka.common.image.ImageStorageService;
-import com.jjikboka.card.CardCreateCommand;
-import com.jjikboka.card.CardCreationService;
+import com.jjikboka.card.dto.CardCreateCommand;
+import com.jjikboka.card.service.CardCreationService;
 import com.jjikboka.quota.service.QuotaService;
 import com.jjikboka.stats.ExpService;
 import com.jjikboka.common.event.AnalyzeEvents;

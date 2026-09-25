@@ -1,4 +1,4 @@
-package com.jjikboka.card;
+package com.jjikboka.card.dto;
 
 /**
  * 빈칸 답 판정 결과 (Notion API-ID 15, core.card 공개 DTO). 채점 후이므로 정답 단어(word)를 공개한다 —
