@@ -1,7 +1,7 @@
 package com.jjikboka.stats;
 
 import com.jjikboka.card.CardStatsService;
-import com.jjikboka.subscription.PremiumService;
+import com.jjikboka.subscription.service.PremiumService;
 import com.jjikboka.studylog.StudyStats;
 import com.jjikboka.studylog.StudyStatsService;
 import com.jjikboka.studylog.SubjectMinutes;

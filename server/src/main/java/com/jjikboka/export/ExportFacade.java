@@ -2,7 +2,7 @@ package com.jjikboka.export;
 
 import com.jjikboka.card.CardQueryService;
 import com.jjikboka.card.CardSummary;
-import com.jjikboka.subscription.PremiumService;
+import com.jjikboka.subscription.service.PremiumService;
 import com.jjikboka.quota.QuotaService;
 import com.jjikboka.export.ExportLogService;
 import com.jjikboka.common.error.BusinessException;

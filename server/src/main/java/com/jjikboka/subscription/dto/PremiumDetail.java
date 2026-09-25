@@ -1,4 +1,4 @@
-package com.jjikboka.subscription;
+package com.jjikboka.subscription.dto;
 
 import java.time.LocalDateTime;
 

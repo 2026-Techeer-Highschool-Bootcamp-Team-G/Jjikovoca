@@ -1,5 +1,8 @@
-package com.jjikboka.subscription;
+package com.jjikboka.subscription.service;
 
+import com.jjikboka.subscription.dto.PremiumDetail;
+import com.jjikboka.subscription.entity.Subscription;
+import com.jjikboka.subscription.repository.SubscriptionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

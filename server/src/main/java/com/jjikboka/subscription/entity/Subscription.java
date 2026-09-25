@@ -1,4 +1,4 @@
-package com.jjikboka.subscription;
+package com.jjikboka.subscription.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "subscription")
-class Subscription {
+public class Subscription {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,7 +53,7 @@ class Subscription {
      * 모의 결제 활성화 (API-5). 검증 없이 결제 완료 상태만 부여한다 — plan=PREMIUM,
      * status=ACTIVE, provider=MOCK, 만료는 now+30일. PG 연동 시 이 팩토리가 결제 확인 결과로 대체된다.
      */
-    static Subscription mockActivated(Long userId, LocalDateTime now) {
+    public static Subscription mockActivated(Long userId, LocalDateTime now) {
         Subscription subscription = new Subscription();
         subscription.userId = userId;
         subscription.plan = "PREMIUM";
@@ -68,24 +68,24 @@ class Subscription {
      * premium 부여 기준: <b>미만료</b>. 해지(CANCELLED)해도 결제한 기간(expires_at)까지는 premium을 유지하므로(명세 §8)
      * status가 아니라 만료로만 판정한다. 멱등 활성화 검사에서도 재사용한다.
      */
-    boolean grantsPremiumAt(LocalDateTime now) {
+    public boolean grantsPremiumAt(LocalDateTime now) {
         return expiresAt.isAfter(now);
     }
 
     /** 해지 (DELETE /api/premium) — 재구독 의사 철회 표시(status=CANCELLED). 결제한 기간(만료)까지는 premium 유지(명세 §8). */
-    void cancel() {
+    public void cancel() {
         this.status = "CANCELLED";
     }
 
-    String getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    String getPlan() {
+    public String getPlan() {
         return plan;
     }
 
-    LocalDateTime getExpiresAt() {
+    public LocalDateTime getExpiresAt() {
         return expiresAt;
     }
 }

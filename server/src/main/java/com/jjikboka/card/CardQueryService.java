@@ -1,6 +1,6 @@
 package com.jjikboka.card;
 
-import com.jjikboka.subscription.PremiumService;
+import com.jjikboka.subscription.service.PremiumService;
 
 import com.jjikboka.studylog.GradeCount;
 import com.jjikboka.studylog.StudyStatsService;

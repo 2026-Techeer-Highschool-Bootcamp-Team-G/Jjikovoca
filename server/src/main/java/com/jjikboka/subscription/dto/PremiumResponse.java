@@ -1,4 +1,4 @@
-package com.jjikboka.subscription;
+package com.jjikboka.subscription.dto;
 
 /**
  * 프리미엄 활성화 응답 (Notion API-ID 5). ApiResponse로 감싸져 {@code { success, data:{ premium }, message }} 형태가 된다.
