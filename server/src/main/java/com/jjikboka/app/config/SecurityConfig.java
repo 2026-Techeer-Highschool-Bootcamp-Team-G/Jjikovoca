@@ -1,5 +1,11 @@
 package com.jjikboka.app.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jjikboka.common.error.ApiError;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
+import java.nio.charset.StandardCharsets;
+
 import com.jjikboka.auth.service.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +31,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final ObjectMapper objectMapper;
 
     /**
      * 허용 오리진(콤마 목록). 배포 프론트는 Vercel(별도 오리진)이라 교차 오리진 CORS가 필요하다 —
@@ -36,8 +43,9 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins:https://jjikovoca.site,https://www.jjikovoca.site}")
     private List<String> allowedOrigins;
 
-    SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, ObjectMapper objectMapper) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.objectMapper = objectMapper;
     }
 
     @Bean
@@ -54,6 +62,14 @@ public class SecurityConfig {
                 // 로그아웃 등 나머지는 인증 필요 — JwtAuthenticationFilter가 실은 userId를 확인
                 .anyRequest().authenticated()
             )
+            // 인증이 없거나 무효하면 401 + 공통 봉투(UNAUTHORIZED). 기본값은 봉투 없는 403이라 업무상 권한 거부(403 FORBIDDEN)와
+            // HTTP 의미가 겹쳤다. 웹 client.ts는 401을 인증 실패로 보고 refresh 후 재시도한다(「보안 및 방어로직」 §3).
+            .exceptionHandling(e -> e.authenticationEntryPoint((request, response, ex) -> {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+                objectMapper.writeValue(response.getOutputStream(), ApiError.unauthorized());
+            }))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
