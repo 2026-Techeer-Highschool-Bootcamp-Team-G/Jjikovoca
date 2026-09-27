@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,9 +19,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 class CoreFlowIntegrationTest extends IntegrationTestSupport {
 
-    // 1x1 PNG data URL — 접수 검증(비어있지 않은 base64)을 통과한다.
-    private static final String IMAGE =
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
 
     @Test
     void 리포트는_학습데이터가_없어도_200이다() throws Exception {
@@ -42,10 +38,7 @@ class CoreFlowIntegrationTest extends IntegrationTestSupport {
         String token = register("core-flow@test.com");
 
         // 캡처 분석 접수(mock) → 202 + jobId
-        String analyzeBody = objectMapper.writeValueAsString(Map.of(
-                "type", "WORD", "cropImages", new String[]{IMAGE}, "fullImage", IMAGE));
-        MvcResult accepted = mockMvc.perform(post("/api/cards/analyze")
-                        .header("Authorization", bearer(token)).contentType(APPLICATION_JSON).content(analyzeBody))
+        MvcResult accepted = submitAnalyze(token, 1)
                 .andExpect(status().isAccepted())
                 .andReturn();
         long jobId = data(accepted).get("jobId").asLong();
@@ -73,44 +66,5 @@ class CoreFlowIntegrationTest extends IntegrationTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.basic.newCards").value(1))
                 .andExpect(jsonPath("$.data.basic.studyCount").value(1));
-    }
-
-    /** 회원가입 후 accessToken을 돌려준다. */
-    private String register(String email) throws Exception {
-        String body = objectMapper.writeValueAsString(Map.of(
-                "email", email, "password", "pass1234!", "nickname", "테스터"));
-        MvcResult result = mockMvc.perform(post("/api/auth/register")
-                        .contentType(APPLICATION_JSON).content(body))
-                .andExpect(status().isOk())
-                .andReturn();
-        return data(result).get("accessToken").asText();
-    }
-
-    /** 분석 작업이 COMPLETED가 될 때까지 짧게 폴링한다(최대 ~5초). */
-    private void awaitJobCompleted(String token, long jobId) throws Exception {
-        for (int attempt = 0; attempt < 50; attempt++) {
-            MvcResult poll = mockMvc.perform(get("/api/cards/analyze/" + jobId)
-                            .header("Authorization", bearer(token)))
-                    .andExpect(status().isOk())
-                    .andReturn();
-            String jobStatus = data(poll).get("status").asText();
-            if ("COMPLETED".equals(jobStatus)) {
-                return;
-            }
-            if ("FAILED".equals(jobStatus)) {
-                throw new AssertionError("분석 작업이 실패했다: jobId=" + jobId);
-            }
-            Thread.sleep(100);
-        }
-        throw new AssertionError("분석 작업이 제한시간 내 완료되지 않았다: jobId=" + jobId);
-    }
-
-    private JsonNode data(MvcResult result) throws Exception {
-        String json = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-        return objectMapper.readTree(json).get("data");
-    }
-
-    private String bearer(String token) {
-        return "Bearer " + token;
     }
 }
