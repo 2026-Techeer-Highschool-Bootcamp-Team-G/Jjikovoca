@@ -112,8 +112,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(allowedOrigins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        config.setExposedHeaders(List.of("Retry-After"));   // 429 대기 시간을 교차 오리진 JS가 읽게(안전 목록 밖 헤더)   // 이 API가 실제로 받는 헤더만(credentials와 * 병용 지양)
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));   // 이 API가 실제로 받는 헤더만(credentials와 * 병용 지양)
+        config.setExposedHeaders(List.of("Retry-After"));   // 429 대기 시간을 교차 오리진 JS가 읽게(안전 목록 밖 헤더)
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);                          // Preflight 캐시 1시간
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -56,7 +56,8 @@ class RateLimitIntegrationTest extends IntegrationTestSupport {
             login(ip).andExpect(status().isUnauthorized());
         }
 
-        // 신뢰 프록시 설정이 없으면 헤더는 무시되고 실제 접속 IP로 센다.
+        // 앱은 X-Forwarded-For를 직접 읽지 않는다 — 헤더를 바꿔도 접속 IP로 센다. MockMvc는 Tomcat 프록시 처리
+        // (forward-headers-strategy)를 거치지 않으므로, 운영 프록시 뒤 신뢰 경계는 실제 부팅 E2E와 #481에서 확인한다.
         mockMvc.perform(post("/api/auth/login").with(r -> { r.setRemoteAddr(ip); return r; })
                         .header("X-Forwarded-For", randomIp())
                         .contentType(APPLICATION_JSON).content(json(credentials())))
