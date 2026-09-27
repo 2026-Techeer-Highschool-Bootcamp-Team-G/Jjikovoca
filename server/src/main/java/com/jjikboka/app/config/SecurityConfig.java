@@ -11,6 +11,7 @@ import com.jjikboka.auth.service.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
@@ -20,8 +21,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 처음부터 JWT 무상태 (13 §5) — 세션 저장소 없음.
@@ -44,9 +47,24 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins:https://jjikovoca.site,https://www.jjikovoca.site}")
     private List<String> allowedOrigins;
 
-    SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, ObjectMapper objectMapper) {
+    /** 인증 엔드포인트 rate limit (P1-11 D). 한도는 초안 — 429 로그를 보고 조정한다. 통합 테스트 베이스는 끈다. */
+    @Value("${app.rate-limit.enabled:true}")
+    private boolean rateLimitEnabled;
+    @Value("${app.rate-limit.window-seconds:60}")
+    private int rateLimitWindowSeconds;
+    @Value("${app.rate-limit.login:10}")
+    private int loginLimit;
+    @Value("${app.rate-limit.register:5}")
+    private int registerLimit;
+    @Value("${app.rate-limit.refresh:30}")
+    private int refreshLimit;
+
+    private final StringRedisTemplate redis;
+
+    SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, ObjectMapper objectMapper, StringRedisTemplate redis) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.objectMapper = objectMapper;
+        this.redis = redis;
     }
 
     @Bean
@@ -75,6 +93,13 @@ public class SecurityConfig {
                 objectMapper.writeValue(response.getOutputStream(), ApiError.unauthorized());
             }))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        if (rateLimitEnabled) {
+            // CORS 필터 뒤 — 429에도 CORS 헤더가 붙어야 브라우저(Vercel 프론트)가 응답을 읽고 Retry-After를 본다.
+            http.addFilterAfter(new AuthRateLimitFilter(redis, objectMapper, Map.of(
+                    "/api/auth/login", loginLimit,
+                    "/api/auth/register", registerLimit,
+                    "/api/auth/refresh", refreshLimit), rateLimitWindowSeconds), CorsFilter.class);
+        }
         return http.build();
     }
 

@@ -9,6 +9,11 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
 
+# nginx(리버스 프록시) 뒤 — Tomcat이 신뢰 프록시(사설 대역)가 붙인 X-Forwarded-For/Proto만 반영해
+# getRemoteAddr()가 실제 클라이언트 IP가 된다(rate limit 키, P1-11 D). 앱은 XFF를 직접 읽지 않는다.
+server:
+  forward-headers-strategy: native
+
 gemini:
   mock: false
   api-key: ${GEMINI_API_KEY}

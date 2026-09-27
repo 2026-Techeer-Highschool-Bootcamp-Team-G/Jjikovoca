@@ -46,6 +46,14 @@ app:
   # 프로젝트 스코프 패턴(https://jjikovoca-*.vercel.app)만 env로 추가한다.
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:https://jjikovoca.site,https://www.jjikovoca.site}
+  # 인증 엔드포인트 rate limit (P1-11 D). IP당 윈도우(초)마다 허용 횟수 — 초과 시 429 RATE_LIMITED + Retry-After.
+  # 한도는 초안(NAT 뒤 다수 사용자 오탐 대비 넉넉히) — 429 로그를 보고 조정한다.
+  rate-limit:
+    enabled: ${APP_RATE_LIMIT_ENABLED:true}
+    window-seconds: 60
+    login: 10
+    register: 5
+    refresh: 30
   image:
     storage: ${APP_IMAGE_STORAGE:local}   # local | s3
     dir: ${APP_IMAGE_DIR:./data/images}
