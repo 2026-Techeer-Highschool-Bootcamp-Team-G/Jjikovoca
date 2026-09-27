@@ -25,7 +25,11 @@ public final class TestTimeZone {
         return containerJdbcUrl + separator + "connectionTimeZone=" + ZONE + "&forceConnectionTimeZoneToSession=true";
     }
 
-    /** JVM 기본 시간대를 프로덕션(TimeZoneConfig)과 같게 고정한다. 컨텍스트 기동 후에도 매 테스트 직전 호출한다. */
+    /**
+     * JVM 기본 시간대를 프로덕션과 같게 고정한다. <b>커넥션 풀보다 먼저</b>(베이스의 static 초기화) 불러야 한다 —
+     * 프로덕션도 main()에서 컨텍스트 기동 전에 고정한다(#473). 늦으면 OS가 UTC인 CI에서 Connector/J가 UTC를 캐시해
+     * Hibernate가 바인딩하는 LocalDate(quota_date)가 하루 앞당겨진다. 매 테스트 직전에도 한 번 더 불러 다른 테스트의 변경을 되돌린다.
+     */
     public static void pinJvm() {
         TimeZone.setDefault(TimeZone.getTimeZone(ZONE));
     }

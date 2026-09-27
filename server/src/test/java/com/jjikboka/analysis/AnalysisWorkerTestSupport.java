@@ -31,6 +31,8 @@ abstract class AnalysisWorkerTestSupport {
             .withExposedPorts(6379);
 
     static {
+        // 컨텍스트(=커넥션 풀)가 만들어지기 전에 시간대를 고정한다 — 프로덕션 main()과 같은 순서(#473).
+        TestTimeZone.pinJvm();
         MYSQL.start();
         REDIS.start();
     }
