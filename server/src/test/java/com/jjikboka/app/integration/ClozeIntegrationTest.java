@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ClozeIntegrationTest extends IntegrationTestSupport {
 
     @Test
-    void 문항에는_정답_단어가_빈칸으로_가려지고_응답에_노출되지_않는다() throws Exception {
+    void 문항의_예문과_응답_필드_어디에도_정답_단어가_노출되지_않는다() throws Exception {
         String token = register("fr6-hidden@test.com");
         long cardId = seedCards(token, 1).get(0);
         String word = cardWord(token, cardId);

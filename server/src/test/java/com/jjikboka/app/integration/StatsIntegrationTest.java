@@ -21,6 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *   <li>FR-14: 출석 이중 계산 방지 · Given 학습한 날, When 잔디 조회, Then 그날 칸이 색칠된다</li>
  *   <li>FR-9: Given 이번 달 학습 로그, When 리포트 조회, Then 학습 통계를 표시</li>
  * </ul>
+ * FR-9는 기본 지표(새 단어·학습 수·정답률·잔디)만 검증한다. 유료 게이팅·약한 단어 Top3·주간 분포는 리포트 화면 확정 후
+ * Phase 3에서 덮는다. FR-14의 복습 시간 증가·오답률 하락 보너스는 구현이 없어 FR 원장에 갭으로 기록한다.
  */
 class StatsIntegrationTest extends IntegrationTestSupport {
 

@@ -60,6 +60,7 @@ class OwnershipIntegrationTest extends IntegrationTestSupport {
     void 인증_없이_보호된_API를_부르면_봉투_없는_403으로_업무상_권한거부와_구분된다() throws Exception {
         mockMvc.perform(get("/api/cards"))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.success").doesNotExist());
+                .andExpect(jsonPath("$.success").doesNotExist())
+                .andExpect(jsonPath("$.errorName").doesNotExist());
     }
 }

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.oneOf;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -61,7 +62,7 @@ class ExamIntegrationTest extends IntegrationTestSupport {
                         .content(json(Map.of("title", "3월 모의고사", "examDate", LocalDate.now().plusDays(7).toString()))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.title").value("3월 모의고사"))
-                .andExpect(jsonPath("$.data.dday").value(org.hamcrest.Matchers.oneOf(7, 6)));
+                .andExpect(jsonPath("$.data.dday").value(oneOf(7, 6)));
     }
 
     @Test
