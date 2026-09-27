@@ -50,17 +50,12 @@ class OwnershipIntegrationTest extends IntegrationTestSupport {
                 .andExpect(jsonPath("$.errorName").value("FORBIDDEN"));
     }
 
-    /**
-     * 현행 계약: 인증이 없으면 Spring Security 기본 진입점이 봉투(ApiResponse) 없는 403을 준다. web 클라이언트는
-     * "403 + success:false 봉투 없음"을 인증 실패로 보고 토큰을 갱신한다(web/src/shared/api/client.ts) — 업무상 권한 거부
-     * (403 + success:false + FORBIDDEN)와 이 구분이 깨지면 갱신 로직이 멈추므로 여기서 지킨다.
-     * 401로 바꾸는 것은 P1-11(보안)에서 web과 함께 다룬다.
-     */
+    /** 인증이 없으면 401 + 공통 봉투(UNAUTHORIZED) — 업무상 권한 거부(403 FORBIDDEN)와 구분된다(#472). */
     @Test
-    void 인증_없이_보호된_API를_부르면_봉투_없는_403으로_업무상_권한거부와_구분된다() throws Exception {
+    void 인증_없이_보호된_API를_부르면_401_UNAUTHORIZED다() throws Exception {
         mockMvc.perform(get("/api/cards"))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.success").doesNotExist())
-                .andExpect(jsonPath("$.errorName").doesNotExist());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorName").value("UNAUTHORIZED"));
     }
 }

@@ -1,5 +1,12 @@
 package com.jjikboka.app.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jjikboka.common.error.ApiError;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
+import java.nio.charset.StandardCharsets;
+
 import com.jjikboka.auth.service.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +32,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final ObjectMapper objectMapper;
 
     /**
      * 허용 오리진(콤마 목록). 배포 프론트는 Vercel(별도 오리진)이라 교차 오리진 CORS가 필요하다 —
@@ -36,8 +44,9 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins:https://jjikovoca.site,https://www.jjikovoca.site}")
     private List<String> allowedOrigins;
 
-    SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, ObjectMapper objectMapper) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.objectMapper = objectMapper;
     }
 
     @Bean
@@ -47,6 +56,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())                 // 무상태 REST — CSRF 토큰 불필요
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // 서블릿 오류 포워드(/error)는 인증 컨텍스트 없이 돈다 — 막으면 404·405·500이 전부 401로 둔갑해
+                // 웹이 헛된 refresh·재시도를 한다. 원 요청의 인가는 이미 끝났으므로 오류 디스패치는 허용한다.
+                .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                 // 인증 불필요: 가입·로그인·재발급(만료된 access로도 호출) + 헬스·이미지·Swagger
                 .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/refresh",
                         "/api/health", "/actuator/health", "/images/**",
@@ -54,6 +66,14 @@ public class SecurityConfig {
                 // 로그아웃 등 나머지는 인증 필요 — JwtAuthenticationFilter가 실은 userId를 확인
                 .anyRequest().authenticated()
             )
+            // 인증이 없거나 무효하면 401 + 공통 봉투(UNAUTHORIZED). 기본값은 봉투 없는 403이라 업무상 권한 거부(403 FORBIDDEN)와
+            // HTTP 의미가 겹쳤다. 웹 client.ts는 401을 인증 실패로 보고 refresh 후 재시도한다(「보안 및 방어로직」 §3).
+            .exceptionHandling(e -> e.authenticationEntryPoint((request, response, ex) -> {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+                objectMapper.writeValue(response.getOutputStream(), ApiError.unauthorized());
+            }))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

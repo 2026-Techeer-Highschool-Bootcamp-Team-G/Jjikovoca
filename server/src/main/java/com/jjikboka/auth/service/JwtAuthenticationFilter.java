@@ -36,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith(BEARER)) {
             try {
-                Long userId = jwtProvider.parseUserId(header.substring(BEARER.length()));
+                Long userId = jwtProvider.parseAccessUserId(header.substring(BEARER.length()));
                 var authentication = new UsernamePasswordAuthenticationToken(userId, null, List.of());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (RuntimeException e) {
