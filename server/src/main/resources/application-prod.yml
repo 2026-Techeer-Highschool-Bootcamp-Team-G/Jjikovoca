@@ -14,6 +14,13 @@ spring:
 server:
   forward-headers-strategy: native
 
+# 운영에서는 API 문서·Swagger UI를 끈다 — 인증 없이 전체 API 표면을 노출하지 않게(P1-11 E). 로컬에서만 명세 대조용.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 gemini:
   mock: false
   api-key: ${GEMINI_API_KEY}

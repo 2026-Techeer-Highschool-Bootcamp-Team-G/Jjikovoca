@@ -18,6 +18,12 @@ import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -26,6 +32,8 @@ import org.springframework.web.filter.CorsFilter;
 import java.util.List;
 import java.util.Map;
 
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
+
 /**
  * 처음부터 JWT 무상태 (13 §5) — 세션 저장소 없음.
  * JwtAuthenticationFilter가 Bearer access 토큰을 검증해 userId를 SecurityContext에 싣고,
@@ -33,6 +41,19 @@ import java.util.Map;
  */
 @Configuration
 public class SecurityConfig {
+
+    /**
+     * API 응답 CSP (P1-11 E, 「보안 및 방어로직」 §6). JSON·이미지만 내보내므로 어떤 리소스 로드도, 프레임 삽입도 허용하지 않는다.
+     * CSP는 응답 문서 자신에게만 걸려 이미지의 교차 오리진 {@code <img>} 임베드에는 영향이 없다.
+     */
+    private static final String API_CSP = "default-src 'none'; frame-ancestors 'none'";
+
+    /**
+     * Swagger UI 화면만 CSP에서 뺀다(스크립트·스타일 사용). API 문서(/v3/api-docs)는 JSON이라 CSP를 그대로 건다.
+     * 운영(prod)에서는 springdoc 자체를 끈다(application-prod.yml).
+     */
+    private static final RequestMatcher SWAGGER_UI = new OrRequestMatcher(
+            antMatcher("/swagger-ui/**"), antMatcher("/swagger-ui.html"));
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final ObjectMapper objectMapper;
@@ -73,6 +94,12 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource))   // 교차 오리진(Vercel 프론트) 허용
             .csrf(csrf -> csrf.disable())                 // 무상태 REST — CSRF 토큰 불필요
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // 보안 응답 헤더. nosniff·X-Frame-Options DENY·HSTS(HTTPS 요청에만)는 Spring Security 기본값을 그대로 쓰고,
+            // CSP와 Referrer-Policy를 더한다 — 토큰이 든 URL·경로가 Referer로 새지 않게 no-referrer.
+            .headers(h -> h
+                .referrerPolicy(r -> r.policy(ReferrerPolicy.NO_REFERRER))
+                .addHeaderWriter(new DelegatingRequestMatcherHeaderWriter(
+                        new NegatedRequestMatcher(SWAGGER_UI), new StaticHeadersWriter("Content-Security-Policy", API_CSP))))
             .authorizeHttpRequests(auth -> auth
                 // 서블릿 오류 포워드(/error)는 인증 컨텍스트 없이 돈다 — 막으면 404·405·500이 전부 401로 둔갑해
                 // 웹이 헛된 refresh·재시도를 한다. 원 요청의 인가는 이미 끝났으므로 오류 디스패치는 허용한다.
