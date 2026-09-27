@@ -3,6 +3,7 @@ package com.jjikboka.app.integration;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -36,18 +37,30 @@ class SecurityHeadersIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
-    void Swagger_경로는_CSP에서_제외한다() throws Exception {
-        // 로컬 명세 대조용 UI가 스크립트를 쓰므로 제외. 운영에서는 springdoc 자체가 꺼진다(application-prod.yml).
-        mockMvc.perform(get("/v3/api-docs"))
+    void 없는_경로의_404에도_보안_헤더가_붙는다() throws Exception {
+        assertSecurityHeaders(mockMvc.perform(get("/api/no-such-path")
+                        .header("Authorization", bearer(register("hdr-404@test.com"))))
+                .andExpect(status().isNotFound()));
+    }
+
+    @Test
+    void Swagger_UI만_CSP에서_제외하고_API_문서는_CSP를_건다() throws Exception {
+        // 로컬 명세 대조용 UI가 스크립트를 쓰므로 제외. 운영에서는 springdoc 자체가 꺼진다(SwaggerDisabled 테스트).
+        mockMvc.perform(get("/swagger-ui/index.html"))
                 .andExpect(status().isOk())
                 .andExpect(header().doesNotExist("Content-Security-Policy"))
                 .andExpect(header().string("X-Content-Type-Options", "nosniff"));
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Security-Policy", API_CSP));
     }
 
     private static void assertSecurityHeaders(ResultActions result) throws Exception {
         result.andExpect(header().string("Content-Security-Policy", API_CSP))
                 .andExpect(header().string("X-Content-Type-Options", "nosniff"))
                 .andExpect(header().string("X-Frame-Options", "DENY"))
-                .andExpect(header().string("Referrer-Policy", "no-referrer"));
+                .andExpect(header().string("Referrer-Policy", "no-referrer"))
+                // 인증된 JSON이 브라우저·중간 캐시에 남지 않게 — Spring Security 기본값이 빠지지 않았는지 고정한다.
+                .andExpect(header().string("Cache-Control", containsString("no-store")));
     }
 }

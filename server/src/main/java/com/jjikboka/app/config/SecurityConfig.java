@@ -48,9 +48,12 @@ public class SecurityConfig {
      */
     private static final String API_CSP = "default-src 'none'; frame-ancestors 'none'";
 
-    /** Swagger UI는 스크립트·스타일을 쓰므로 CSP에서 뺀다. 운영(prod)에서는 springdoc 자체를 끈다(application-prod.yml). */
-    private static final RequestMatcher SWAGGER = new OrRequestMatcher(
-            antMatcher("/swagger-ui/**"), antMatcher("/swagger-ui.html"), antMatcher("/v3/api-docs/**"));
+    /**
+     * Swagger UI 화면만 CSP에서 뺀다(스크립트·스타일 사용). API 문서(/v3/api-docs)는 JSON이라 CSP를 그대로 건다.
+     * 운영(prod)에서는 springdoc 자체를 끈다(application-prod.yml).
+     */
+    private static final RequestMatcher SWAGGER_UI = new OrRequestMatcher(
+            antMatcher("/swagger-ui/**"), antMatcher("/swagger-ui.html"));
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final ObjectMapper objectMapper;
@@ -96,7 +99,7 @@ public class SecurityConfig {
             .headers(h -> h
                 .referrerPolicy(r -> r.policy(ReferrerPolicy.NO_REFERRER))
                 .addHeaderWriter(new DelegatingRequestMatcherHeaderWriter(
-                        new NegatedRequestMatcher(SWAGGER), new StaticHeadersWriter("Content-Security-Policy", API_CSP))))
+                        new NegatedRequestMatcher(SWAGGER_UI), new StaticHeadersWriter("Content-Security-Policy", API_CSP))))
             .authorizeHttpRequests(auth -> auth
                 // 서블릿 오류 포워드(/error)는 인증 컨텍스트 없이 돈다 — 막으면 404·405·500이 전부 401로 둔갑해
                 // 웹이 헛된 refresh·재시도를 한다. 원 요청의 인가는 이미 끝났으므로 오류 디스패치는 허용한다.
