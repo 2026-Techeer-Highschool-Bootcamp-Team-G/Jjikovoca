@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -63,6 +64,18 @@ class RateLimitIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
+    void 경로_글자를_퍼센트_인코딩해도_같은_한도로_센다() throws Exception {
+        String ip = randomIp();
+        // /api/auth/%6Cogin 은 컨트롤러·인가 규칙에는 /api/auth/login 으로 매칭된다 — 원시 URI로 세면 한도를 우회한다.
+        String[] variants = {"/api/auth/login", "/api/auth/%6Cogin", "/api/%61uth/login", "/api/auth/%6cogin"};
+        for (int i = 0; i < 10; i++) {
+            loginAt(URI.create(variants[i % variants.length]), ip).andExpect(status().isUnauthorized());
+        }
+        // 11번째 — 인코딩을 바꿔도 같은 카운터라 막혀야 한다.
+        loginAt(URI.create("/api/auth/l%6Fgin"), ip).andExpect(status().isTooManyRequests());
+    }
+
+    @Test
     void 가입은_분당_5회까지다() throws Exception {
         String ip = randomIp();
         for (int i = 0; i < 5; i++) {
@@ -76,6 +89,11 @@ class RateLimitIntegrationTest extends IntegrationTestSupport {
 
     private ResultActions login(String ip) throws Exception {
         return mockMvc.perform(post("/api/auth/login").with(r -> { r.setRemoteAddr(ip); return r; })
+                .contentType(APPLICATION_JSON).content(json(credentials())));
+    }
+
+    private ResultActions loginAt(URI uri, String ip) throws Exception {
+        return mockMvc.perform(post(uri).with(r -> { r.setRemoteAddr(ip); return r; })
                 .contentType(APPLICATION_JSON).content(json(credentials())));
     }
 
