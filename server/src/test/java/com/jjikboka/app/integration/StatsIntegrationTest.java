@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 class StatsIntegrationTest extends IntegrationTestSupport {
 
+    // FR-13 명세값(ExpService.DAILY_CAP과 같아야 한다). 서버 값을 참조하지 않고 명세를 그대로 적어, 한도가 바뀌면 여기서 드러나게 한다.
     private static final int DAILY_CAP = 100;
 
     @Test
@@ -48,8 +49,7 @@ class StatsIntegrationTest extends IntegrationTestSupport {
         // 빈칸 정답 10연속 = 10 + 15×9 = 145 → 캡처 적립과 합쳐 한도를 확실히 넘긴다.
         int lastEarned = -1;
         for (long cardId : cardIds) {
-            String word = data(mockMvc.perform(get("/api/cards/" + cardId).header("Authorization", bearer(token)))
-                    .andExpect(status().isOk()).andReturn()).get("word").asText();
+            String word = cardWord(token, cardId);
             JsonNode answer = data(mockMvc.perform(post("/api/study/cloze/" + cardId + "/answer")
                             .header("Authorization", bearer(token)).contentType(APPLICATION_JSON)
                             .content(json(Map.of("guess", word, "durationMs", 1000))))
@@ -70,6 +70,7 @@ class StatsIntegrationTest extends IntegrationTestSupport {
     void 학습하면_리포트_지표와_오늘_잔디에_반영된다() throws Exception {
         String token = register("fr9-report@test.com");
         List<Long> cardIds = seedCards(token, 3);
+        LocalDate before = LocalDate.now();
 
         study(token, cardIds.get(0), "KNOW");
         study(token, cardIds.get(1), "KNOW");
@@ -80,16 +81,18 @@ class StatsIntegrationTest extends IntegrationTestSupport {
         JsonNode basic = report.get("basic");
         assertThat(basic.get("newCards").asLong()).isEqualTo(3);
         assertThat(basic.get("studyCount").asLong()).isEqualTo(3);
-        assertThat(basic.get("accuracy").get("word").isNumber()).isTrue();
+        // 알아요 2 / 전체 3 = 0.67 (비율, 소수 둘째 자리 반올림 — StudyStatsService.accuracy)
+        assertThat(basic.get("accuracy").get("word").asDouble()).isEqualTo(0.67);
 
         JsonNode today = null;
         for (JsonNode day : report.get("grass")) {
-            if (LocalDate.now().toString().equals(day.get("date").asText())) {
+            if (day.get("count").asLong() > 0) {
                 today = day;
             }
         }
-        assertThat(today).as("오늘 날짜의 잔디 칸이 있어야 한다").isNotNull();
-        assertThat(today.get("count").asLong()).isGreaterThanOrEqualTo(3);
+        assertThat(today).as("학습한 날의 잔디 칸이 있어야 한다").isNotNull();
+        assertTodayPlus(LocalDate.parse(today.get("date").asText()), before, 0);
+        assertThat(today.get("count").asLong()).isEqualTo(3);
         assertThat(today.get("level").asInt()).isPositive();
     }
 

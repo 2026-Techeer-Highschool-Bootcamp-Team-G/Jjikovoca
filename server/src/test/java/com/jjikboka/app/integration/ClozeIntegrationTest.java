@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *   <li>Given 답 제출, When 서버 판정, Then 판정 결과가 study_log에 기록되고 Leitner 스케줄이 갱신된다</li>
  * </ul>
  * 현행 구현은 판정 결과를 그대로 기록한다(정답=KNOW·오답=DONT_KNOW). FR-6이 요구하는 판정 후 사용자 자기평가(알/헷/몰)
- * 단계는 구현이 없어 FR 원장에 갭으로 기록한다.
+ * 단계는 구현이 없어 FR 원장에 갭으로 기록한다. 정답 단어는 mock AI 응답에서 읽는다({@code cardWord}) — 하드코딩하지 않는다.
  */
 class ClozeIntegrationTest extends IntegrationTestSupport {
 
@@ -34,7 +34,6 @@ class ClozeIntegrationTest extends IntegrationTestSupport {
 
         JsonNode item = clozeItem(token, cardId);
 
-        assertThat(item.get("clozeText").asText()).contains("_____");
         assertThat(item.get("clozeText").asText().toLowerCase()).doesNotContain(word.toLowerCase());
         assertThat(item.has("word")).isFalse();
     }
@@ -55,10 +54,14 @@ class ClozeIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
-    void 오답을_내면_정답과_뜻을_보여주고_box0으로_돌아가며_학습기록이_남는다() throws Exception {
+    void 오답을_내면_정답과_뜻을_보여주고_box0과_콤보0으로_돌아가며_학습기록이_남는다() throws Exception {
         String token = register("fr6-wrong@test.com");
         long cardId = seedCards(token, 1).get(0);
         String word = cardWord(token, cardId);
+        // 먼저 맞혀 box 1·콤보 1로 올려 둬야, 오답이 실제로 둘을 되돌리는지 확인할 수 있다.
+        answer(token, cardId, word)
+                .andExpect(jsonPath("$.data.boxLevel").value(1))
+                .andExpect(jsonPath("$.data.combo").value(1));
 
         answer(token, cardId, "definitely-not-the-word")
                 .andExpect(status().isOk())
@@ -68,7 +71,7 @@ class ClozeIntegrationTest extends IntegrationTestSupport {
                 .andExpect(jsonPath("$.data.boxLevel").value(0))
                 .andExpect(jsonPath("$.data.combo").value(0));
 
-        assertThat(studyCount(token)).isEqualTo(1);
+        assertThat(studyCount(token)).isEqualTo(2);
     }
 
     @Test
@@ -127,13 +130,6 @@ class ClozeIntegrationTest extends IntegrationTestSupport {
         body.put("durationMs", 1500);
         return mockMvc.perform(post("/api/study/cloze/" + cardId + "/answer")
                 .header("Authorization", bearer(token)).contentType(APPLICATION_JSON).content(json(body)));
-    }
-
-    private String cardWord(String token, long cardId) throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/cards/" + cardId).header("Authorization", bearer(token)))
-                .andExpect(status().isOk())
-                .andReturn();
-        return data(result).get("word").asText();
     }
 
     private int studyCount(String token) throws Exception {

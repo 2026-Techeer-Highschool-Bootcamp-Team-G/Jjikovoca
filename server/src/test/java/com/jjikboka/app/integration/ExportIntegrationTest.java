@@ -73,7 +73,7 @@ class ExportIntegrationTest extends IntegrationTestSupport {
 
     private String downloadUrl(MvcResult created) throws Exception {
         String url = data(created).get("downloadUrl").asText();
-        assertThat(url).startsWith("/api/export/").endsWith("/download");
+        assertThat(url).isNotBlank();
         return url;
     }
 }

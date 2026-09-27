@@ -7,7 +7,6 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,28 +32,30 @@ class StudyIntegrationTest extends IntegrationTestSupport {
     void 몰라요를_고르면_box0으로_돌아가고_다음날_재출제되며_오늘_복습큐에서_빠진다() throws Exception {
         String token = register("fr5-dontknow@test.com");
         long cardId = seedCards(token, 1).get(0);
+        study(token, cardId, "KNOW").andExpect(status().isOk());   // box 1 — 리셋이 실제로 일어나는지 보려고 먼저 올린다
+        LocalDate before = LocalDate.now();
 
         JsonNode result = data(study(token, cardId, "DONT_KNOW").andExpect(status().isOk()).andReturn());
 
         assertThat(result.get("boxLevel").asInt()).isZero();
         assertThat(result.get("graduated").asBoolean()).isFalse();
-        LocalDate nextReview = LocalDateTime.parse(result.get("nextReviewAt").asText()).toLocalDate();
-        assertThat(nextReview).isEqualTo(LocalDate.now().plusDays(1));
+        assertTodayPlus(nextReviewDate(result), before, 1);
         // 다음 복습 시각이 미래라 오늘의 복습 큐에서는 빠진다.
         assertThat(reviewQueueIds(token)).doesNotContain(cardId);
     }
 
     @Test
-    void 헷갈려요는_box를_유지하고_다음날_재출제된다() throws Exception {
+    void 헷갈려요는_box를_유지하고_간격과_무관하게_다음날_재출제된다() throws Exception {
         String token = register("fr5-confused@test.com");
         long cardId = seedCards(token, 1).get(0);
-        study(token, cardId, "KNOW").andExpect(status().isOk());   // box 1
+        study(token, cardId, "KNOW").andExpect(status().isOk());
+        study(token, cardId, "KNOW").andExpect(status().isOk());   // box 2 — 원래 간격은 +3일
+        LocalDate before = LocalDate.now();
 
         JsonNode result = data(study(token, cardId, "CONFUSED").andExpect(status().isOk()).andReturn());
 
-        assertThat(result.get("boxLevel").asInt()).isEqualTo(1);
-        assertThat(LocalDateTime.parse(result.get("nextReviewAt").asText()).toLocalDate())
-                .isEqualTo(LocalDate.now().plusDays(1));
+        assertThat(result.get("boxLevel").asInt()).isEqualTo(2);
+        assertTodayPlus(nextReviewDate(result), before, 1);
     }
 
     @Test
@@ -62,13 +63,13 @@ class StudyIntegrationTest extends IntegrationTestSupport {
         String token = register("fr5-graduate@test.com");
         long cardId = seedCards(token, 1).get(0);
 
-        JsonNode last = null;
-        for (int i = 1; i <= 4; i++) {
-            last = data(study(token, cardId, "KNOW").andExpect(status().isOk()).andReturn());
-            assertThat(last.get("boxLevel").asInt()).isEqualTo(i);
+        for (int box = 1; box <= 4; box++) {
+            JsonNode result = data(study(token, cardId, "KNOW").andExpect(status().isOk()).andReturn());
+            assertThat(result.get("boxLevel").asInt()).isEqualTo(box);
+            // 졸업은 box 4에서만 — 그 전에 졸업하면 조기 졸업 회귀다.
+            assertThat(result.get("graduated").asBoolean()).isEqualTo(box == 4);
         }
 
-        assertThat(last.get("graduated").asBoolean()).isTrue();
         assertThat(reviewQueueIds(token)).doesNotContain(cardId);
     }
 
@@ -91,7 +92,7 @@ class StudyIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
-    void 선택_복습에서_아무것도_고르지_않으면_큐가_비어_시작할_수_없다() throws Exception {
+    void 선택_복습에서_아무것도_고르지_않으면_빈_큐가_나온다() throws Exception {
         String token = register("fr10-pick-empty@test.com");
         seedCards(token, 2);
 
@@ -150,9 +151,7 @@ class StudyIntegrationTest extends IntegrationTestSupport {
         return ids(data(result).get("cards"));
     }
 
-    private static List<Long> ids(JsonNode cards) {
-        List<Long> ids = new ArrayList<>();
-        cards.forEach(card -> ids.add(card.get("id").asLong()));
-        return ids;
+    private static LocalDate nextReviewDate(JsonNode studyResult) {
+        return LocalDateTime.parse(studyResult.get("nextReviewAt").asText()).toLocalDate();
     }
 }

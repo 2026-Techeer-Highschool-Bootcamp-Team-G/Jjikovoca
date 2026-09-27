@@ -6,6 +6,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +36,8 @@ class ExamIntegrationTest extends IntegrationTestSupport {
 
         JsonNode exam = data(createExam(token, "중간고사", examDate).andExpect(status().isOk()).andReturn());
 
-        assertThat(exam.get("dday").asLong()).isEqualTo(10);
+        // 요청이 자정을 넘기면 서버의 "오늘"이 하루 뒤라 D-9가 된다 — 둘 다 올바른 계산이다.
+        assertThat(exam.get("dday").asLong()).isIn(10L, 9L);
         assertThat(examTitles(token)).containsExactly("중간고사");
     }
 
@@ -59,7 +61,7 @@ class ExamIntegrationTest extends IntegrationTestSupport {
                         .content(json(Map.of("title", "3월 모의고사", "examDate", LocalDate.now().plusDays(7).toString()))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.title").value("3월 모의고사"))
-                .andExpect(jsonPath("$.data.dday").value(7));
+                .andExpect(jsonPath("$.data.dday").value(org.hamcrest.Matchers.oneOf(7, 6)));
     }
 
     @Test
@@ -108,8 +110,11 @@ class ExamIntegrationTest extends IntegrationTestSupport {
 
         mockMvc.perform(patch("/api/exams/" + othersExam).header("Authorization", bearer(me))
                         .contentType(APPLICATION_JSON).content(json(Map.of("title", "탈취"))))
-                .andExpect(status().isForbidden());
-        tag(me, myCard, List.of(othersExam)).andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorName").value("FORBIDDEN"));
+        tag(me, myCard, List.of(othersExam))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorName").value("FORBIDDEN"));
     }
 
     private ResultActions createExam(String token, String title, LocalDate examDate) throws Exception {
@@ -130,7 +135,7 @@ class ExamIntegrationTest extends IntegrationTestSupport {
         MvcResult result = mockMvc.perform(get("/api/exams").header("Authorization", bearer(token)))
                 .andExpect(status().isOk())
                 .andReturn();
-        List<String> titles = new java.util.ArrayList<>();
+        List<String> titles = new ArrayList<>();
         data(result).get("exams").forEach(exam -> titles.add(exam.get("title").asText()));
         return titles;
     }
@@ -140,14 +145,10 @@ class ExamIntegrationTest extends IntegrationTestSupport {
                         .header("Authorization", bearer(token)))
                 .andExpect(status().isOk())
                 .andReturn();
-        List<Long> ids = new java.util.ArrayList<>();
-        data(result).get("cards").forEach(card -> ids.add(card.get("id").asLong()));
-        return ids;
+        return ids(data(result).get("cards"));
     }
 
     private static List<Long> tagIds(JsonNode cardTagResponse) {
-        List<Long> ids = new java.util.ArrayList<>();
-        cardTagResponse.get("exams").forEach(exam -> ids.add(exam.get("id").asLong()));
-        return ids;
+        return ids(cardTagResponse.get("exams"));
     }
 }

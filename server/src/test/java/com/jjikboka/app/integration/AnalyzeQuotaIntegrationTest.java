@@ -2,7 +2,6 @@ package com.jjikboka.app.integration;
 
 import org.junit.jupiter.api.Test;
 
-
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -12,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * 옛 하드캡이 되살아나면 4회째 접수부터 EXTRACT_LIMIT_REACHED(429)로 여기서 바로 빨간불이 된다.
  */
 class AnalyzeQuotaIntegrationTest extends IntegrationTestSupport {
-
 
     @Test
     void 무료사용자는_옛_demo캡3을_넘겨_일일한도5까지_접수하고_초과는_QUOTA_EXCEEDED다() throws Exception {

@@ -19,11 +19,13 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -121,9 +123,12 @@ abstract class IntegrationTestSupport {
                 .header("Authorization", bearer(token)).contentType(APPLICATION_JSON).content(body));
     }
 
-    /** 분석 작업이 COMPLETED가 될 때까지 짧게 폴링한다(최대 ~5초). 워커가 AFTER_COMMIT 비동기라 필요하다. */
+    /**
+     * 분석 작업이 COMPLETED가 될 때까지 폴링한다(최대 ~30초). 워커가 AFTER_COMMIT 비동기라 필요하다.
+     * mock은 보통 즉시 끝나지만, 크롭 10장 팬아웃을 느린 CI 러너에서 돌려도 넘치지 않게 여유를 둔다.
+     */
     protected void awaitJobCompleted(String token, long jobId) throws Exception {
-        for (int attempt = 0; attempt < 50; attempt++) {
+        for (int attempt = 0; attempt < 300; attempt++) {
             MvcResult poll = mockMvc.perform(get("/api/cards/analyze/" + jobId)
                             .header("Authorization", bearer(token)))
                     .andExpect(status().isOk())
@@ -148,9 +153,33 @@ abstract class IntegrationTestSupport {
         MvcResult feed = mockMvc.perform(get("/api/cards").header("Authorization", bearer(token)))
                 .andExpect(status().isOk())
                 .andReturn();
+        return ids(data(feed).get("cards"));
+    }
+
+    /**
+     * 카드의 단어(정답)를 돌려준다. mock AI는 모든 크롭에 같은 단어("sound")를 돌려주므로,
+     * 단어를 하드코딩하지 말고 이 헬퍼로 읽어 mock 응답이 바뀌어도 테스트가 따라가게 한다.
+     */
+    protected String cardWord(String token, long cardId) throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/cards/" + cardId).header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andReturn();
+        return data(result).get("word").asText();
+    }
+
+    /** 응답 배열에서 각 원소의 id를 뽑는다(카드 피드·큐 등 {@code [{id, ...}]} 형태 공통). */
+    protected static List<Long> ids(JsonNode items) {
         List<Long> ids = new ArrayList<>();
-        data(feed).get("cards").forEach(card -> ids.add(card.get("id").asLong()));
+        items.forEach(item -> ids.add(item.get("id").asLong()));
         return ids;
+    }
+
+    /**
+     * 서버가 "오늘"을 기준으로 계산한 날짜를 검증한다. 요청 직전에 잰 {@code before}와 검증 시점의 오늘 중 하나에
+     * {@code plusDays}를 더한 값이면 통과시켜, 테스트가 자정(KST)을 넘겨 실행돼도 흔들리지 않게 한다.
+     */
+    protected static void assertTodayPlus(LocalDate actual, LocalDate before, int plusDays) {
+        assertThat(actual).isIn(before.plusDays(plusDays), LocalDate.now().plusDays(plusDays));
     }
 
     protected JsonNode data(MvcResult result) throws Exception {

@@ -23,6 +23,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *   <li>예외: 중복 이메일 거부 · 비밀번호 불일치 401 · 앱 내 계정 탈퇴</li>
  * </ul>
  * refresh는 rotation(사용한 토큰 즉시 폐기)이라, 같은 초에 재발급돼도 옛 토큰이 되살아나지 않는지(jti 고유성)도 함께 지킨다.
+ * <p>부분 커버리지: "만료된 access"는 시간을 조작하지 않고 refresh 재발급 경로만 검증한다(만료 자체는 JWT 라이브러리 책임).
+ * 알려진 결함: access·refresh 토큰에 종류(typ) 구분이 없어 refresh 토큰이 Bearer로 통과한다 — P1-11(보안)에서 고친다.
  */
 class AuthIntegrationTest extends IntegrationTestSupport {
 
@@ -117,8 +119,12 @@ class AuthIntegrationTest extends IntegrationTestSupport {
         mockMvc.perform(delete("/api/account").header("Authorization", bearer(access)))
                 .andExpect(status().isOk());
 
-        login("fr1-withdraw@test.com", PASSWORD).andExpect(status().isUnauthorized());
-        refresh(tokens.get("refreshToken").asText()).andExpect(status().isUnauthorized());
+        login("fr1-withdraw@test.com", PASSWORD)
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorName").value("INVALID_CREDENTIALS"));
+        refresh(tokens.get("refreshToken").asText())
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorName").value("INVALID_REFRESH_TOKEN"));
     }
 
     private ResultActions login(String email, String password) throws Exception {
