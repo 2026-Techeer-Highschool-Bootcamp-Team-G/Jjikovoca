@@ -2,6 +2,7 @@ package com.jjikboka.app.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jjikboka.common.error.ApiError;
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import java.nio.charset.StandardCharsets;
@@ -55,6 +56,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())                 // 무상태 REST — CSRF 토큰 불필요
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // 서블릿 오류 포워드(/error)는 인증 컨텍스트 없이 돈다 — 막으면 404·405·500이 전부 401로 둔갑해
+                // 웹이 헛된 refresh·재시도를 한다. 원 요청의 인가는 이미 끝났으므로 오류 디스패치는 허용한다.
+                .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                 // 인증 불필요: 가입·로그인·재발급(만료된 access로도 호출) + 헬스·이미지·Swagger
                 .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/refresh",
                         "/api/health", "/actuator/health", "/images/**",
