@@ -71,12 +71,12 @@ public class AuthService {
         } catch (RuntimeException e) {
             throw invalidRefreshToken();
         }
-        RefreshToken stored = refreshTokenRepository.findByTokenHash(sha256(request.refreshToken())).orElse(null);
-        if (stored == null) {
+        // rotation: 구 refresh를 조회 없이 바로 삭제한다. DELETE가 행 잠금을 잡으므로 같은 토큰으로 동시에 들어온
+        // 두 요청 중 하나만 1행을 지우고, 나머지는 0행 = 재사용으로 판정된다(조회 후 삭제면 둘 다 통과할 틈이 생긴다).
+        if (refreshTokenRepository.deleteByTokenHash(sha256(request.refreshToken())) == 0) {
             refreshTokenRepository.deleteByUserId(userId);   // 재사용 탐지 → 그 사용자의 모든 refresh 폐기
             throw invalidRefreshToken();
         }
-        refreshTokenRepository.delete(stored); // rotation: 구 refresh 즉시 폐기
         String accessToken = jwtProvider.createAccessToken(userId);
         String refreshToken = jwtProvider.createRefreshToken(userId);
         refreshTokenRepository.save(RefreshToken.issue(

@@ -14,8 +14,16 @@ import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -81,6 +89,26 @@ class TokenSecurityIntegrationTest extends IntegrationTestSupport {
                 .andExpect(jsonPath("$.errorName").value("INVALID_REFRESH_TOKEN"));
         // 누가 탈취자인지 모르므로 살아 있던 새 refresh도 함께 폐기된다.
         refresh(current).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void 같은_refresh로_동시에_재발급하면_하나만_성공하고_나머지는_재사용으로_거부된다() throws Exception {
+        String token = registerForTokens("sec-concurrent-refresh@test.com").get("refreshToken").asText();
+        CountDownLatch start = new CountDownLatch(1);
+        Callable<Integer> call = () -> {
+            start.await();
+            return refresh(token).andReturn().getResponse().getStatus();
+        };
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        try {
+            Future<Integer> a = pool.submit(call);
+            Future<Integer> b = pool.submit(call);
+            start.countDown();
+            // 조회 후 삭제였다면 둘 다 200(이중 발급)이거나 삭제 0행으로 500이 날 수 있다.
+            assertThat(List.of(a.get(), b.get())).containsExactlyInAnyOrder(200, 401);
+        } finally {
+            pool.shutdownNow();
+        }
     }
 
     @Test
