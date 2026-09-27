@@ -1,5 +1,6 @@
 package com.jjikboka.app.integration;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,12 +9,24 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MySQLContainer;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * 통합 테스트 베이스 (08 §3, H2 금지). 실 MySQL·Redis를 Testcontainers로 띄우고 그 접속값을 @DynamicPropertySource로 주입한다.
@@ -71,4 +84,84 @@ abstract class IntegrationTestSupport {
 
     @Autowired
     protected ObjectMapper objectMapper;
+
+    // ── 공용 픽스처 ──────────────────────────────────────────────────────────────
+    // 싱글톤 컨테이너를 모든 테스트가 공유하므로, 테스트마다 고유 이메일로 가입해 데이터 간섭을 막는다.
+
+    /** 1x1 PNG data URL — 분석 접수 검증(비어있지 않은 base64)을 통과한다. */
+    protected static final String IMAGE =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+
+    protected static final String PASSWORD = "pass1234!";
+
+    /** 회원가입 후 토큰 응답(data)을 돌려준다 — accessToken·refreshToken이 필요한 인증 테스트용. */
+    protected JsonNode registerForTokens(String email) throws Exception {
+        String body = objectMapper.writeValueAsString(Map.of(
+                "email", email, "password", PASSWORD, "nickname", "테스터"));
+        MvcResult result = mockMvc.perform(post("/api/auth/register")
+                        .contentType(APPLICATION_JSON).content(body))
+                .andExpect(status().isOk())
+                .andReturn();
+        return data(result);
+    }
+
+    /** 회원가입 후 accessToken을 돌려준다. */
+    protected String register(String email) throws Exception {
+        return registerForTokens(email).get("accessToken").asText();
+    }
+
+    /** 분석 접수 요청(mock AI). 크롭 N장을 한 번에 보내 쿼터 1회로 카드 N장을 만든다. */
+    protected ResultActions submitAnalyze(String token, int cropCount) throws Exception {
+        String[] crops = new String[cropCount];
+        Arrays.fill(crops, IMAGE);
+        String body = objectMapper.writeValueAsString(Map.of(
+                "type", "WORD", "cropImages", crops, "fullImage", IMAGE));
+        return mockMvc.perform(post("/api/cards/analyze")
+                .header("Authorization", bearer(token)).contentType(APPLICATION_JSON).content(body));
+    }
+
+    /** 분석 작업이 COMPLETED가 될 때까지 짧게 폴링한다(최대 ~5초). 워커가 AFTER_COMMIT 비동기라 필요하다. */
+    protected void awaitJobCompleted(String token, long jobId) throws Exception {
+        for (int attempt = 0; attempt < 50; attempt++) {
+            MvcResult poll = mockMvc.perform(get("/api/cards/analyze/" + jobId)
+                            .header("Authorization", bearer(token)))
+                    .andExpect(status().isOk())
+                    .andReturn();
+            String jobStatus = data(poll).get("status").asText();
+            if ("COMPLETED".equals(jobStatus)) {
+                return;
+            }
+            if ("FAILED".equals(jobStatus)) {
+                throw new AssertionError("분석 작업이 실패했다: jobId=" + jobId);
+            }
+            Thread.sleep(100);
+        }
+        throw new AssertionError("분석 작업이 제한시간 내 완료되지 않았다: jobId=" + jobId);
+    }
+
+    /** mock 분석으로 카드 N장을 만들고, 피드에 보이는 카드 id를 돌려준다. */
+    protected List<Long> seedCards(String token, int count) throws Exception {
+        MvcResult accepted = submitAnalyze(token, count).andExpect(status().isAccepted()).andReturn();
+        awaitJobCompleted(token, data(accepted).get("jobId").asLong());
+
+        MvcResult feed = mockMvc.perform(get("/api/cards").header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andReturn();
+        List<Long> ids = new ArrayList<>();
+        data(feed).get("cards").forEach(card -> ids.add(card.get("id").asLong()));
+        return ids;
+    }
+
+    protected JsonNode data(MvcResult result) throws Exception {
+        String json = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        return objectMapper.readTree(json).get("data");
+    }
+
+    protected String bearer(String token) {
+        return "Bearer " + token;
+    }
+
+    protected String json(Object body) throws Exception {
+        return objectMapper.writeValueAsString(body);
+    }
 }
