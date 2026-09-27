@@ -14,6 +14,13 @@ spring:
     enabled: true
     locations: classpath:db/migration   # V1__baseline.sql (03 ERD)
 
+  # Redis 명령·연결 타임아웃. 기본(Lettuce 60초)이면 Redis가 멈췄을 때 rate limit·캐시 호출이 요청 스레드를
+  # 최대 1분씩 붙잡는다 — fail-open이 fail-slow가 되지 않게 짧게 끊는다(P1-11 D).
+  data:
+    redis:
+      timeout: 500ms
+      connect-timeout: 1s
+
 server:
   port: ${SERVER_PORT:8000}    # 기본 8000(프론트 proxy·05 §2-1 정합). SERVER_PORT env로 덮어쓰기 가능
 
