@@ -57,19 +57,25 @@ public class AuthService {
         return issueTokens(user);
     }
 
-    @Transactional
+    /**
+     * 재발급 + rotation + 재사용 탐지(#472). 서명·만료·typ=refresh가 유효한데 저장소에 없는 토큰은 이미 쓰였거나
+     * 폐기된 토큰의 <b>재사용</b>이다 — 탈취자와 정상 사용자 중 누가 먼저 썼는지 알 수 없으므로 그 사용자의 refresh를
+     * 전부 폐기해 탈취된 세션을 끊는다. 폐기 뒤 예외를 던지므로, 폐기가 롤백되지 않게 BusinessException은 커밋한다.
+     */
+    @Transactional(noRollbackFor = BusinessException.class)
     public TokenResponse refresh(RefreshRequest request) {
         Long userId;
         try {
-            // JWT 서명·만료 검증 (형식·서명·기간이 깨지면 예외)
-            userId = jwtProvider.parseUserId(request.refreshToken());
+            // JWT 서명·만료·종류(typ=refresh) 검증 — access나 위조 토큰은 여기서 거부
+            userId = jwtProvider.parseRefreshUserId(request.refreshToken());
         } catch (RuntimeException e) {
-            throw new BusinessException(HttpStatus.UNAUTHORIZED, "INVALID_REFRESH_TOKEN", "다시 로그인해 주세요.");
+            throw invalidRefreshToken();
         }
-        // 저장소에 해시가 있어야 유효 — 없으면 이미 폐기(rotation)됐거나 재사용 탐지
-        RefreshToken stored = refreshTokenRepository.findByTokenHash(sha256(request.refreshToken()))
-                .orElseThrow(() -> new BusinessException(
-                        HttpStatus.UNAUTHORIZED, "INVALID_REFRESH_TOKEN", "다시 로그인해 주세요."));
+        RefreshToken stored = refreshTokenRepository.findByTokenHash(sha256(request.refreshToken())).orElse(null);
+        if (stored == null) {
+            refreshTokenRepository.deleteByUserId(userId);   // 재사용 탐지 → 그 사용자의 모든 refresh 폐기
+            throw invalidRefreshToken();
+        }
         refreshTokenRepository.delete(stored); // rotation: 구 refresh 즉시 폐기
         String accessToken = jwtProvider.createAccessToken(userId);
         String refreshToken = jwtProvider.createRefreshToken(userId);
@@ -118,6 +124,10 @@ public class AuthService {
         // premium은 계산값(subscription 판정) — 신규 가입은 항상 false
         return new AuthResponse(accessToken, refreshToken,
                 new AuthResponse.UserSummary(user.getEmail(), user.getNickname(), false));
+    }
+
+    private static BusinessException invalidRefreshToken() {
+        return new BusinessException(HttpStatus.UNAUTHORIZED, "INVALID_REFRESH_TOKEN", "다시 로그인해 주세요.");
     }
 
     private static String sha256(String value) {
