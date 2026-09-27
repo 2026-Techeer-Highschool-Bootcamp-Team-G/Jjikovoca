@@ -31,4 +31,5 @@ RUN apt-get update \
 USER spring
 EXPOSE 8000
 # 컨테이너 메모리 인지 힙 (t3.small 등 소형 인스턴스). Chromium 동시 렌더는 드물어 별도 상한 없이 둔다.
-ENTRYPOINT ["java","-XX:MaxRAMPercentage=75.0","-jar","app.jar"]
+# JVM 시간대는 기동 시점부터 KST — OS(UTC)와 무관하게 JDBC 풀이 같은 시간대로 만들어지게 한다(#473).
+ENTRYPOINT ["java","-XX:MaxRAMPercentage=75.0","-Duser.timezone=Asia/Seoul","-jar","app.jar"]
