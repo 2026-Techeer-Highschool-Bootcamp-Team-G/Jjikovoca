@@ -15,5 +15,6 @@ public record ApiError(boolean success, String errorName, String errorCode, Stri
     public static ApiError unauthorized()  { return of("UNAUTHORIZED", "401", "로그인이 필요합니다."); }
     public static ApiError forbidden()     { return of("FORBIDDEN", "403", "접근 권한이 없습니다."); }
     public static ApiError quotaExceeded() { return of("QUOTA_EXCEEDED", "429", "오늘의 AI 분석 횟수를 모두 사용했습니다."); }
+    public static ApiError rateLimited()   { return of("RATE_LIMITED", "429", "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요."); }
     public static ApiError aiFailed()      { return of("AI_FAILED", "502", "AI 분석에 실패했습니다. 잠시 후 다시 시도해 주세요."); }
 }

@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -41,6 +42,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
+// 스위트 전체가 같은 IP(127.0.0.1)로 가입·로그인하므로 rate limit은 끈다 — 한도 검증은 RateLimitIntegrationTest가 켜고 한다.
+@TestPropertySource(properties = "app.rate-limit.enabled=false")
 abstract class IntegrationTestSupport {
 
     // 싱글톤 컨테이너 — JVM당 1회 기동해 모든 통합테스트 클래스가 공유한다(Ryuk가 JVM 종료 시 정리).
