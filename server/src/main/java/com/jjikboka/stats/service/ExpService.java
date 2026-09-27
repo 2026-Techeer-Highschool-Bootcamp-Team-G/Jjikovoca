@@ -60,7 +60,7 @@ public class ExpService {
     @Transactional
     public AttendResult attend(Long userId) {
         LocalDate today = LocalDate.now();
-        UserStat stat = userStatRepository.findById(userId).orElseGet(() -> UserStat.of(userId));
+        UserStat stat = lockStat(userId);
 
         if (today.equals(stat.getLastAttendDate())) {
             return new AttendResult(0, stat.getExp(), false, stat.getStreakDays());   // 재호출 멱등
@@ -119,8 +119,18 @@ public class ExpService {
     }
 
     /** 공통 적립 — 일일 한도(DAILY_CAP) 내에서 amount만큼(초과 시 0), exp_log 기록 + 레벨 재계산. 레벨업 시 알림 이벤트(AFTER_COMMIT). */
+    /**
+     * 적립 대상 user_stat을 잠가 가져온다(없으면 먼저 만든다). 행 잠금이 걸린 뒤에 일일 합계를 계산하므로
+     * 동시 적립의 PK 충돌·exp lost update·일일 한도 초과가 함께 막힌다(#475).
+     */
+    private UserStat lockStat(Long userId) {
+        userStatRepository.createIfAbsent(userId);
+        return userStatRepository.findForUpdate(userId)
+                .orElseThrow(() -> new IllegalStateException("user_stat 생성 직후 조회 실패: userId=" + userId));
+    }
+
     private ExpDelta grant(Long userId, String source, int amount) {
-        UserStat stat = userStatRepository.findById(userId).orElseGet(() -> UserStat.of(userId));
+        UserStat stat = lockStat(userId);
         int earned = 0;
         if (amount > 0) {
             LocalDate today = LocalDate.now();
