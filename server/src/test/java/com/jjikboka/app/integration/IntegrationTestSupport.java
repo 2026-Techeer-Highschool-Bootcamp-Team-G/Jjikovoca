@@ -1,5 +1,6 @@
 package com.jjikboka.app.integration;
 
+import com.jjikboka.support.TestTimeZone;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +55,7 @@ abstract class IntegrationTestSupport {
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", MYSQL::getJdbcUrl);
+        registry.add("spring.datasource.url", () -> TestTimeZone.jdbcUrl(MYSQL.getJdbcUrl()));
         registry.add("spring.datasource.username", MYSQL::getUsername);
         registry.add("spring.datasource.password", MYSQL::getPassword);
         registry.add("spring.data.redis.host", REDIS::getHost);
@@ -72,11 +73,11 @@ abstract class IntegrationTestSupport {
         }
     }
 
-    // 테스트 JVM을 UTC로 고정한다(컨텍스트 기동이 기본 tz를 OS값으로 되돌리므로 매 테스트 직전에 재설정) —
-    // UTC인 MySQL 세션과 정렬해 JDBC의 DATE tz 변환으로 "오늘"(quota_date 등) 기준 로직이 어긋나는 것을 막는다.
+    // JVM·JDBC 연결 시간대를 프로덕션(KST)과 일치시킨다(매 테스트 직전 재설정) — JVM↔DB 시간대가 어긋나면
+    // quota_date가 하루 밀리거나(#454) Hibernate가 읽는 created_at이 9시간 밀린다. 근거는 TestTimeZone.
     @BeforeEach
-    void pinUtcTimezone() {
-        java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("UTC"));
+    void pinProductionTimezone() {
+        TestTimeZone.pinJvm();
     }
 
     @Autowired

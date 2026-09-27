@@ -1,5 +1,6 @@
 package com.jjikboka.analysis;
 
+import com.jjikboka.support.TestTimeZone;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,7 +37,7 @@ abstract class AnalysisWorkerTestSupport {
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", MYSQL::getJdbcUrl);
+        registry.add("spring.datasource.url", () -> TestTimeZone.jdbcUrl(MYSQL.getJdbcUrl()));
         registry.add("spring.datasource.username", MYSQL::getUsername);
         registry.add("spring.datasource.password", MYSQL::getPassword);
         registry.add("spring.data.redis.host", REDIS::getHost);
@@ -63,10 +64,9 @@ abstract class AnalysisWorkerTestSupport {
     /** 테스트 간 격리 — 공유 컨테이너라 이전 테스트 잔여 행이 끼어들지 않게 매 테스트 전에 관련 테이블을 비운다(FK 순서: card→quota→job). */
     @BeforeEach
     void cleanTables() {
-        // 테스트 JVM을 UTC로 고정한다(컨텍스트 기동이 기본 tz를 OS값으로 되돌리므로 매 테스트 직전에 재설정).
-        // Testcontainers MySQL 세션이 UTC라, 개발기/CI 기본 tz(예: Asia/Seoul)에선 JDBC가 LocalDate(quota_date)를
-        // tz 변환하며 하루 밀어 넣어 "오늘" 기준 조회·환불이 어긋난다(UTC 자정 근처에만 재현되는 시각 의존 실패).
-        java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("UTC"));
+        // JVM·JDBC 연결 시간대를 프로덕션(KST)과 일치시킨다 — JVM↔DB 시간대가 어긋나면 quota_date가 하루 밀리거나
+        // (#454) created_at이 9시간 밀린다. 근거는 TestTimeZone.
+        TestTimeZone.pinJvm();
         jdbcTemplate.update("DELETE FROM card");
         jdbcTemplate.update("DELETE FROM user_quota_daily");
         jdbcTemplate.update("DELETE FROM analyze_job");
