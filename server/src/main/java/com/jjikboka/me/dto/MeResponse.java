@@ -1,4 +1,4 @@
-package com.jjikboka.app.me;
+package com.jjikboka.me.dto;
 
 import java.time.LocalDateTime;
 

@@ -1,6 +1,8 @@
-package com.jjikboka.app.me;
+package com.jjikboka.me.controller;
 
 import com.jjikboka.common.response.ApiResponse;
+import com.jjikboka.me.dto.MeResponse;
+import com.jjikboka.me.service.MeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;

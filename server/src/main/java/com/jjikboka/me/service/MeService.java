@@ -1,7 +1,8 @@
-package com.jjikboka.app.me;
+package com.jjikboka.me.service;
 
 import com.jjikboka.auth.dto.UserProfile;
 import com.jjikboka.auth.service.UserQueryService;
+import com.jjikboka.me.dto.MeResponse;
 import com.jjikboka.subscription.dto.PremiumDetail;
 import com.jjikboka.subscription.service.PremiumService;
 import com.jjikboka.quota.service.QuotaService;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Service;
  * 도메인끼리는 서로를 모르고(13 §2), app이 조립만 담당한다. level/exp는 exp 현황에서, 결제정보는 프리미엄 조회에서 가져온다.
  */
 @Service
-class MeService {
+public class MeService {
 
     /** 모의 결제 금액(원) — 실 PG 전환 시 plan별 가격표로 대체(현재 단일 상수). */
     private static final int PREMIUM_AMOUNT = 4900;
@@ -39,7 +40,7 @@ class MeService {
         this.aiMockMode = aiMockMode;
     }
 
-    MeResponse getMe(Long userId) {
+    public MeResponse getMe(Long userId) {
         UserProfile profile = userQueryService.getProfile(userId);
         PremiumDetail premium = premiumService.premiumDetail(userId);
         QuotaStatus quota = quotaService.getToday(userId);
