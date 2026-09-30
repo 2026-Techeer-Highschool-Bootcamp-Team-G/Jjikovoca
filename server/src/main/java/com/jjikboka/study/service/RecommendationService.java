@@ -1,6 +1,7 @@
-package com.jjikboka.app.study;
+package com.jjikboka.study.service;
 
 import com.jjikboka.card.service.CardStatsService;
+import com.jjikboka.study.dto.RecommendationResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

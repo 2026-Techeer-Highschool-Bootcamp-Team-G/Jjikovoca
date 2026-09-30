@@ -1,4 +1,4 @@
-package com.jjikboka.app.study;
+package com.jjikboka.study.dto;
 
 /**
  * 학습 추천 요약 (API-6b, GET /api/study/recommendation). 홈에서 "오늘 뭘 학습할지" 한눈에 —

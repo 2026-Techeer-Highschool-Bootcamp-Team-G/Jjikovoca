@@ -1,4 +1,4 @@
-package com.jjikboka.app.study;
+package com.jjikboka.study.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

@@ -1,4 +1,4 @@
-package com.jjikboka.app.study;
+package com.jjikboka.study.dto;
 
 import com.jjikboka.card.dto.ClozeAnswerResult;
 import com.jjikboka.stats.dto.ClozeExp;
@@ -34,7 +34,7 @@ public record ClozeAnswerResponse(
         }
     }
 
-    static ClozeAnswerResponse from(ClozeAnswerResult result, ClozeExp exp, int combo) {
+    public static ClozeAnswerResponse from(ClozeAnswerResult result, ClozeExp exp, int combo) {
         return new ClozeAnswerResponse(
                 result.correct(),
                 result.word(),

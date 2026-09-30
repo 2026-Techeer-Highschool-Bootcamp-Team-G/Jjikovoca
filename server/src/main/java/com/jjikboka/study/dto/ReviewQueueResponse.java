@@ -1,4 +1,4 @@
-package com.jjikboka.app.study;
+package com.jjikboka.study.dto;
 
 import com.jjikboka.card.dto.ReviewQueueItem;
 
@@ -10,7 +10,7 @@ import java.util.List;
  */
 public record ReviewQueueResponse(int dueCount, List<ReviewQueueItem> cards) {
 
-    static ReviewQueueResponse of(List<ReviewQueueItem> cards) {
+    public static ReviewQueueResponse of(List<ReviewQueueItem> cards) {
         return new ReviewQueueResponse(cards.size(), cards);
     }
 }

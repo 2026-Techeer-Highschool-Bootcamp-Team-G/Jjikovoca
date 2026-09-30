@@ -1,4 +1,4 @@
-package com.jjikboka.app.study;
+package com.jjikboka.study.dto;
 
 import com.jjikboka.card.dto.FlashcardItem;
 
@@ -10,7 +10,7 @@ import java.util.List;
  */
 public record FlashcardQueueResponse(int total, List<FlashcardItem> cards) {
 
-    static FlashcardQueueResponse of(List<FlashcardItem> cards) {
+    public static FlashcardQueueResponse of(List<FlashcardItem> cards) {
         return new FlashcardQueueResponse(cards.size(), cards);
     }
 }

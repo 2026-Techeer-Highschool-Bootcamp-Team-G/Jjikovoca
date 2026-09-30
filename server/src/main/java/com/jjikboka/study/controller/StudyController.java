@@ -1,7 +1,14 @@
-package com.jjikboka.app.study;
+package com.jjikboka.study.controller;
 
 import com.jjikboka.card.service.StudyQueueService;
 import com.jjikboka.common.response.ApiResponse;
+import com.jjikboka.study.dto.FlashcardQueueResponse;
+import com.jjikboka.study.dto.RecommendationResponse;
+import com.jjikboka.study.dto.ReviewQueueResponse;
+import com.jjikboka.study.dto.StudyRecordRequest;
+import com.jjikboka.study.dto.StudyResultResponse;
+import com.jjikboka.study.service.RecommendationService;
+import com.jjikboka.study.service.StudyService;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

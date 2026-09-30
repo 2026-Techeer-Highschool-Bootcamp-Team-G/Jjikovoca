@@ -1,7 +1,9 @@
-package com.jjikboka.app.study;
+package com.jjikboka.study.service;
 
 import com.jjikboka.card.dto.ClozeAnswerResult;
 import com.jjikboka.card.service.ClozeService;
+import com.jjikboka.study.dto.ClozeAnswerRequest;
+import com.jjikboka.study.dto.ClozeAnswerResponse;
 import com.jjikboka.studylog.service.StudyLogService;
 import com.jjikboka.studylog.dto.StudyRecordCommand;
 import com.jjikboka.studylog.service.StudyStatsService;

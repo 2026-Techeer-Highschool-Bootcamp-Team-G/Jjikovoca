@@ -1,7 +1,9 @@
-package com.jjikboka.app.study;
+package com.jjikboka.study.service;
 
 import com.jjikboka.card.service.CardReviewService;
 import com.jjikboka.card.dto.PostReviewCardState;
+import com.jjikboka.study.dto.StudyRecordRequest;
+import com.jjikboka.study.dto.StudyResultResponse;
 import com.jjikboka.studylog.service.StudyLogService;
 import com.jjikboka.studylog.dto.StudyRecordCommand;
 import com.jjikboka.stats.dto.ExpDelta;

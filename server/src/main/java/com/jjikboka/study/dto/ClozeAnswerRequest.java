@@ -1,4 +1,4 @@
-package com.jjikboka.app.study;
+package com.jjikboka.study.dto;
 
 /**
  * 빈칸 답 제출 요청 (Notion API-ID 15). guess 누락은 서비스에서 400 MISSING_GUESS로 던진다(스펙 errorName 정합).

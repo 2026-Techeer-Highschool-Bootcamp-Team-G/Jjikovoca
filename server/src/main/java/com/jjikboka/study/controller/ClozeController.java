@@ -1,9 +1,13 @@
-package com.jjikboka.app.study;
+package com.jjikboka.study.controller;
 
 import com.jjikboka.analysis.service.GeminiClient;
 import com.jjikboka.card.dto.ClozeRegenerated;
 import com.jjikboka.card.service.ClozeService;
 import com.jjikboka.common.response.ApiResponse;
+import com.jjikboka.study.dto.ClozeAnswerRequest;
+import com.jjikboka.study.dto.ClozeAnswerResponse;
+import com.jjikboka.study.dto.ClozeGenerateResponse;
+import com.jjikboka.study.service.ClozeStudyService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;

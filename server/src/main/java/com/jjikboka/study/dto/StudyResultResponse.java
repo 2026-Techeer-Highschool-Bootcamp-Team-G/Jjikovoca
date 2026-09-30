@@ -1,4 +1,4 @@
-package com.jjikboka.app.study;
+package com.jjikboka.study.dto;
 
 import com.jjikboka.card.dto.PostReviewCardState;
 import com.jjikboka.stats.dto.ExpDelta;
@@ -17,7 +17,7 @@ public record StudyResultResponse(
         ExpDelta exp
 ) {
 
-    static StudyResultResponse of(PostReviewCardState state, ExpDelta exp) {
+    public static StudyResultResponse of(PostReviewCardState state, ExpDelta exp) {
         return new StudyResultResponse(state.cardId(), state.boxLevel(), state.nextReviewAt(), state.graduated(), exp);
     }
 }
