@@ -1,0 +1,26 @@
+package com.jjikovoca.analysis.service;
+
+import com.jjikovoca.analysis.dto.AnalysisContent;
+import com.jjikovoca.analysis.dto.GeminiImage;
+
+/**
+ * 분석 모델 클라이언트 (API-6). 지금은 모의 구현({@link MockGeminiClient})만 있고, 실 Gemini 전환 시
+ * 이 인터페이스 구현만 갈아끼운다(계약 불변, 모의 우선 방침). 공개 인터페이스라 app 워커가 주입해 쓴다.
+ */
+public interface GeminiClient {
+
+    /**
+     * 영어 단어(WORD) 분석 콘텐츠를 생성한다. images는 접수 때 저장한 크롭/지문(비었을 수 있음) —
+     * 모의 구현은 무시하고, 실 구현은 비전 입력으로 넣는다. type은 호환용 인자로 항상 "WORD"다.
+     */
+    public AnalysisContent generate(String type, java.util.List<GeminiImage> images);
+
+    /** 주어진 단어(숙어 포함)를 담은 새 예문을 생성한다(API-16 예문 재생성). 세션용 — 카드 원문은 바꾸지 않는다. */
+    public String generateExample(String word);
+
+    /**
+     * 단어의 뜻을 기억할 AI 연상 이미지를 생성해 data URL({@code data:{mime};base64,...})로 돌려준다(API-6c, 온디맨드).
+     * 실 구현은 이미지 모델을 호출하고, 모의 구현은 고정 이미지를 돌려준다. meaning은 문맥 뜻(없으면 null).
+     */
+    public String generateMnemonicImage(String word, String meaning);
+}
