@@ -1,4 +1,4 @@
-package com.jjikboka.app.integration;
+package com.jjikboka.integration;
 
 import org.junit.jupiter.api.Test;
 

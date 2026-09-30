@@ -1,4 +1,4 @@
-package com.jjikboka.app.integration;
+package com.jjikboka.integration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jsonwebtoken.Jwts;

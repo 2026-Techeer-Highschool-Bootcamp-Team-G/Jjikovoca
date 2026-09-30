@@ -1,4 +1,4 @@
-package com.jjikboka.app;
+package com.jjikboka;
 
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
@@ -28,6 +28,7 @@ class ArchitectureTest {
                     "com.jjikboka.auth..", "com.jjikboka.analysis..", "com.jjikboka.card..",
                     "com.jjikboka.exam..", "com.jjikboka.studylog..", "com.jjikboka.stats..",
                     "com.jjikboka.quota..", "com.jjikboka.subscription..",
-                    "com.jjikboka.notification..", "com.jjikboka.export..")
+                    "com.jjikboka.notification..", "com.jjikboka.export..",
+                    "com.jjikboka.me..", "com.jjikboka.study..", "com.jjikboka.wordbook..")
             .allowEmptyShould(true);
 }

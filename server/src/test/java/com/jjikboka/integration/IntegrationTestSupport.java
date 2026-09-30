@@ -1,4 +1,4 @@
-package com.jjikboka.app.integration;
+package com.jjikboka.integration;
 
 import com.jjikboka.support.TestTimeZone;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -38,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * <p>외부 의존은 없앤다: Gemini는 mock, 이미지·내보내기는 temp 디렉토리. 컨테이너는 싱글톤(static 블록에서 JVM당 1회 기동)이라
  * 모든 통합테스트 클래스가 공유한다(클래스 단위 start/stop이 없어, 통합테스트가 여럿이어도 컨테이너 라이프사이클 레이스가 없다).
- * {@code com.jjikboka.app} 하위라 {@code JjikbokaApplication}(같은 패키지 트리)이 @SpringBootConfiguration으로 잡힌다.
+ * {@code com.jjikboka} 하위라 {@code JjikbokaApplication}(같은 패키지 트리)이 @SpringBootConfiguration으로 잡힌다.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
