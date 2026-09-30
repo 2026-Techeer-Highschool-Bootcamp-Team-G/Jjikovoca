@@ -630,9 +630,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jjikboka-web@workspace:.":
+"jjikovoca-web@workspace:.":
   version: 0.0.0-use.local
-  resolution: "jjikboka-web@workspace:."
+  resolution: "jjikovoca-web@workspace:."
   dependencies:
     "@tanstack/react-query": "npm:^5.101.3"
     "@types/katex": "npm:^0.16.8"
