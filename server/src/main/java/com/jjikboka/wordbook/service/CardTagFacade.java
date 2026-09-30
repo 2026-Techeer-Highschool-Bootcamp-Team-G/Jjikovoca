@@ -1,8 +1,10 @@
-package com.jjikboka.app.cards;
+package com.jjikboka.wordbook.service;
 
 import com.jjikboka.card.service.CardQueryService;
 import com.jjikboka.exam.dto.ExamTag;
 import com.jjikboka.exam.service.ExamTagService;
+import com.jjikboka.wordbook.dto.CardTagResponse;
+import com.jjikboka.wordbook.dto.CardUntagResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

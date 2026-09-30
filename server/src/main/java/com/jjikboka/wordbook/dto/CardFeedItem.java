@@ -1,4 +1,4 @@
-package com.jjikboka.app.cards;
+package com.jjikboka.wordbook.dto;
 
 import com.jjikboka.card.dto.CardSummary;
 import com.jjikboka.exam.dto.ExamTag;
@@ -32,7 +32,7 @@ public record CardFeedItem(
         List<ExamTag> exams
 ) {
 
-    static CardFeedItem of(CardSummary card, List<ExamTag> exams) {
+    public static CardFeedItem of(CardSummary card, List<ExamTag> exams) {
         return new CardFeedItem(card.id(), card.type(), card.subject(), card.word(), card.contextMeaning(),
                 card.example(), card.exampleMeaning(), card.concept(),
                 card.boxLevel(), card.graduated(), card.createdAt(),

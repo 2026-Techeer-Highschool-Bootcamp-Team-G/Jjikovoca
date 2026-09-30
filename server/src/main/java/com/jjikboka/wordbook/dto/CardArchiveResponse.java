@@ -1,4 +1,4 @@
-package com.jjikboka.app.cards;
+package com.jjikboka.wordbook.dto;
 
 import com.jjikboka.card.dto.ArchiveDay;
 

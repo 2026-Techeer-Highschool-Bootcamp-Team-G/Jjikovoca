@@ -1,6 +1,10 @@
-package com.jjikboka.app.cards;
+package com.jjikboka.wordbook.controller;
 
 import com.jjikboka.common.response.ApiResponse;
+import com.jjikboka.wordbook.dto.CardTagRequest;
+import com.jjikboka.wordbook.dto.CardTagResponse;
+import com.jjikboka.wordbook.dto.CardUntagResponse;
+import com.jjikboka.wordbook.service.CardTagFacade;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;

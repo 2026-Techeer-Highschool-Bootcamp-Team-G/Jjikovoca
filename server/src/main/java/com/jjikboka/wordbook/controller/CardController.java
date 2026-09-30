@@ -1,10 +1,14 @@
-package com.jjikboka.app.cards;
+package com.jjikboka.wordbook.controller;
 
 import com.jjikboka.card.service.CardCommandService;
 import com.jjikboka.card.dto.CardCounts;
 import com.jjikboka.card.dto.CardDetail;
 import com.jjikboka.card.service.CardQueryService;
 import com.jjikboka.common.response.ApiResponse;
+import com.jjikboka.wordbook.dto.CardArchiveResponse;
+import com.jjikboka.wordbook.dto.CardDeleteResponse;
+import com.jjikboka.wordbook.dto.CardFeedResponse;
+import com.jjikboka.wordbook.service.FeedFacade;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;

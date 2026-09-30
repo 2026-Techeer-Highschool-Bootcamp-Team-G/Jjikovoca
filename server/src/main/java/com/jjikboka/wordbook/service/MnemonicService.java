@@ -1,4 +1,4 @@
-package com.jjikboka.app.cards;
+package com.jjikboka.wordbook.service;
 
 import com.jjikboka.analysis.service.GeminiClient;
 import com.jjikboka.common.image.ImageStorageService;

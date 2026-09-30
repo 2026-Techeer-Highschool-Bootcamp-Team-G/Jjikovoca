@@ -1,9 +1,11 @@
-package com.jjikboka.app.cards;
+package com.jjikboka.wordbook.service;
 
 import com.jjikboka.card.service.CardQueryService;
 import com.jjikboka.card.dto.CardSummary;
 import com.jjikboka.exam.service.ExamFeedService;
 import com.jjikboka.exam.dto.ExamTag;
+import com.jjikboka.wordbook.dto.CardFeedItem;
+import com.jjikboka.wordbook.dto.CardFeedResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
