@@ -20,7 +20,7 @@ import java.util.TimeZone;
 public class JjikbokaApplication {
     public static void main(String[] args) {
         // 커넥션 풀이 생기기 전에 JVM 시간대를 KST로 고정한다 — 늦으면 LocalDate가 하루 밀려 저장된다(#473).
-        // (app.config.TimeZoneConfig와 같은 값. 루트는 app 모듈 내부를 참조할 수 없어 여기서 직접 적용한다.)
+        // (common.config.TimeZoneConfig와 같은 값. 루트는 common 모듈보다 먼저 실행돼야 해서 여기서 직접 적용한다.)
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
         SpringApplication.run(JjikbokaApplication.class, args);
     }

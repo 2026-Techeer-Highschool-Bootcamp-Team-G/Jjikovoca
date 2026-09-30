@@ -1,4 +1,4 @@
-package com.jjikboka.app.config;
+package com.jjikboka.auth.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;

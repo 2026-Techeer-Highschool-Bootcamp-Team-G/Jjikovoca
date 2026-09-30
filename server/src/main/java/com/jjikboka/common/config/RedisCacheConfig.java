@@ -1,4 +1,4 @@
-package com.jjikboka.app.config;
+package com.jjikboka.common.config;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,8 +17,8 @@ import java.time.Duration;
 import java.util.Map;
 
 /**
- * Redis 캐시-어사이드 (13 §9). 캐시 인프라(연결·CacheManager)는 조립 모듈(app) 소유(§9-3),
- * "무엇을 캐싱하는가"는 소유 모듈(core.stats·analysis)이 @Cacheable로 결정.
+ * Redis 캐시-어사이드 (13 §9). 캐시 인프라(연결·CacheManager)는 공용 모듈(common) 소유(§9-3),
+ * "무엇을 캐싱하는가"는 소유 모듈(stats·analysis)이 @Cacheable로 결정.
  *
  * 직렬화 = JSON(redis-cli로 눈으로 확인 가능) · DTO만 캐싱, JPA 엔티티 금지(§9-2).
  * 무효화는 §6 이벤트로 evict — 여기선 TTL 정책만 정의.

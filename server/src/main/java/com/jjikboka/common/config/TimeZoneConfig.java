@@ -1,4 +1,4 @@
-package com.jjikboka.app.config;
+package com.jjikboka.common.config;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
