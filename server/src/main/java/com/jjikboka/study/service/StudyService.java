@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 
 /**
- * 학습 기록 조립 (API-11, app 파사드). 카드 전이(core.card)와 study_log 원장(core.review)을 한 트랜잭션으로 엮는다 —
+ * 학습 기록 조립 (API-11, study 파사드). 카드 전이(core.card)와 study_log 원장(core.review)을 한 트랜잭션으로 엮는다 —
  * 둘 중 하나라도 실패하면 함께 롤백돼 "전이됐는데 기록이 없거나" 그 반대가 생기지 않는다.
  *
  * <p>enum 허용값·RETRY+CONFUSED 조합은 여기서 검증해 400 INVALID_STUDY_RESULT로 막는다(스펙 errorName 정합).

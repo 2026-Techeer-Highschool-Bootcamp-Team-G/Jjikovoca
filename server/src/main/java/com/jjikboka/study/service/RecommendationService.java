@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * 학습 추천 조립 (API-6b, app 파사드). 복습 대기 수·평균 회상확률(core.card)로 홈 추천 요약을 만든다.
+ * 학습 추천 조립 (API-6b, study 파사드). 복습 대기 수·평균 회상확률(core.card)로 홈 추천 요약을 만든다.
  * 예상 시간은 카드당 heuristic(30초)로 파생 — 밸런스 기획 확정 전 placeholder.
  */
 @Service

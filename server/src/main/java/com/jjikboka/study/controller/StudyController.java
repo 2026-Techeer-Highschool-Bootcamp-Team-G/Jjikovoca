@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 학습 API (Notion API-ID 11·12·13). 인증 필요 — JwtAuthenticationFilter가 실은 userId를 넣는다.
- * 복습 활동 결과를 단일 진입점으로 기록(서버가 라이트너 전이 강제)하고, 플래시카드·복습 큐를 제공한다. app→core.card 조립(13 §2).
+ * 복습 활동 결과를 단일 진입점으로 기록(서버가 라이트너 전이 강제)하고, 플래시카드·복습 큐를 제공한다. study→core.card 조립(13 §2).
  */
 @RestController
 class StudyController {

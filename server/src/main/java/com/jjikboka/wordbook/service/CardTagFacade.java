@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 카드 시험 태깅 조립 (API-43·44, app 파사드). 카드 소유(core.card)와 시험 소유(core.review)를 각 슬라이스에 맡기고
- * exam_card 태깅을 한 트랜잭션으로 엮는다 — 카드·시험 엔티티가 서로 다른 슬라이스라 app이 양쪽을 검증·조립한다(13 §2).
+ * 카드 시험 태깅 조립 (API-43·44, wordbook 파사드). 카드 소유(core.card)와 시험 소유(core.review)를 각 슬라이스에 맡기고
+ * exam_card 태깅을 한 트랜잭션으로 엮는다 — 카드·시험 엔티티가 서로 다른 슬라이스라 wordbook이 양쪽을 검증·조립한다(13 §2).
  */
 @Service
 public class CardTagFacade {

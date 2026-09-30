@@ -3,7 +3,7 @@ package com.jjikboka.me.dto;
 import java.time.LocalDateTime;
 
 /**
- * 내 정보 응답 (Notion API-ID 3). 여러 도메인을 조합한 결과이므로 app 조립 레벨에 둔다.
+ * 내 정보 응답 (Notion API-ID 3). 여러 도메인을 조합한 결과이므로 최상단 me 모듈에 둔다.
  * ApiResponse로 감싸져 {@code { success, data:{ ... }, message }} 형태가 된다.
  *
  * - premium: subscription status+expires_at 계산값(app_user 컬럼 아님).

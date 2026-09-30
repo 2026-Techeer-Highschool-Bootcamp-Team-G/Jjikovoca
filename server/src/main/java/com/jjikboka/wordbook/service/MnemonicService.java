@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 /**
- * 연상 이미지 온디맨드 조립 (API-6c, app 파사드). 캐시 확인(core.card) → 생성(analysis Gemini) → 저장(app.image S3) →
+ * 연상 이미지 온디맨드 조립 (API-6c, wordbook 파사드). 캐시 확인(core.card) → 생성(analysis Gemini) → 저장(common.image S3) →
  * 키 캐시(core.card). 느린 외부 호출(생성)은 트랜잭션 밖에서 하고, 키 저장만 짧은 트랜잭션(core.card)에 맡긴다 —
  * 이미지 생성 수초 동안 DB 커넥션을 쥐지 않게 한다.
  */

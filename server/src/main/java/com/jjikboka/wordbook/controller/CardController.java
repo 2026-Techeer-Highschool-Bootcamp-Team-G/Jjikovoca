@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 카드 API (Notion API-ID 7·8·9·36). 인증 필요 — JwtAuthenticationFilter가 실은 userId를 넣는다.
  * 피드는 최신순·soft-delete 제외(subject로 과목 좁힘), 상세·삭제는 소유자 검증을 서버가 강제하고,
- * 보관함은 월별 크롭 원문을 일자별로 묶는다. app→core.card 조립(13 §2).
+ * 보관함은 월별 크롭 원문을 일자별로 묶는다. wordbook→core.card 조립(13 §2).
  */
 @RestController
 @RequestMapping("/api/cards")

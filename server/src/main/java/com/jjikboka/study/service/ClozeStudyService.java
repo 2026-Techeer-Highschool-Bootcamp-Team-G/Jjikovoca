@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * 빈칸 답 제출 조립 (API-15, app 파사드). 판정·전이(core.card) + study_log 원장(core.review) + 경험치(core.stats)를
+ * 빈칸 답 제출 조립 (API-15, study 파사드). 판정·전이(core.card) + study_log 원장(core.review) + 경험치(core.stats)를
  * 한 트랜잭션으로 엮는다 — 이 엔드포인트가 CLOZE 학습의 <b>단일 기록·시간·경험치 주체</b>다(FE는 별도 /study 미호출).
  * guess 누락은 여기서 400 MISSING_GUESS로 막고, 판정 결과를 그대로 CLOZE 활동으로 기록한다(정답=KNOW·오답=DONT_KNOW).
  *

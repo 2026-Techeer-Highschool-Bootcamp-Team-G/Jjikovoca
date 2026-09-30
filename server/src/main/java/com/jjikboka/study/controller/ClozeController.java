@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * 빈칸 퀴즈 API (Notion API-ID 14·15·16). 인증 필요 — JwtAuthenticationFilter가 실은 userId를 넣는다.
  * 문항 생성은 정답을 숨기고, 답 제출은 서버가 판정해 전이·기록까지 처리하며, 예문 재생성은 AI(analysis)와 core.card를
- * app이 조립한다 — AI 생성기를 core.card에 주입해 슬라이스 경계를 지킨다(13 §2).
+ * study 모듈이 조립한다 — AI 생성기를 core.card에 주입해 슬라이스 경계를 지킨다(13 §2).
  */
 @RestController
 class ClozeController {

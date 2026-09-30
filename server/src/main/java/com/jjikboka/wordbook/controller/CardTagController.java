@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 카드 시험 태깅 API (Notion API-ID 43·44, F-29). 인증 필요 — JwtAuthenticationFilter가 실은 userId를 넣는다.
- * 카드를 시험 범위에 넣고(멱등·다대다) 뺀다. 카드·시험 소유는 서버가 각 슬라이스로 강제한다. app→core 조립(13 §2).
+ * 카드를 시험 범위에 넣고(멱등·다대다) 뺀다. 카드·시험 소유는 서버가 각 슬라이스로 강제한다. wordbook→core 조립(13 §2).
  */
 @RestController
 class CardTagController {

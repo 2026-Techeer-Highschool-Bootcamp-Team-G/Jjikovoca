@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 카드 피드 조립 (API-7 F-29, app 파사드). 피드 본문(core.card)에 시험 태깅 필터·칩(core.review)을 합친다 —
- * 두 도메인이 다른 슬라이스라 app이 조립한다(13 §2). examId·untagged 필터는 상호 배타(examId 우선).
+ * 카드 피드 조립 (API-7 F-29, wordbook 파사드). 피드 본문(core.card)에 시험 태깅 필터·칩(core.review)을 합친다 —
+ * 두 도메인이 다른 슬라이스라 wordbook이 조립한다(13 §2). examId·untagged 필터는 상호 배타(examId 우선).
  */
 @Service
 public class FeedFacade {

@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
- * 내 정보 조합 (app 조립 레벨). auth·core.card·core.stats의 공개 조회 서비스만 호출해 조립한다 —
- * 도메인끼리는 서로를 모르고(13 §2), app이 조립만 담당한다. level/exp는 exp 현황에서, 결제정보는 프리미엄 조회에서 가져온다.
+ * 내 정보 조합 (me 모듈). auth·core.card·core.stats의 공개 조회 서비스만 호출해 조립한다 —
+ * 도메인끼리는 서로를 모르고(13 §2), me 모듈이 조립만 담당한다. level/exp는 exp 현황에서, 결제정보는 프리미엄 조회에서 가져온다.
  */
 @Service
 public class MeService {
