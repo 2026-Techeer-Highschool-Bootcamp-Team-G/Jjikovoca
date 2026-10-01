@@ -28,7 +28,7 @@ java -version   # "21.0.x" 확인
 cd server && ./gradlew --stop
 
 # 3) 빌드 전, E2E로 띄운 leftover bootRun 종료(메모리 최대 확보)
-pkill -f JjikbokaApplication
+pkill -f JjikovocaApplication
 
 # 4) 빌드
 ./gradlew build
@@ -47,7 +47,7 @@ pkill -f JjikbokaApplication
 ## 진단 팁
 ```bash
 # 쌓인 데몬·leftover 앱 확인
-ps aux | grep -iE "JjikbokaApplication|GradleDaemon|gradle" | grep -v grep
+ps aux | grep -iE "JjikovocaApplication|GradleDaemon|gradle" | grep -v grep
 lsof -nP -iTCP:8000 -sTCP:LISTEN            # bootRun 점유 확인
 vm_stat | grep "Pages free"                # free 메모리(페이지×16KB)
 /usr/libexec/java_home -V                   # 설치된 JDK 목록(현재 JAVA_HOME 포함)

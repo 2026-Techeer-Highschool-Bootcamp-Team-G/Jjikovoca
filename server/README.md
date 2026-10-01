@@ -1,4 +1,4 @@
-# 찍어보카 백엔드 (jjikboka-server)
+# 찍어보카 백엔드 (jjikovoca-server)
 
 **단일 모듈 모놀리스** — 하나의 실행 이미지(`app.jar`)로 배포하고, 도메인 경계는 패키지 + Spring Modulith가
 빌드에서 강제한다. MSA는 하지 않으며(문서 15), 쿠버네티스는 이 단일 이미지를 레플리카 N개로 복제하는
@@ -12,8 +12,8 @@
 server/
 ├── build.gradle.kts        단일 빌드 (실행 jar = app.jar)
 ├── settings.gradle.kts
-└── src/main/java/com/jjikboka/
-    ├── JjikbokaApplication.java   진입점
+└── src/main/java/com/jjikovoca/
+    ├── JjikovocaApplication.java   진입점
     ├── common/         공용 기술 인프라(응답·에러·이벤트·이미지·헬스·설정) — 도메인 무의존
     ├── auth/           인증·계정·토큰, Security 설정
     ├── card/           카드 애그리거트(캡처·피드·보관함·Leitner 복습·클로즈)
