@@ -27,7 +27,7 @@ export async function downloadExport(downloadUrl: string): Promise<void> {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = filename ?? 'jjikoboka-export.pdf' // .pdf 파일명 명시(서버가 안 주면 폴백)
+  a.download = filename ?? 'chilldan-export.pdf' // .pdf 파일명 명시(서버가 안 주면 폴백)
   document.body.appendChild(a)
   a.click()
   a.remove()
