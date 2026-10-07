@@ -133,7 +133,6 @@ button {
   }
 }
 
-/* AI 분석 중(토스식): 중앙 그래픽이 둥실 떠오름 */
 @keyframes jjik-float {
   0%,
   100% {
@@ -151,7 +150,6 @@ button {
   }
 }
 
-/* 카메라 로딩(토스식): 스켈레톤 시머가 사선으로 훑고 지나감 */
 @keyframes jjik-shimmer-sweep {
   0% {
     transform: translateX(-140%) skewX(-12deg);
@@ -332,7 +330,6 @@ button {
   }
 }
 
-/* Toss식 성공 팝 — 스프링 오버슈트로 튀어오르며 등장 (졸업·완료·정답) */
 @keyframes jjik-pop-spring {
   0% {
     opacity: 0;
@@ -350,7 +347,6 @@ button {
   }
 }
 
-/* Toss식 순차 등장 — 아래에서 살짝 떠오르며 페이드 인 (배지·제목·문구 스태거) */
 @keyframes jjik-rise-in {
   from {
     opacity: 0;
@@ -362,7 +358,6 @@ button {
   }
 }
 
-/* Toss식 축하 컨페티 — 중심에서 바깥으로 튀어 흩어지며 사라짐 (--tx/--ty/--r) */
 @keyframes jjik-confetti-burst {
   0% {
     opacity: 0;

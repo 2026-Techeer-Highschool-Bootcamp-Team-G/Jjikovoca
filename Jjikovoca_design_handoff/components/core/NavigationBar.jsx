@@ -1,7 +1,6 @@
 import React from 'react'
 import { Icon } from './Icon'
 
-// TDS NavigationBar (9:3) — 좌 뒤로가기(44 터치영역) · 중앙 타이틀 · 우 액션 슬롯. 높이 56
 export function NavigationBar({ title, right, onBack }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', height: 56, padding: '0 8px', background: 'var(--color-bg-primary)' }}>

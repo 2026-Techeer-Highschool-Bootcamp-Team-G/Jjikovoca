@@ -9,7 +9,6 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   block?: boolean
 }
 
-// TDS Button (6:50). Fill(primary) / Weak(ghost) · Size M48(md) / L52(lg) · block=full width
 export function Button({ variant = 'primary', size = 'md', block = false, style, ...rest }: Props) {
   const sizeStyle =
     size === 'lg'

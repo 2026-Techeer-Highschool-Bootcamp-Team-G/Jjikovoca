@@ -1,6 +1,5 @@
 import React from 'react'
 
-// TDS TextField (59:54) — 라벨 + 입력 필드(bg-secondary, 테두리 없음, 52px) + 헬퍼
 export function TextField({ label, value, onChange, placeholder, helper, type = 'text' }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%' }}>

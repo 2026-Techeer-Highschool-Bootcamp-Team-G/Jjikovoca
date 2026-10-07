@@ -1,6 +1,5 @@
 import React from 'react'
 
-// TDS ListHeader (8:7). 좌: 섹션 제목(17 medium) / 우: 링크(13 brand)
 export function ListHeader({ title, link, onLink }) {
   return (
     <div style={{ display: 'flex', height: 48, alignItems: 'center', justifyContent: 'space-between', padding: '0 var(--spacing-xl)' }}>

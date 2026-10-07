@@ -2,7 +2,6 @@ import type { ReactNode, SVGProps } from 'react'
 
 type IconProps = SVGProps<SVGSVGElement> & { size?: number }
 
-// Toss 스타일 라인 아이콘 (24px 그리드, 2px 스트로크, currentColor). Figma DS·Assets 대응 임시 세트.
 function Svg({ size = 24, children, ...rest }: IconProps & { children: ReactNode }) {
   return (
     <svg

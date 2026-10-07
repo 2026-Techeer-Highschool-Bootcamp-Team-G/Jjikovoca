@@ -9,7 +9,6 @@ interface Props<K extends string> {
   onChange: (key: K) => void
 }
 
-// TDS Tab (9:21). Selected: 텍스트 강조 + 2px 브랜드 인디케이터 / Default: tertiary.
 // 인디케이터는 버튼별 on/off 가 아니라 단일 바가 선택 탭 위치로 슬라이드(부드러운 전환).
 export function Tabs<K extends string>({ tabs, value, onChange }: Props<K>) {
   const selectedIndex = Math.max(0, tabs.findIndex((t) => t.key === value))

@@ -112,7 +112,6 @@ export function AnalyzingView() {
   )
 }
 
-// AI 분석 중 오브(토스식) — 숨쉬는 글로우 + 회전 스캔 링 + 궤도 스파클 + 둥실 떠오르는 글리프
 function AnalyzingOrb({ emoji }: { emoji: string }) {
   return (
     <div style={{ position: 'relative', width: 200, height: 200 }} aria-hidden>
