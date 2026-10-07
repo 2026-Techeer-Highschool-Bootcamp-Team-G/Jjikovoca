@@ -1,4 +1,3 @@
-// 성공/완료 그래픽 — 초록 원 체크가 스프링으로 팝 + 링 퍼짐 + 반짝임 (토스식)
 export function SuccessGraphic() {
   return (
     <div

@@ -7,7 +7,6 @@ interface Props {
   type?: string
 }
 
-// TDS TextField (59:54) — 라벨 + 입력 필드(bg-secondary) + 헬퍼. 로그인·검색·폼 공용.
 export function TextField({ label, value, onChange, placeholder, helper, type = 'text' }: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%' }}>

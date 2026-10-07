@@ -12,7 +12,6 @@ interface Props {
   divider?: boolean
 }
 
-// TDS ListRow (8:11) — 좌 아이콘(40) · 중 제목/부제 · 우 값+화살표. 설정·목록 공용.
 export function ListRow({
   icon,
   title,

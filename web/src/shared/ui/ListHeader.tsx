@@ -4,7 +4,6 @@ interface Props {
   onLink?: () => void
 }
 
-// TDS ListHeader (8:7). 좌: 섹션 제목(17 medium) / 우: 링크(13 brand)
 export function ListHeader({ title, link, onLink }: Props) {
   return (
     <div

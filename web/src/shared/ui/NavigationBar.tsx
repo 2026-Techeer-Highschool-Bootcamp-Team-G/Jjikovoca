@@ -7,7 +7,6 @@ interface Props {
   onBack?: () => void
 }
 
-// TDS NavigationBar (9:3) — 좌 뒤로가기(44 터치영역) · 중앙 타이틀 · 우 액션 슬롯
 export function NavigationBar({ title, right, onBack }: Props) {
   return (
     <div

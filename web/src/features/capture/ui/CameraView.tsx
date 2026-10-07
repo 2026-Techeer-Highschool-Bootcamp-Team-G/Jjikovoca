@@ -411,7 +411,6 @@ function Corner({ style }: { style: CSSProperties }) {
   return <div style={{ position: 'absolute', width: 28, height: 28, ...style }} />
 }
 
-// 카메라 로딩 (토스식) — 프레임 스켈레톤 + 사선 시머 스윕 + 오토포커스 브리딩 링 + 통통 튀는 점
 function CameraLoading() {
   const lineColor = 'rgba(255,255,255,0.55)'
   const lineAnim = 'jjik-edge-glow 1.6s ease-in-out infinite'
