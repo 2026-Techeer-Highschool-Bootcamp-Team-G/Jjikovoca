@@ -1,6 +1,5 @@
 import React from 'react'
 
-// TDS Tab (9:21). Selected: 텍스트 강조 + 2px 브랜드 인디케이터 / Default: tertiary.
 // 인디케이터는 단일 바가 선택 탭 위치로 슬라이드한다.
 export function Tabs({ tabs, value, onChange }) {
   const selectedIndex = Math.max(0, tabs.findIndex((t) => t.key === value))

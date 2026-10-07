@@ -279,7 +279,6 @@ Object.assign(__ds_scope, { AppLogo });
 
 // components/core/Badge.jsx
 try { (() => {
-// TDS Badge (7:42). Fill=강조 / Weak=보조. 용례: 박스 레벨(blue)·졸업(green)·몰라요(red)·복습예정(yellow)·과목(grey)
 const FILL = {
   blue: {
     bg: 'var(--color-brand-primary)',
@@ -405,7 +404,6 @@ Object.assign(__ds_scope, { BottomSheet });
 // components/core/Button.jsx
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
-// TDS Button (6:50). Fill(primary) / Weak(weak) / Ghost(테두리) · Size M(md) / L52(lg) · block=full width
 function Button({
   variant = 'primary',
   size = 'md',
@@ -519,7 +517,6 @@ Object.assign(__ds_scope, { Dialog });
 // components/core/Icon.jsx
 try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
-// Toss 스타일 라인 아이콘 (24px 그리드, 2px 스트로크, currentColor) — web/src/shared/ui/icons.tsx 세트를 그대로 이식
 const ICON_NAMES = ['menu', 'search', 'bell', 'clock', 'calendar', 'fire', 'check', 'refresh', 'trophy', 'chevron-right', 'chevron-left', 'close', 'speaker', 'home', 'book', 'vocab', 'chart', 'user', 'camera'];
 const PATHS = {
   menu: /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("line", {
@@ -699,7 +696,6 @@ Object.assign(__ds_scope, { ICON_NAMES, Icon });
 
 // components/core/ListHeader.jsx
 try { (() => {
-// TDS ListHeader (8:7). 좌: 섹션 제목(17 medium) / 우: 링크(13 brand)
 function ListHeader({
   title,
   link,
@@ -738,7 +734,6 @@ Object.assign(__ds_scope, { ListHeader });
 
 // components/core/ListRow.jsx
 try { (() => {
-// TDS ListRow (8:11) — 좌 아이콘(40 원형) · 중 제목/부제 · 우 값 + 화살표. 설정·목록 공용, 높이 64
 function ListRow({
   icon,
   title,
@@ -823,7 +818,6 @@ Object.assign(__ds_scope, { ListRow });
 
 // components/core/NavigationBar.jsx
 try { (() => {
-// TDS NavigationBar (9:3) — 좌 뒤로가기(44 터치영역) · 중앙 타이틀 · 우 액션 슬롯. 높이 56
 function NavigationBar({
   title,
   right,
@@ -999,7 +993,6 @@ Object.assign(__ds_scope, { SegmentedControl });
 
 // components/core/Tabs.jsx
 try { (() => {
-// TDS Tab (9:21). Selected: 텍스트 강조 + 2px 브랜드 인디케이터 / Default: tertiary.
 // 인디케이터는 단일 바가 선택 탭 위치로 슬라이드한다.
 function Tabs({
   tabs,
@@ -1174,7 +1167,6 @@ Object.assign(__ds_scope, { TagList });
 
 // components/core/TextField.jsx
 try { (() => {
-// TDS TextField (59:54) — 라벨 + 입력 필드(bg-secondary, 테두리 없음, 52px) + 헬퍼
 function TextField({
   label,
   value,

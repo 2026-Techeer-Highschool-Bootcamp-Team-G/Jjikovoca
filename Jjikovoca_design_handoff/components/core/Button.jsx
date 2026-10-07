@@ -1,6 +1,5 @@
 import React from 'react'
 
-// TDS Button (6:50). Fill(primary) / Weak(weak) / Ghost(테두리) · Size M(md) / L52(lg) · block=full width
 export function Button({ variant = 'primary', size = 'md', block = false, style, children, ...rest }) {
   const sizeStyle =
     size === 'lg'

@@ -1,7 +1,6 @@
 import React from 'react'
 import { Icon } from './Icon'
 
-// TDS ListRow (8:11) — 좌 아이콘(40 원형) · 중 제목/부제 · 우 값 + 화살표. 설정·목록 공용, 높이 64
 export function ListRow({ icon, title, subtitle, value, valueColor, onClick, showArrow = true, divider = false }) {
   return (
     <button

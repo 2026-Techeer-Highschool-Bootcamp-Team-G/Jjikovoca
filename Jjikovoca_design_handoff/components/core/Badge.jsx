@@ -1,6 +1,5 @@
 import React from 'react'
 
-// TDS Badge (7:42). Fill=강조 / Weak=보조. 용례: 박스 레벨(blue)·졸업(green)·몰라요(red)·복습예정(yellow)·과목(grey)
 const FILL = {
   blue: { bg: 'var(--color-brand-primary)', fg: 'var(--color-text-inverse)' },
   green: { bg: 'var(--color-success-primary)', fg: 'var(--color-text-inverse)' },

@@ -1,6 +1,5 @@
 import React from 'react'
 
-// Toss 스타일 라인 아이콘 (24px 그리드, 2px 스트로크, currentColor) — web/src/shared/ui/icons.tsx 세트를 그대로 이식
 export const ICON_NAMES = [
   'menu','search','bell','clock','calendar','fire','check','refresh','trophy',
   'chevron-right','chevron-left','close','speaker','home','book','vocab','chart','user','camera',
