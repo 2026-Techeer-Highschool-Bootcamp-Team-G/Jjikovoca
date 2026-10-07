@@ -59,7 +59,7 @@ public class AppUser {
      */
     public void softDelete(LocalDateTime now) {
         this.deletedAt = now;
-        this.email = "deleted_" + id + "@deleted.jjikovoca";
+        this.email = "deleted_" + id + "@deleted.chilldan";
     }
 
     public Long getId() {
