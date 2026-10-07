@@ -120,7 +120,7 @@ class ChromiumExportRenderer implements ExportRenderer {
                   h1{font-size:20px;color:#3182f6;margin:0 0 24px}
                   ul{list-style:none;padding:0} li{padding:12px 0;border-bottom:1px solid #eee}
                   .h{font-weight:700;display:block} .b{color:#4e5968;font-size:14px}
-                </style></head><body><h1>찍어보카 오답노트 (%s)</h1><ul>%s</ul></body></html>
+                </style></head><body><h1>칠단 오답노트 (%s)</h1><ul>%s</ul></body></html>
                 """.formatted(escape(type), rows.toString());
     }
 

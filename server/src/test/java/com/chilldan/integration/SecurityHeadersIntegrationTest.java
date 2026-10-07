@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * API 보안 응답 헤더 (#482, P1-11 E). 설계 정본은 「찍어보카 보안 및 방어로직」 §6.
+ * API 보안 응답 헤더 (#482, P1-11 E). 설계 정본은 「칠단 보안 및 방어로직」 §6.
  * 성공 응답뿐 아니라 인증 실패(401) 응답에도 같은 헤더가 붙어야 한다.
  */
 class SecurityHeadersIntegrationTest extends IntegrationTestSupport {

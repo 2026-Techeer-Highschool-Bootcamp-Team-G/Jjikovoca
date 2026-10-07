@@ -63,7 +63,7 @@ class PdfBoxExportRenderer implements ExportRenderer {
 
     private void writeContent(PDDocument doc, PDType0Font font, String type, List<CardSummary> cards) throws IOException {
         Layout layout = new Layout(doc, font);
-        layout.paragraph(TITLE_SIZE, "찍어보카 오답노트 (" + nn(type) + ")");
+        layout.paragraph(TITLE_SIZE, "칠단 오답노트 (" + nn(type) + ")");
         layout.space(LINE_GAP);
         int index = 1;
         for (CardSummary card : cards) {

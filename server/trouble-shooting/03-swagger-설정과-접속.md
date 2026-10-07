@@ -22,8 +22,8 @@
 | 파일 | 역할 |
 |---|---|
 | `build.gradle.kts` | `org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0` 의존성 |
-| `src/main/java/com/jjikovoca/common/config/OpenApiConfig.java` | OpenAPI 정의 — 제목("찍어보카 API")·버전 + **JWT Bearer 보안 스킴**(Authorize 버튼) |
-| `src/main/java/com/jjikovoca/auth/config/SecurityConfig.java` | `/swagger-ui/**`·`/swagger-ui.html`·`/v3/api-docs/**`를 인증 예외(permitAll) |
+| `src/main/java/com/chilldan/common/config/OpenApiConfig.java` | OpenAPI 정의 — 제목("칠단 API")·버전 + **JWT Bearer 보안 스킴**(Authorize 버튼) |
+| `src/main/java/com/chilldan/auth/config/SecurityConfig.java` | `/swagger-ui/**`·`/swagger-ui.html`·`/v3/api-docs/**`를 인증 예외(permitAll) |
 
 > 위 URL은 **springdoc 기본 경로**다. `application.yml`에 별도 커스텀을 넣지 않았다.
 

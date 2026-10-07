@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * 인증 엔드포인트 rate limit (#479, P1-11 D). 설계 정본은 「찍어보카 보안 및 방어로직」 §5.
+ * 인증 엔드포인트 rate limit (#479, P1-11 D). 설계 정본은 「칠단 보안 및 방어로직」 §5.
  * 실 Redis(Testcontainers)에 카운터를 쌓는다. 테스트마다 다른 IP를 써 카운터가 서로 섞이지 않게 한다.
  */
 @TestPropertySource(properties = "app.rate-limit.enabled=true")

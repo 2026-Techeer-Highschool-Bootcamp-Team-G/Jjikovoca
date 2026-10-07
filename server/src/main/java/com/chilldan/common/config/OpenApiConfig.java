@@ -23,8 +23,8 @@ public class OpenApiConfig {
     OpenAPI chilldanOpenApi() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("찍어보카 API")
-                        .description("찍어보카 백엔드 REST API — 04_API_명세서 대응")
+                        .title("칠단 API")
+                        .description("칠단 백엔드 REST API — 04_API_명세서 대응")
                         .version("v0.0.1"))
                 .addSecurityItem(new SecurityRequirement().addList(BEARER))
                 .components(new Components().addSecuritySchemes(BEARER,

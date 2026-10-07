@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * 토큰 수명주기 보안 회귀 테스트 (#472, P1-11). 설계 정본은 「찍어보카 보안 및 방어로직」 §2·§3.
+ * 토큰 수명주기 보안 회귀 테스트 (#472, P1-11). 설계 정본은 「칠단 보안 및 방어로직」 §2·§3.
  * <ul>
  *   <li>토큰 종류 분리: 보호 API는 access만, 재발급은 refresh만 받는다 — refresh(14일)를 Bearer로 쓰지 못한다</li>
  *   <li>재사용 탐지: 이미 쓴 refresh가 다시 오면 그 사용자의 refresh를 전부 폐기한다(탈취 세션 차단)</li>

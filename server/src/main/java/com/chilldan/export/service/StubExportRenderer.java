@@ -17,7 +17,7 @@ class StubExportRenderer implements ExportRenderer {
 
     @Override
     public Rendered render(String type, List<CardSummary> cards) {
-        StringBuilder body = new StringBuilder("찍어보카 내보내기 (").append(type).append(")\n\n");
+        StringBuilder body = new StringBuilder("칠단 내보내기 (").append(type).append(")\n\n");
         int index = 1;
         for (CardSummary card : cards) {
             body.append(index++).append(". ");
