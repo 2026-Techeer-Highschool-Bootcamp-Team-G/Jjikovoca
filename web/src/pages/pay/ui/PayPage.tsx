@@ -43,7 +43,7 @@ export function PayPage() {
           }}
         >
           <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--color-text-primary)' }}>
-            ⭐ 찍어보카 프리미엄 (월 구독)
+            ⭐ 칠단 프리미엄 (월 구독)
           </span>
           <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
             오늘 결제 후 매월 자동 결제

@@ -19,11 +19,11 @@ export function PrivacyPage() {
       <NavigationBar title="개인정보 처리방침" onBack={() => navigate(-1)} />
 
       <div style={{ padding: '8px var(--spacing-xl) 48px', maxWidth: 720, margin: '0 auto', width: '100%' }}>
-        <p style={{ margin: '4px 0 2px', fontSize: 22, fontWeight: 800, color: 'var(--color-text-primary)' }}>찍어보카(Jjikovoca)</p>
+        <p style={{ margin: '4px 0 2px', fontSize: 22, fontWeight: 800, color: 'var(--color-text-primary)' }}>칠단(Chilldan)</p>
         <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-tertiary)' }}>시행일: {EFFECTIVE}</p>
 
         <p style={intro}>
-          찍어보카(이하 “서비스”)는 이용자의 개인정보를 소중히 여기며, 「개인정보 보호법」 등 관련 법령과 Google 개발자 프로그램 정책을 준수합니다. 본 방침은
+          칠단(이하 “서비스”)은 이용자의 개인정보를 소중히 여기며, 「개인정보 보호법」 등 관련 법령과 Google 개발자 프로그램 정책을 준수합니다. 본 방침은
           서비스가 어떤 개인정보를 수집·이용하고, 어떻게 보호하는지를 설명합니다.
         </p>
 

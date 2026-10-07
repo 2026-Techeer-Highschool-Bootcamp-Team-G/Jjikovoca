@@ -35,7 +35,7 @@ export function LoginPage() {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, paddingTop: 100 }}>
         <BrandLogo />
         <h1 style={{ margin: '12px 0 0', fontSize: 28, fontWeight: 700, color: 'var(--color-text-primary)' }}>
-          찍어보카
+          칠단
         </h1>
         <p style={{ margin: 0, fontSize: 14, color: 'var(--color-text-secondary)' }}>
           내 시험지로 만든 나만의 단어장
