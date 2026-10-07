@@ -31,7 +31,7 @@ export function PaywallPage() {
           ⭐
         </span>
         <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: 'var(--color-text-primary)' }}>
-          찍어보카 프리미엄
+          칠단 프리미엄
         </h1>
         <p style={{ margin: 0, fontSize: 14, color: 'var(--color-text-secondary)' }}>
           잠겨 있던 힌트·리포트·PDF를 전부 열어보세요

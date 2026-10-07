@@ -52,7 +52,7 @@ export function OnboardingPage() {
           ‹
         </button>
         <span style={{ fontSize: 15, fontWeight: 800 }}>
-          <span style={mark}>찍어보카</span>
+          <span style={mark}>칠단</span>
         </span>
         <button type="button" onClick={finish} style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-tertiary)', background: 'none', border: 'none', cursor: 'pointer' }}>
           건너뛰기
@@ -99,7 +99,7 @@ export function OnboardingPage() {
       {/* 하단 버튼 */}
       <div style={{ padding: '0 24px 34px' }}>
         <Button block size="lg" onClick={onNext}>
-          {step === last ? '찍어보카 시작하기' : '다음'}
+          {step === last ? '칠단 시작하기' : '다음'}
         </Button>
         <button
           type="button"

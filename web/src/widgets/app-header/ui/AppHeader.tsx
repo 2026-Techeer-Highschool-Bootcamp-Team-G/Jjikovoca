@@ -9,7 +9,7 @@ export function AppHeader({ onBell }: Props) {
   return (
     <header style={{ padding: '10px var(--spacing-xl) 4px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--color-text-brand)' }}>찍어보카</h1>
+        <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--color-text-brand)' }}>칠단</h1>
         <button
           type="button"
           aria-label="알림"
