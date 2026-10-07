@@ -49,7 +49,7 @@ public class ExportStorage {
                 .map(path -> path.getFileName().toString())
                 .map(name -> name.substring(name.lastIndexOf('.') + 1))
                 .orElse("bin");
-        return "jjikoboka-export-" + exportId + "." + ext;
+        return "chilldan-export-" + exportId + "." + ext;
     }
 
     /** {@code export-{id}.*} 중 실제 파일 하나를 찾는다. exportId가 서버 발급이라 프리픽스는 안전하다. */
